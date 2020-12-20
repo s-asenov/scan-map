@@ -1,0 +1,8 @@
+.bg-test {
+  background: var(--primary);
+}
+
+.navbar-test .nav-link {
+  color: white;
+  text-decoration: none;
+}
