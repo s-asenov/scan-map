@@ -7,14 +7,15 @@ function putImageData(image, options, ctx) {
     img.src = url;
     img.onload = () => {
       const myOptions = Object.assign({}, options);
+
       ctx.drawImage(
         img,
         myOptions[`x`] * img.width,
         myOptions[`y`] * img.height,
         myOptions[`sw`] * img.width,
         myOptions[`sh`] * img.height,
-        myOptions[`dx`] * img.width - 1 || 0,
-        myOptions[`dh`] * img.width - 1 || 0,
+        myOptions[`dx`] * img.width || 0, //- 1
+        myOptions[`dh`] * img.width || 0, //- 1
         myOptions[`sw`] * img.width, //myOptions.sw * img.width,
         myOptions[`sh`] * img.height //myOptions.sh * img.height,);
       );
@@ -23,25 +24,33 @@ function putImageData(image, options, ctx) {
         y: myOptions[`y`] * img.height,
         sw: myOptions[`sw`] * img.width,
         sh: myOptions[`sh`] * img.height,
-        dx: myOptions[`dx`] * img.width - 1 || 0,
-        dy: myOptions[`dh`] * img.width - 1 || 0,
+        dx: myOptions[`dx`] * img.width || 0, //- 1
+        dy: myOptions[`dh`] * img.width || 0, //- 1
         sw: myOptions[`sw`] * img.width, //myOptions.sw * img.width,
         sh: myOptions[`sh`] * img.height,
       });
     };
     img.onerror = () => {
-      this.src = "/uncompressed/default.jpg";
+      img.src = "/uncompressed/default.jpg";
       resolve(img);
     };
   });
   return promise;
 }
 
-function loadImgFromCanvas(canvas, promises) {
-  Promise.all(promises).then(() => {
-    const dataUrl = canvas.toDataURL("image/jpeg");
+function loadImgFromCanvas(canvasA, promises) {
+  Promise.all(promises).then((arr) => {
+    const canvasB = document.getElementById("canvasB");
+    const ctx = canvasB.getContext("2d");
+    canvasB.width = 1024;
+    canvasB.height = 1024;
+
+    ctx.drawImage(canvasA, 0, 0, 1024, 1024);
+
+    const dataUrl = canvasB.toDataURL("image/jpeg");
     // let imageFoo = document.createElement("img");
     // imageFoo.src = dataUrl;
+
     // Style your image here
     // imageFoo.style.width = arr[0].sw + arr[1].sw;
     // imageFoo.style.height = arr[0].sh;

@@ -8,7 +8,7 @@ function Map() {
 
   useEffect(() => {
     const loader = new Loader({
-      apiKey: "AIzaSyCge57N4OSWUygQX1Q88oV7hqQVNrBiMOc",
+      apiKey: process.env.GOOGLE_MAPS_API_KEY,
       libraries: ["drawing", "geometry", "places", "visualization"],
     });
 
@@ -152,13 +152,12 @@ function Map() {
           fillOpacity: 0,
           draggable: true,
           bounds: {
-            north: 43.3,
+            north: 43.01,
             south: 42.7,
-            east: 22.9,
+            east: 22.6,
             west: 22.1,
           },
         });
-
         rectangle.setMap(map);
 
         rectangle.addListener("dragend", () => {
@@ -181,7 +180,8 @@ function Map() {
     <React.Fragment>
       <div id="map" style={{ height: "90vh" }} />
       <MapButton rectangle={rect} />
-      <canvas id="canvas" style={{ display: "none" }} />
+      <canvas id="canvasA" />
+      <canvas id="canvasB" />
     </React.Fragment>
   );
 }

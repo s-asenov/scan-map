@@ -1,30 +1,38 @@
 import React from "react";
+import "./NavBar.css";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
-import NavDropdown from "react-bootstrap/NavDropdown";
-import "./NavBar.css";
+import { Button, Form, Image } from "react-bootstrap";
+import logo from "../../images/search.png";
+import { NavLink } from "react-router-dom";
 
 function NavBar() {
   return (
-    <Navbar variant="test" bg="test">
-      <Navbar.Brand href="#home">React-Bootstrap</Navbar.Brand>
+    <Navbar variant="indigo" bg="indigo" expand="lg">
+      <Navbar.Brand as={NavLink} to="/">
+        <Image src={logo} rounded height="54" width="54" />
+      </Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">
-        <Nav className="mr-auto">
-          <Nav.Link href="#home">Home</Nav.Link>
-          <Nav.Link href="#link">Link</Nav.Link>
-          <NavDropdown title="Dropdown" id="basic-nav-dropdown">
-            <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
-            <NavDropdown.Item href="#action/3.2">
-              Another action
-            </NavDropdown.Item>
-            <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
-            <NavDropdown.Divider />
-            <NavDropdown.Item href="#action/3.4">
-              Separated link
-            </NavDropdown.Item>
-          </NavDropdown>
+        <Nav>
+          <Nav.Link as={NavLink} to="/">
+            Home
+          </Nav.Link>
+          <Nav.Link as={NavLink} to="/map">
+            Map
+          </Nav.Link>
+          <Nav.Link as={NavLink} to="#about-us">
+            About us
+          </Nav.Link>
         </Nav>
+        <div className="buttons">
+          <Button as={NavLink} to="/login" variant="login">
+            Login
+          </Button>
+          <Button as={NavLink} to="/register" variant="register">
+            Register
+          </Button>
+        </div>
       </Navbar.Collapse>
     </Navbar>
   );
