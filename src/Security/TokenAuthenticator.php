@@ -2,51 +2,46 @@
 
 namespace App\Security;
 
+use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 
-class LoginAuthenticator extends AbstractGuardAuthenticator
+class TokenAuthenticator extends AbstractGuardAuthenticator
 {
-    /**
-     * @var UserPasswordEncoderInterface
-     */
-    private $passwordEncoder;
+    private $ur;
 
-    public function __construct(UserPasswordEncoderInterface $passwordEncoder)
+    public function __construct(UserRepository $ur)
     {
-
-        $this->passwordEncoder = $passwordEncoder;
+        $this->ur = $ur;
     }
 
     public function supports(Request $request)
     {
-        return $request->attributes->get('_route') === "api_login" && !$request->headers->has("AUTH-TOKEN");
+        // $request->headers->has('Application')
+        return $request->headers->has('AUTH-TOKEN');
     }
 
     public function getCredentials(Request $request)
     {
-        $form = $request->toArray();
-        
         return [
-            'email' => $form['email'],
-            'password' => $form['password'] 
+//            'Application' => $request->headers->get('Application'),
+            'AUTH-TOKEN' => $request->headers->get('AUTH-TOKEN')
         ];
     }
 
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
-        $user = $userProvider->loadUserByUsername($credentials['email']);
+        $user = $this->ur->findOneBy(['apiToken' => $credentials['AUTH-TOKEN']]);
 
         if (!$user) {
-            throw new CustomUserMessageAuthenticationException('Email could not be found.');
+            throw new AuthenticationException('User not found');
         }
 
         return $user;
@@ -54,12 +49,20 @@ class LoginAuthenticator extends AbstractGuardAuthenticator
 
     public function checkCredentials($credentials, UserInterface $user)
     {
-        return $this->passwordEncoder->isPasswordValid($user, $credentials['password']);
+//        if ($credentials['Application'] !== $_ENV['APP_SECRET']) {
+//            return false;
+//        }
+
+        return true;
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
-        return new JsonResponse('Login failed', Response::HTTP_BAD_REQUEST);
+        $data = [
+            'message' => strtr($exception->getMessageKey(), $exception->getMessageData())
+        ];
+
+        return new JsonResponse($data, Response::HTTP_FORBIDDEN);
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $providerKey)
@@ -69,11 +72,11 @@ class LoginAuthenticator extends AbstractGuardAuthenticator
 
     public function start(Request $request, AuthenticationException $authException = null)
     {
-        if ($request->headers->has('AUTH-TOKEN')) {
-            return new JsonResponse('User already logged in!', Response::HTTP_UNAUTHORIZED);
-        } else {
-            return new JsonResponse('Login failed!', Response::HTTP_BAD_REQUEST);
-        }
+        $data = [
+            'error' => "Unauthorized request!"
+        ];
+
+        return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
     }
 
     public function supportsRememberMe()

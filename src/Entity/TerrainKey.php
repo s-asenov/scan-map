@@ -2,11 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\TerrainKeysRepository;
+use App\Repository\TerrainKeyRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass=TerrainKeysRepository::class)
+ * @ORM\Entity(repositoryClass=TerrainKeyRepository::class)
  * @ORM\Table(name="`terrain_keys`")
  */
 class TerrainKey
@@ -18,70 +20,71 @@ class TerrainKey
     private $id;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="datetime")
      */
-    private $zipName;
+    private $createdOn;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="keys")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     * @ORM\Column(type="datetime")
      */
-    private $user;
+    private $expiringOn;
 
-    function random_str(
-        int $length = 20,
-        string $keyspace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    ): string {
-        if ($length < 1) {
-            throw new \RangeException("Length must be a positive integer");
-        }
-        $pieces = [];
-        $max = mb_strlen($keyspace, '8bit') - 1;
-        for ($i = 0; $i < $length; ++$i) {
-            $pieces []= $keyspace[random_int(0, $max)];
-        }
-        return implode('', $pieces);
-    }
+    /**
+     * @ORM\ManyToOne(targetEntity=Terrain::class, inversedBy="terrainKeys")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $terrain;
 
-    public function __construct(User $user)
+    public function __construct(int $id)
     {
         $now = new \DateTime();
-        $this->id = $now->format('Y-m-d H:i:s') . "-" . $user->getId() . $this->random_str();
+        $formattedDate = $now->format('YmdHisv');
+
+        $this->id = uniqid($formattedDate . $id) . "-" . random_str();
+        $this->createdOn = $now;
+        $this->expiringOn = new \DateTime("+1 hour");
     }
 
-    public function getId(): ?int
+    public function getId(): ?string
     {
         return $this->id;
     }
 
-    public function setId(int $id): self
+    public function getCreatedOn(): ?\DateTimeInterface
     {
-        $this->id = $id;
+        return $this->createdOn;
+    }
+
+    public function setCreatedOn(\DateTimeInterface $createdOn): self
+    {
+        $this->createdOn = $createdOn;
 
         return $this;
     }
 
-    public function getZipName(): ?string
+    public function getExpiringOn(): ?\DateTimeInterface
     {
-        return $this->zipName;
+        return $this->expiringOn;
     }
 
-    public function setZipName(string $zipName): self
+    public function setExpiringOn(\DateTimeInterface $expiringOn): self
     {
-        $this->zipName = $zipName;
+        $this->expiringOn = $expiringOn;
 
         return $this;
     }
 
-    public function getUser(): ?User
+
+    public function getTerrain(): Terrain
     {
-        return $this->user;
+        return $this->terrain;
     }
 
-    public function setUser(?User $user): self
+    public function setTerrain(Terrain $terrain): self
     {
-        $this->user = $user;
+        $this->terrain = $terrain;
 
         return $this;
     }
+    
 }

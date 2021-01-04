@@ -1,12 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import "./NavBar.css";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
-import { Button, Form, Image } from "react-bootstrap";
+import { Button, Image } from "react-bootstrap";
 import logo from "../../images/search.png";
-import { NavLink } from "react-router-dom";
+import { NavLink, useHistory } from "react-router-dom";
+import { getAuth, removeAuth } from "../../helpers/auth";
 
 function NavBar() {
+  const history = useHistory();
+  const isAuth = getAuth();
+
+  const logout = () => {
+    removeAuth();
+    history.replace("/");
+  };
+
   return (
     <Navbar variant="indigo" bg="indigo" expand="lg">
       <Navbar.Brand as={NavLink} to="/">
@@ -18,20 +27,30 @@ function NavBar() {
           <Nav.Link as={NavLink} to="/">
             Home
           </Nav.Link>
-          <Nav.Link as={NavLink} to="/map">
-            Map
-          </Nav.Link>
-          <Nav.Link as={NavLink} to="#about-us">
+          <Nav.Link as={NavLink} to="/#about-us">
             About us
           </Nav.Link>
+          {isAuth && (
+            <Nav.Link as={NavLink} to="/map">
+              Map
+            </Nav.Link>
+          )}
         </Nav>
         <div className="buttons">
-          <Button as={NavLink} to="/login" variant="login">
-            Login
-          </Button>
-          <Button as={NavLink} to="/register" variant="register">
-            Register
-          </Button>
+          {!isAuth ? (
+            <React.Fragment>
+              <Button as={NavLink} to="/login" variant="login">
+                Login
+              </Button>
+              <Button as={NavLink} to="/register" variant="register">
+                Register
+              </Button>{" "}
+            </React.Fragment>
+          ) : (
+            <Button onClick={() => logout()} variant="outline-light">
+              Logout
+            </Button>
+          )}
         </div>
       </Navbar.Collapse>
     </Navbar>

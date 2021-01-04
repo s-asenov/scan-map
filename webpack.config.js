@@ -56,10 +56,10 @@ Encore.addPlugin(new Dotenv())
   })
 
   // enables Sass/SCSS support
-  .enableSassLoader()
+  // .enableSassLoader()
 
   // uncomment if you use TypeScript
-  //.enableTypeScriptLoader()
+  // .enableTypeScriptLoader()
 
   // uncomment if you use React
   .enableReactPreset();
@@ -74,8 +74,5 @@ Encore.addPlugin(new Dotenv())
 // module.exports = Encore.getWebpackConfig();
 
 var config = Encore.getWebpackConfig();
-// config.target = "node";
-config.node = {
-  fs: "empty",
-};
+
 module.exports = config;

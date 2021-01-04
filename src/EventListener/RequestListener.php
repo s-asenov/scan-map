@@ -2,10 +2,10 @@
 
 namespace App\EventListener;
 
-use App\Exception\BadHeaderException;
 use Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class RequestListener
 {
@@ -23,7 +23,7 @@ class RequestListener
         }
 
         if (strpos($request->headers->get('Content-Type'), 'application/json') !== 0) {
-//            throw new BadHeaderException();
+            throw new AccessDeniedException();
         }
 
         $data = json_decode($request->getContent(), true);

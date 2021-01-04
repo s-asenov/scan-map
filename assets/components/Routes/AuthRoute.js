@@ -1,10 +1,24 @@
 import React from "react";
-import { Redirect, Route } from "react-router-dom";
+import { Redirect, useLocation } from "react-router-dom";
+import MyRoute from "./MyRoute";
 
 function AuthRoute({ children, ...rest }) {
-  var isAuth = false; //todo
+  const location = useLocation();
 
-  return <Route {...rest}>{!isAuth ? <Redirect to="/" /> : children}</Route>;
+  const token = localStorage.getItem("remember");
+  const isForm =
+    location.pathname === "/login" || location.pathname === "/register";
+
+  let render;
+  if (!token && !isForm) {
+    render = <Redirect to="/login" />;
+  } else if (token && isForm) {
+    render = <Redirect to="/" />;
+  } else {
+    render = children;
+  }
+
+  return <MyRoute {...rest}>{render}</MyRoute>;
 }
 
 export default AuthRoute;

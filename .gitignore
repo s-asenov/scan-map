@@ -10,6 +10,8 @@
 /migrations/
 ###< symfony/framework-bundle ###
 
+/stuff.txt
+/zip
 /public/uncompressed/
 /.idea/
 /.vscode/
