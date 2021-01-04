@@ -1,9 +1,10 @@
-import { fix } from "./helpers";
+import axios from "axios";
+import { fix, getUniqImagesPos } from "./helpers";
 
 function putImageData(image, options, ctx) {
   const url = "https://localhost:8000/uncompressed/" + image;
-  var promise = new Promise((resolve, reject) => {
-    var img = new Image();
+  let promise = new Promise((resolve, reject) => {
+    let img = new Image();
     img.src = url;
     img.onload = () => {
       const myOptions = Object.assign({}, options);
@@ -19,49 +20,36 @@ function putImageData(image, options, ctx) {
         myOptions[`sw`] * img.width, //myOptions.sw * img.width,
         myOptions[`sh`] * img.height //myOptions.sh * img.height,);
       );
-      resolve({
-        x: myOptions[`x`] * img.width,
-        y: myOptions[`y`] * img.height,
-        sw: myOptions[`sw`] * img.width,
-        sh: myOptions[`sh`] * img.height,
-        dx: myOptions[`dx`] * img.width || 0, //- 1
-        dy: myOptions[`dh`] * img.width || 0, //- 1
-        sw: myOptions[`sw`] * img.width, //myOptions.sw * img.width,
-        sh: myOptions[`sh`] * img.height,
-      });
+
+      resolve(img.src);
     };
     img.onerror = () => {
       img.src = "/uncompressed/default.jpg";
-      resolve(img);
+      resolve(img.src);
     };
   });
+
   return promise;
 }
 
-function loadImgFromCanvas(canvasA, promises) {
-  Promise.all(promises).then((arr) => {
-    const canvasB = document.getElementById("canvasB");
-    const ctx = canvasB.getContext("2d");
-    canvasB.width = 1024;
-    canvasB.height = 1024;
+async function loadImgFromCanvas(canvasA, promises) {
+  const arr = await Promise.all(promises);
+  const unique = getUniqImagesPos(arr);
 
-    ctx.drawImage(canvasA, 0, 0, 1024, 1024);
+  const canvasB = document.createElement("canvas");
+  const ctx = canvasB.getContext("2d");
+  canvasB.width = 1081;
+  canvasB.height = 1081;
 
-    const dataUrl = canvasB.toDataURL("image/jpeg");
-    // let imageFoo = document.createElement("img");
-    // imageFoo.src = dataUrl;
+  ctx.drawImage(canvasA, 0, 0, 1081, 1081);
 
-    // Style your image here
-    // imageFoo.style.width = arr[0].sw + arr[1].sw;
-    // imageFoo.style.height = arr[0].sh;
-    let link = document.createElement("a");
-    link.download = "filename";
-    link.href = dataUrl;
-    link.click();
+  const dataUrl = canvasB.toDataURL("image/jpeg");
+  const content = dataUrl.split("base64,")[1];
 
-    // After you are done styling it, append it to the BODY element
-    // document.body.appendChild(imageFoo);
-  });
+  return {
+    base64: content,
+    unique,
+  };
 }
 
 function calculateDismensions(unique, ctx, corners) {
@@ -140,7 +128,9 @@ function calculateDismensions(unique, ctx, corners) {
       promises.push(promise);
     });
 
-    loadImgFromCanvas(ctx.canvas, promises);
+    const base64 = loadImgFromCanvas(ctx.canvas, promises);
+
+    return base64;
   } else if (unique.count === 2) {
     if (unique.direction === "horizontal") {
       //first square
@@ -183,7 +173,11 @@ function calculateDismensions(unique, ctx, corners) {
         promises.push(promise);
       });
 
-      loadImgFromCanvas(ctx.canvas, promises);
+      const base64 = loadImgFromCanvas(ctx.canvas, promises).then((r) => {
+        return r;
+      });
+
+      // return base64;
     } else {
       //first square
       const x1 = topLeft.lng - Math.floor(topLeft.lng);
@@ -223,7 +217,9 @@ function calculateDismensions(unique, ctx, corners) {
         promises.push(promise);
       });
 
-      loadImgFromCanvas(ctx.canvas, promises);
+      const base64 = loadImgFromCanvas(ctx.canvas, promises);
+
+      return base64;
     }
   } else {
     const image = unique.images[0];
@@ -236,11 +232,16 @@ function calculateDismensions(unique, ctx, corners) {
 
     const options = { x: fix(x), y: fix(y), sw: fix(sw), sh: fix(sh) };
 
+    ctx.canvas.width = options.sw * 1201;
+    ctx.canvas.height = options.sh * 1201;
+
     let promises = [];
     let promise = putImageData(image, options, ctx);
     promises.push(promise);
 
-    loadImgFromCanvas(ctx.canvas, promises);
+    const base64 = loadImgFromCanvas(ctx.canvas, promises);
+
+    return base64;
   }
 }
 

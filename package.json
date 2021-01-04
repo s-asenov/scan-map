@@ -20,8 +20,10 @@
     "dependencies": {
         "@babel/preset-react": "^7.12.10",
         "@googlemaps/js-api-loader": "^1.11.1",
+        "axios": "^0.21.1",
         "bootstrap": "^4.5.3",
         "dotenv-webpack": "^6.0.0",
+        "formik": "^2.2.6",
         "html2canvas": "^1.0.0-rc.7",
         "prop-types": "^15.7.2",
         "react": "^17.0.1",

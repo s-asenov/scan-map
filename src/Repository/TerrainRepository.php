@@ -2,25 +2,25 @@
 
 namespace App\Repository;
 
-use App\Entity\TerrainKey;
+use App\Entity\Terrain;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method TerrainKey|null find($id, $lockMode = null, $lockVersion = null)
- * @method TerrainKey|null findOneBy(array $criteria, array $orderBy = null)
- * @method TerrainKey[]    findAll()
- * @method TerrainKey[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Terrain|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Terrain|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Terrain[]    findAll()
+ * @method Terrain[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class TerrainKeysRepository extends ServiceEntityRepository
+class TerrainRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, TerrainKey::class);
+        parent::__construct($registry, Terrain::class);
     }
 
     // /**
-    //  * @return TerrainKey[] Returns an array of TerrainKey objects
+    //  * @return Terrain[] Returns an array of Terrain objects
     //  */
     /*
     public function findByExampleField($value)
@@ -37,7 +37,7 @@ class TerrainKeysRepository extends ServiceEntityRepository
     */
 
     /*
-    public function findOneBySomeField($value): ?TerrainKey
+    public function findOneBySomeField($value): ?Terrain
     {
         return $this->createQueryBuilder('t')
             ->andWhere('t.exampleField = :val')

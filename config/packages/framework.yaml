@@ -15,3 +15,19 @@ framework:
     #fragments: true
     php_errors:
         log: true
+
+    http_client:
+        scoped_clients:
+            trefle_api:
+                base_uri: 'https://trefle.io/api/v1/'
+                headers:
+                    Authorization: '%env(resolve:TREFLE_TOKEN)%'
+            geonames_api:
+                base_uri: 'http://api.geonames.org/'
+                query:
+                    username: '%env(resolve:GEONAMES_ACC)%'
+            wiki_api:
+                base_uri: 'https://en.wikipedia.org/w/api.php'
+                query:
+                    action: 'query'
+                    format: 'json'

@@ -4,12 +4,14 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
  * @ORM\Table(name="`users`")
+ * @UniqueEntity(fields={"email"})
  */
 class User implements UserInterface
 {
@@ -28,13 +30,13 @@ class User implements UserInterface
     private $email;
 
     /**
-     * @ORM\Column(type="string", length=180, unique=true)
+     * @ORM\Column(type="string", length=180)
      * @Assert\NotBlank(message="First name should not be blank.")
      */
     private $firstName;
 
     /**
-     * @ORM\Column(type="string", length=180, unique=true)
+     * @ORM\Column(type="string", length=180)
      * @Assert\NotBlank(message="Last name should not be blank.")
      */
     private $lastName;
@@ -62,9 +64,16 @@ class User implements UserInterface
      */
     private $lastSeen;
 
+    /**
+     * @ORM\Column(type="string")
+     */
+    private $apiToken;
+
     public function __construct()
     {
         $this->createdAt = new \DateTime();
+        $this->lastSeen = new \DateTime();
+        $this->apiToken = random_str(255);
     }
 
     public function getId(): ?int
@@ -189,6 +198,18 @@ class User implements UserInterface
     public function setLastSeen(\DateTimeInterface $lastSeen): self
     {
         $this->lastSeen = $lastSeen;
+
+        return $this;
+    }
+
+    public function getApiToken(): ?string
+    {
+        return $this->apiToken;
+    }
+
+    public function setApiToken(string $apiToken): self
+    {
+        $this->apiToken = $apiToken;
 
         return $this;
     }

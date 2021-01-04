@@ -8,13 +8,17 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
+ * List distributions zones. Zones are following the WGSRPD convention.
+ * Every zone has its unique id got from.
+ * @link https://trefle.io
+ *
  * @ORM\Entity(repositoryClass=DistributionZoneRepository::class)
+ * @ORM\Table(name="`distribution_zones`")
  */
 class DistributionZone
 {
     /**
      * @ORM\Id
-     * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
     private $id;
@@ -35,14 +39,27 @@ class DistributionZone
      */
     private $children;
 
+    /**
+     * @ORM\OneToMany(targetEntity=DistributionZonePlant::class, mappedBy="distributionZone", orphanRemoval=true)
+     */
+    private $distributionZonePlants;
+
     public function __construct()
     {
         $this->children = new ArrayCollection();
+        $this->distributionZonePlants = new ArrayCollection();
     }
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function setId(int $id): self
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     public function getName(): ?string
@@ -93,6 +110,36 @@ class DistributionZone
             // set the owning side to null (unless already changed)
             if ($child->getParent() === $this) {
                 $child->setParent(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|DistributionZonePlant[]
+     */
+    public function getDistributionZonePlants(): Collection
+    {
+        return $this->distributionZonePlants;
+    }
+
+    public function addDistributionZonePlant(DistributionZonePlant $distributionZonePlant): self
+    {
+        if (!$this->distributionZonePlants->contains($distributionZonePlant)) {
+            $this->distributionZonePlants[] = $distributionZonePlant;
+            $distributionZonePlant->setDistributionZone($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDistributionZonePlant(DistributionZonePlant $distributionZonePlant): self
+    {
+        if ($this->distributionZonePlants->removeElement($distributionZonePlant)) {
+            // set the owning side to null (unless already changed)
+            if ($distributionZonePlant->getDistributionZone() === $this) {
+                $distributionZonePlant->setDistributionZone(null);
             }
         }
 

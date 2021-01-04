@@ -81,18 +81,19 @@ function Map() {
           };
         };
 
-        var styles = [
-          {
-            featureType: "all",
-            elementType: "labels",
-            stylers: [{ visibility: "off" }],
-          },
-          {
-            featureType: "road",
-            elementType: "geometry",
-            stylers: [{ visibility: "off" }],
-          },
+        const styles = [
+          // {
+          //   featureType: "all",
+          //   elementType: "labels",
+          //   stylers: [{ visibility: "off" }],
+          // },
+          // {
+          //   featureType: "road",
+          //   elementType: "geometry",
+          //   stylers: [{ visibility: "off" }],
+          // },
         ];
+
 
         const { initMap, initRect } = init();
 
@@ -114,9 +115,9 @@ function Map() {
           fillOpacity: 0,
           draggable: true,
           bounds: {
-            north: 43.01,
+            north: 42.85,
             south: 42.7,
-            east: 22.6,
+            east: 22.3,
             west: 22.1,
           },
         });
@@ -142,8 +143,6 @@ function Map() {
     <React.Fragment>
       <div id="map" style={{ height: "90vh" }} />
       <MapButton rectangle={rect} />
-      <canvas id="canvasA" />
-      <canvas id="canvasB" />
     </React.Fragment>
   );
 }
