@@ -1,0 +1,42 @@
+#footer {
+  background-color: #212529;
+}
+
+#footer ul {
+  margin: 0;
+  padding: 0;
+}
+
+#footer li {
+  margin-bottom: 0.75rem;
+  list-style: none;
+}
+
+#footer hr {
+  margin: 0;
+}
+
+#footer a {
+  color: #aaaaaa;
+}
+
+#footer a:hover {
+  color: #dddddd;
+}
+
+.footer-title {
+  color: #ffffff;
+  margin-bottom: 1.5rem;
+}
+
+.links {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+@media only screen and (min-width: 992px) {
+  .links {
+    text-align: unset;
+    margin-bottom: 0;
+  }
+}

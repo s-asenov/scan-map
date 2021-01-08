@@ -2,11 +2,16 @@ import React from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import ContactForm from "./ContactForm";
 import "./Contacts.css";
+import { FaHome } from "react-icons/fa";
+import { MdEmail } from "react-icons/md";
 
 function Contacts() {
   return (
-    <div className="homepage-section mt-4 contacts">
+    <div className="homepage-section contacts">
       <Container>
+        <h2 className="text-center font-weight-bold mb-5">
+          Свържете се се нас
+        </h2>
         <Row>
           <Col md="6">
             <ContactForm />

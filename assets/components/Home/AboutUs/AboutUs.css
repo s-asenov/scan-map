@@ -68,7 +68,7 @@
 .technology {
   display: flex;
   flex-direction: column;
-  box-shadow: 8px 8px 13px 0px rgba(108, 0, 130, 0.5);
+  box-shadow: 8px 8px 13px 0px #6c757d;
 }
 
 .technology-image {

@@ -5,6 +5,7 @@ import { isAuth } from "../../helpers/auth";
 import AboutUs from "./AboutUs/AboutUs";
 import Advantages from "./Advantages/Advantages";
 import Contacts from "./Contacts/Contacts";
+import Demo from "./Demo/Demo";
 import Heading from "./Heading/Heading";
 import "./Home.css";
 
@@ -20,6 +21,7 @@ function Home() {
       <Heading isAuth={isAuth()} />
       <Advantages />
       <AboutUs />
+      <Demo />
       <Contacts />
     </React.Fragment>
   );

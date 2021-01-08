@@ -1,3 +1,20 @@
 .contacts {
-  background-color: rgba(190, 83, 211, 0.452);
+  background-color: #e0e0e0;
+}
+
+.contact-info {
+}
+
+.form {
+  margin-bottom: 2rem;
+}
+
+.form label {
+  font-weight: 600;
+}
+
+@media only screen and (min-width: 992px) {
+  .form {
+    margin-bottom: 0;
+  }
 }

@@ -41,36 +41,36 @@ function ContactForm() {
   const { touched, errors, handleSubmit, values, handleChange } = formik;
 
   return (
-    <Form onSubmit={handleSubmit}>
+    <Form className="form" onSubmit={handleSubmit}>
       <Form.Group controlId="from">
-        <Form.Label>Email address</Form.Label>
+        <Form.Label>Имейл адрес</Form.Label>
         <Form.Control
           type="email"
           value={values.from}
-          placeholder="Enter email"
+          placeholder="Имейл"
           isInvalid={touched.from && errors.from}
           onChange={handleChange}
         />
         <FormInvalidFeedback error={errors.from} />
       </Form.Group>
       <Form.Group controlId="subject">
-        <Form.Label>First name</Form.Label>
+        <Form.Label>Тема</Form.Label>
         <Form.Control
           type="text"
           value={values.subject}
-          placeholder="Enter subject"
+          placeholder="Тема"
           isInvalid={touched.subject && errors.subject}
           onChange={handleChange}
         />
         <FormInvalidFeedback error={errors.subject} />
       </Form.Group>
       <Form.Group controlId="text">
-        <Form.Label>Description</Form.Label>
+        <Form.Label>Въведете текст</Form.Label>
         <Form.Control
           as="textarea"
-          rows="5"
+          rows="7"
           value={values.text}
-          placeholder="Enter text"
+          placeholder="Текст"
           isInvalid={touched.text && errors.text}
           onChange={handleChange}
         />

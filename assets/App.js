@@ -10,7 +10,6 @@ import AuthRoute from "./components/Routes/AuthRoute";
 import Register from "./components/Register/Register";
 import { createBrowserHistory } from "history";
 import httpService from "./helpers/api/apiInterceptor";
-import { isAuth } from "./helpers/auth";
 
 const history = createBrowserHistory();
 httpService.setupInterceptors(history);

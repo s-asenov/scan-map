@@ -15,6 +15,7 @@
 /public/uncompressed/
 /.idea/
 /.vscode/
+/favicons/
 
 ###> symfony/webpack-encore-bundle ###
 /node_modules/
