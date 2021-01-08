@@ -8,6 +8,10 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class FormHelper
 {
     const MISSING_CREDENTIALS = "Missing credentials!";
+    const UNAUTHORIZED = "Unauthorized";
+    const META_DELETED = "deleted";
+    const META_SUCCESS = "success";
+    const META_ERROR = "error";
 
     public function __construct()
     {

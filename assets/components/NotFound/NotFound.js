@@ -13,8 +13,7 @@ function NotFound() {
   return (
     <Container id="error-wrapper">
       <Row>
-        <Col></Col>
-        <Col md="9" id="countUp">
+        <Col md="9" id="countUp" className="mx-auto">
           <div className="number" data-count="404">
             <CountUp end={404} duration={2} />
           </div>
@@ -27,7 +26,6 @@ function NotFound() {
             HOMEPAGE
           </Button>
         </Col>
-        <Col></Col>
       </Row>
     </Container>
   );

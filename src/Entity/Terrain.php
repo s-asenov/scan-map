@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\TerrainRepository;
+use App\Util\MyHelper;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -38,11 +39,12 @@ class Terrain
 
     public function __construct(User $user)
     {
+        $helper = new MyHelper();
         $now = new \DateTime();
         $formattedDate = $now->format('YmdHisv');
 
         do {
-            $name = $user->getId() . "-" . uniqid($formattedDate) . "-" . random_str() . ".zip";
+            $name = $user->getId() . "-" . uniqid($formattedDate) . "-" . $helper->random_str() . ".zip";
             $this->zipName = $name;
         } while (file_exists('zip/' . $name));
 

@@ -1,10 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
 import "./Map.css";
 import MapButton from "./MapButton";
+import MapContext from "../Utils/context/MapContext";
+import MapReducer from "../Utils/reducers/Map/MapReducer";
+import { LOADED, LOADING } from "../Utils/reducers/Map/MapActions";
+
+const initialState = {
+  loading: false,
+  loaded: false,
+};
 
 function Map() {
   const [rect, setRect] = useState(null);
+  const [state, dispatch] = useReducer(MapReducer, initialState);
+
+  const value = {
+    loaded: state.loaded,
+    setLoaded: (value) => dispatch({ type: LOADED, payload: value }),
+    loading: state.loading,
+    setLoading: (value) => dispatch({ type: LOADING, payload: value }),
+  };
 
   useEffect(() => {
     const loader = new Loader({
@@ -94,7 +110,6 @@ function Map() {
           // },
         ];
 
-
         const { initMap, initRect } = init();
 
         const map = initMap(document.getElementById("map"), {
@@ -139,11 +154,14 @@ function Map() {
         console.log(e);
       });
   }, []);
+
   return (
-    <React.Fragment>
+    <MapContext.Provider value={value}>
       <div id="map" style={{ height: "90vh" }} />
       <MapButton rectangle={rect} />
-    </React.Fragment>
+      {state.loaded && <h2>Loadedd</h2>}
+      {state.loading && <h2>Loading</h2>}
+    </MapContext.Provider>
   );
 }
 

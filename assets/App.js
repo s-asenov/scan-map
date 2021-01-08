@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { Router, Switch, Route } from "react-router-dom";
 import Map from "./components/Map/Map";
 import "./App.css";
 import Home from "./components/Home/Home";
@@ -8,10 +8,16 @@ import MyRoute from "./components/Routes/MyRoute";
 import Login from "./components/Login/Login";
 import AuthRoute from "./components/Routes/AuthRoute";
 import Register from "./components/Register/Register";
+import { createBrowserHistory } from "history";
+import httpService from "./helpers/api/apiInterceptor";
+import { isAuth } from "./helpers/auth";
+
+const history = createBrowserHistory();
+httpService.setupInterceptors(history);
 
 function App() {
   return (
-    <Router>
+    <Router history={history}>
       <Switch>
         <AuthRoute path="/map">
           <Map />

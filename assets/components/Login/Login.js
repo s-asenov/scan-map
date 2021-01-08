@@ -6,6 +6,7 @@ import Button from "react-bootstrap/Button";
 import axios from "axios";
 import { NavLink, useHistory } from "react-router-dom";
 import { setAuth } from "../../helpers/auth";
+import FormInvalidFeedback from "../Utils/FormInvalidFeedback";
 
 const initialValues = {
   email: "",
@@ -86,7 +87,7 @@ function Login() {
         <FormInvalidFeedback error={errors.password} />
       </Form.Group>
       <Form.Text>
-        Don't have a profile? <NavLink>Sign up!</NavLink>
+        Don't have a profile? <NavLink to="/register">Sign up!</NavLink>
       </Form.Text>
       <Button variant="primary" type="submit">
         Submit

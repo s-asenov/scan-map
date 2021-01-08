@@ -1,0 +1,60 @@
+.advantage-wrapper {
+  background-color: #e0e0e0;
+}
+
+.advantage-wrapper .row .col-lg-4:not(:last-child) {
+  margin-bottom: 2rem;
+}
+
+.advantage-wrapper .col-lg-4 {
+  padding-left: 1.75rem;
+  padding-right: 1.75rem;
+}
+
+.advantage {
+  transition: 0.25s all;
+  -webkit-box-shadow: 7px 5px 13px 0px rgba(0, 0, 0, 0.46);
+  box-shadow: 7px 5px 13px 0px rgba(0, 0, 0, 0.46);
+
+  text-align: center;
+  background: #ffffff;
+
+  border-radius: 25% 10%;
+}
+
+.advantage p {
+  color: var(--secondary);
+}
+
+.advantage h3 {
+  color: #2b0082;
+  margin-top: 1rem;
+}
+
+.advantage svg {
+  color: #6c0082;
+}
+
+.svg {
+  display: none;
+}
+
+@media only screen and (min-width: 992px) {
+  .advantage {
+    margin: 0;
+    /* width: 80%; */
+  }
+
+  .advantage-wrapper .col-lg-4 {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  .advantage-wrapper .row .col-lg-4:not(:last-child) {
+    margin-bottom: 0;
+  }
+
+  .svg {
+    display: unset;
+  }
+}

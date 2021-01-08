@@ -4,14 +4,14 @@ import PropTypes from "prop-types";
 
 function FormInvalidFeedback({ error }) {
   if (error) {
-    <FormControl.Feedback type="invalid">{error}</FormControl.Feedback>;
+    return <FormControl.Feedback type="invalid">{error}</FormControl.Feedback>;
   } else {
     return null;
   }
 }
 
 FormInvalidFeedback.propTypes = {
-  error: PropTypes.string.isRequired,
+  error: PropTypes.string,
 };
 
 export default FormInvalidFeedback;

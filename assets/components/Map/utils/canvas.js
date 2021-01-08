@@ -1,8 +1,9 @@
 import axios from "axios";
+import { BASE_URL } from "../../../helpers/base";
 import { fix, getUniqImagesPos } from "./helpers";
 
 function putImageData(image, options, ctx) {
-  const url = "https://localhost:8000/uncompressed/" + image;
+  const url = BASE_URL + "uncompressed/" + image;
   let promise = new Promise((resolve, reject) => {
     let img = new Image();
     img.src = url;

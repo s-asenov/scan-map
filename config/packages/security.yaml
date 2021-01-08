@@ -28,7 +28,9 @@ security:
                 authenticators:
                    - App\Security\TokenAuthenticator
         main:
+            pattern: ^/
             anonymous: lazy
+#            http_basic: ~
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication

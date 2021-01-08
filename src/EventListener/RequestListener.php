@@ -18,13 +18,13 @@ class RequestListener
     {
         $request = $event->getRequest();
 
-        if (strpos($request->attributes->get("_route"), "api") === false) {
-            return $request;
+        if (strpos($request->attributes->get("_route"), "api") === true) {
+            if (strpos($request->headers->get('Content-Type'), 'application/json') !== 0) {
+                throw new AccessDeniedException();
+            }
         }
 
-        if (strpos($request->headers->get('Content-Type'), 'application/json') !== 0) {
-            throw new AccessDeniedException();
-        }
+
 
         $data = json_decode($request->getContent(), true);
         $request->request->replace(is_array($data) ? $data : []);

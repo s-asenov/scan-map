@@ -77,36 +77,9 @@ class MapController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/api/map/key/{id}", name="api_key_save")
-     * @param int $id
-     * @param EntityManagerInterface $em
-     * @param TerrainRepository $repository
-     * @return JsonResponse
-     */
-    public function addKey(int $id, EntityManagerInterface $em, TerrainRepository $repository): JsonResponse
-    {
-        $terrain = $repository->find($id);
-
-        if ($terrain->getUser() !== $this->getUser()) {
-            return new JsonResponse([
-                'status' => "error",
-            ]);
-        }
-        $terrainKey = new TerrainKey($this->getUser()->getId());
-        $terrainKey->setTerrain($terrain);
-
-        $em->persist($terrainKey);
-        $em->flush();
-
-        return new JsonResponse([
-            'status' => "success",
-            'key' => "saved"
-        ]);
-    }
 
     /**
-     * @Route("/api/zip/{id}", name="api_get_zip")
+     * @Route("/zip/{id}", name="get_zip")
      * @param string $id
      * @param TerrainKeyRepository $repository
      * @return BinaryFileResponse|JsonResponse
@@ -115,7 +88,7 @@ class MapController extends AbstractController
     {
         $terrainKey = $repository->find($id);
 
-        if ($terrainKey->getExpiringOn() < new \DateTime() || $terrainKey->getTerrain()->getUser() !== $this->getUser()) {
+        if ($terrainKey->getExpiringOn() < new \DateTime()) {
             return new JsonResponse([
                 'status' => "error",
                 'key' => "expired"

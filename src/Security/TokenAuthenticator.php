@@ -25,11 +25,17 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
     public function supports(Request $request)
     {
         // $request->headers->has('Application')
+//        return $_COOKIE['x-token'] ? true : false;
+
         return $request->headers->has('AUTH-TOKEN');
     }
 
     public function getCredentials(Request $request)
     {
+//        return [
+//            'AUTH-TOKEN' => $_COOKIE['x-token']
+//        ];
+
         return [
 //            'Application' => $request->headers->get('Application'),
             'AUTH-TOKEN' => $request->headers->get('AUTH-TOKEN')
@@ -59,10 +65,10 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
         $data = [
-            'message' => strtr($exception->getMessageKey(), $exception->getMessageData())
+            'error' => strtr($exception->getMessageKey(), $exception->getMessageData())
         ];
 
-        return new JsonResponse($data, Response::HTTP_FORBIDDEN);
+        return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $providerKey)

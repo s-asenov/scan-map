@@ -3,9 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\TerrainKeyRepository;
+use App\Util\MyHelper;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use function App\Util\random_str;
 
 /**
  * @ORM\Entity(repositoryClass=TerrainKeyRepository::class)
@@ -38,9 +40,10 @@ class TerrainKey
     public function __construct(int $id)
     {
         $now = new \DateTime();
+        $helper = new MyHelper();
         $formattedDate = $now->format('YmdHisv');
 
-        $this->id = uniqid($formattedDate . $id) . "-" . random_str();
+        $this->id = uniqid($formattedDate . $id) . "-" . $helper->random_str();
         $this->createdOn = $now;
         $this->expiringOn = new \DateTime("+1 hour");
     }

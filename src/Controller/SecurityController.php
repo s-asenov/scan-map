@@ -40,7 +40,7 @@ class SecurityController extends AbstractController
     {
         $form = $request->request->all();
 
-        if (!$formHelper->checkFormData(['firstName', 'lastName', 'email', 'password'], $request->request->all())) {
+        if (!$formHelper->checkFormData(['firstName', 'lastName', 'email', 'password'], $form)) {
             return new JsonResponse($formHelper::MISSING_CREDENTIALS);
         }
 

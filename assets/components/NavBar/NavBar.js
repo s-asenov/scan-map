@@ -16,10 +16,28 @@ function NavBar() {
     history.replace("/");
   };
 
+  const NavLinks = () => {
+    if (isAuth) {
+      return (
+        <React.Fragment>
+          <Nav.Link as={NavLink} to="/map">
+            Map
+          </Nav.Link>
+          <Nav.Link as={NavLink} to="/maps">
+            My maps
+          </Nav.Link>
+        </React.Fragment>
+      );
+    } else {
+      return null;
+    }
+  };
+
   return (
     <Navbar variant="indigo" bg="indigo" expand="lg">
       <Navbar.Brand as={NavLink} to="/">
-        <Image src={logo} rounded height="54" width="54" />
+        {/* <Image src={logo} rounded height="54" width="54" /> */}
+        Terrain Flora Drawer
       </Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">
@@ -27,14 +45,8 @@ function NavBar() {
           <Nav.Link as={NavLink} to="/">
             Home
           </Nav.Link>
-          <Nav.Link as={NavLink} to="/#about-us">
-            About us
-          </Nav.Link>
-          {isAuth && (
-            <Nav.Link as={NavLink} to="/map">
-              Map
-            </Nav.Link>
-          )}
+          <Nav.Link href="/#about-us">About us</Nav.Link>
+          <NavLinks />
         </Nav>
         <div className="buttons">
           {!isAuth ? (

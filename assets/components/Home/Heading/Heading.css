@@ -1,0 +1,30 @@
+#heading {
+  min-height: 90vh;
+  width: 100%;
+  text-align: center;
+
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+    url("../../../images/heading.jpg");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+#heading #hero-title {
+  color: white;
+  font-weight: 600;
+  font-size: 3rem;
+
+  /* font-family: serif; */
+}
+
+#heading #heading-description {
+  /* color: white; */
+  width: 80%;
+  letter-spacing: 0.02rem;
+}
+
+@media only screen and (min-width: 992px) {
+  #heading #heading-description {
+    width: 50%;
+  }
+}

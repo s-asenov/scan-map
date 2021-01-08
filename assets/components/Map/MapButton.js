@@ -1,11 +1,17 @@
 import axios from "axios";
-import React from "react";
+import React, { useContext } from "react";
 import { Button } from "react-bootstrap";
+import apiInstance from "../../helpers/api/instance";
+import { getAuth } from "../../helpers/auth";
+import MapContext from "../Utils/context/MapContext";
 import calculateDismensions from "./utils/canvas";
 import { getFilename, getUniqImagesPos } from "./utils/helpers";
 
 function MapButton({ rectangle }) {
+  const context = useContext(MapContext);
+
   const handleRequest = async (rLatLng, unique, ctx) => {
+    context.setLoading(true);
     const topLeft = rLatLng.nw;
     const topRight = rLatLng.ne;
     const botLeft = rLatLng.sw;
@@ -56,21 +62,14 @@ function MapButton({ rectangle }) {
         return;
       }
 
-      axios
-        .post(
-          "/api/map",
-          {
-            lat: center.lat(),
-            lng: center.lng(),
-            jpg: base64,
-          },
-          {
-            headers: {
-              "AUTH-TOKEN": localStorage.getItem("remember"),
-            },
-          }
-        )
+      apiInstance
+        .post("map", {
+          lat: center.lat(),
+          lng: center.lng(),
+          jpg: base64,
+        })
         .then((response) => {
+          context.setLoaded(true);
           console.log(response.data);
         });
     });

@@ -2,6 +2,7 @@
 
 namespace App\Security;
 
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,6 +20,7 @@ class LoginAuthenticator extends AbstractGuardAuthenticator
      * @var UserPasswordEncoderInterface
      */
     private $passwordEncoder;
+    private $token;
 
     public function __construct(UserPasswordEncoderInterface $passwordEncoder)
     {
@@ -49,6 +51,7 @@ class LoginAuthenticator extends AbstractGuardAuthenticator
             throw new CustomUserMessageAuthenticationException('Email could not be found.');
         }
 
+        $this->token = $user->getApiToken();
         return $user;
     }
 
@@ -64,6 +67,8 @@ class LoginAuthenticator extends AbstractGuardAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $providerKey)
     {
+        // setcookie('x-token', $this->token, 0, '/', null, true, true);
+
         return null;
     }
 
