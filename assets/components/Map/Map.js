@@ -1,17 +1,23 @@
 import React, { useEffect, useReducer, useState } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
 import "./Map.css";
-import MapButton from "./MapButton";
+import MapButton from "./MapButton/MapButton";
 import MapContext from "../Utils/context/MapContext";
 import MapReducer from "../Utils/reducers/Map/MapReducer";
 import { LOADED, LOADING } from "../Utils/reducers/Map/MapActions";
+import LoadingModal from "./LoadingModal/LoadingModal";
+import { useLocation } from "react-router-dom";
+import LoadingAlert from "./LoadingAlert";
 
 const initialState = {
   loading: false,
   loaded: false,
+  showAlert: false,
 };
 
 function Map() {
+  const location = useLocation();
+
   const [rect, setRect] = useState(null);
   const [state, dispatch] = useReducer(MapReducer, initialState);
 
@@ -20,6 +26,9 @@ function Map() {
     setLoaded: (value) => dispatch({ type: LOADED, payload: value }),
     loading: state.loading,
     setLoading: (value) => dispatch({ type: LOADING, payload: value }),
+    reset: () => dispatch({ type: "reset", payload: initialState }),
+    showAlert: state.showAlert,
+    setShowAlert: (value) => dispatch({ type: "alert", payload: value }),
   };
 
   useEffect(() => {
@@ -157,10 +166,17 @@ function Map() {
 
   return (
     <MapContext.Provider value={value}>
-      <div id="map" style={{ height: "90vh" }} />
-      <MapButton rectangle={rect} />
-      {state.loaded && <h2>Loadedd</h2>}
-      {state.loading && <h2>Loading</h2>}
+      <div id="map-content">
+        <div id="map" />
+        <MapButton rectangle={rect} />
+        {/* <p>Картата генерира нужните файлове</p> */}
+        <LoadingModal loaded={state.loaded} loading={state.loading} />
+      </div>
+      <LoadingAlert
+        loaded={state.loaded}
+        loading={state.loading}
+        map={location.map}
+      />
     </MapContext.Provider>
   );
 }

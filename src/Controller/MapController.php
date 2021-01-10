@@ -40,9 +40,10 @@ class MapController extends AbstractController
         $lat = $form['lat'];
         $lng = $form['lng'];
         $image = $form['jpg'];
+        $name = $form['name'];
 
         try {
-            $plants = $retriever->getPlants($lat, $lng);
+            $plants = array_values($retriever->getPlants($lat, $lng));
         } catch (ClientExceptionInterface |
         TransportExceptionInterface |
         ServerExceptionInterface |
@@ -59,6 +60,7 @@ class MapController extends AbstractController
         $zipDir = $this->getParameter('app.zip_directory');
 
         $terrain = new Terrain($this->getUser());
+        $terrain->setName($name);
         $fileName = $terrain->getZipName();
 
         $em->persist($terrain);

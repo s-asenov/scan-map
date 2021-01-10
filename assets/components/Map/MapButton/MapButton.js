@@ -1,14 +1,14 @@
-import axios from "axios";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
+import "./MapButton.css";
 import { Button } from "react-bootstrap";
-import apiInstance from "../../helpers/api/instance";
-import { getAuth } from "../../helpers/auth";
-import MapContext from "../Utils/context/MapContext";
-import calculateDismensions from "./utils/canvas";
-import { getFilename, getUniqImagesPos } from "./utils/helpers";
+import apiInstance from "../../../helpers/api/instance";
+import MapContext from "../../Utils/context/MapContext";
+import calculateDismensions from "../utils/canvas";
+import { getFilename, getUniqImagesPos } from "../utils/helpers";
 
 function MapButton({ rectangle }) {
   const context = useContext(MapContext);
+  const [error, setError] = useState(null);
 
   const handleRequest = async (rLatLng, unique, ctx) => {
     context.setLoading(true);
@@ -30,6 +30,23 @@ function MapButton({ rectangle }) {
   };
 
   const handleClick = () => {
+    let terrainName;
+
+    terrainName = prompt("Моля въведете име на местността:");
+
+    if (terrainName === null || terrainName === "") {
+      terrainName = prompt("Името не трябва да е празно!");
+      return;
+    }
+
+    if (terrainName.length > 255) {
+      terrainName = prompt("Името не трябва да е по-дълго от 255 символа!");
+      return;
+    } else if (!/^[a-z \u0400-\u04FF ,.'-]+$/i.test(terrainName)) {
+      terrainName = prompt("Името не приема специални символи!");
+      return;
+    }
+
     if (
       rectangle.getPos().ne.y < 0 ||
       rectangle.getPos().sw.y > document.getElementById("map").offsetHeight - 12
@@ -67,6 +84,7 @@ function MapButton({ rectangle }) {
           lat: center.lat(),
           lng: center.lng(),
           jpg: base64,
+          name: terrainName,
         })
         .then((response) => {
           context.setLoaded(true);
@@ -75,7 +93,11 @@ function MapButton({ rectangle }) {
     });
   };
 
-  return <Button onClick={handleClick}>Render</Button>;
+  return (
+    <Button onClick={handleClick} variant="primary map-btn">
+      Генерирай
+    </Button>
+  );
 }
 
 export default MapButton;

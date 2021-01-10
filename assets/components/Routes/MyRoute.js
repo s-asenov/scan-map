@@ -6,8 +6,10 @@ import Footer from "../Footer/Footer";
 function MyRoute({ children, ...rest }) {
   return (
     <React.Fragment>
+      {/* <div id="page-content"> */}
       <NavBar />
       <Route {...rest}>{children}</Route>
+      {/* </div> */}
       <Footer />
     </React.Fragment>
   );

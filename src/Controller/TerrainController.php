@@ -62,7 +62,7 @@ class TerrainController extends AbstractController
 
         return new JsonResponse([
             'status' => "success",
-            'terrain' => $normalized
+            'terrains' => $normalized
         ]);
     }
 

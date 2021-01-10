@@ -1,0 +1,18 @@
+.loading-modal {
+  align-items: center;
+  padding: 1rem 0;
+}
+
+.loading-modal .spinner-border {
+  width: 4rem;
+  height: 4rem;
+  border-width: 0.5em;
+  color: var(--indigo);
+  margin-bottom: 1em;
+}
+
+.loading-modal p {
+  font-weight: 500;
+  letter-spacing: 0.02rem;
+  font-size: 1.1rem;
+}

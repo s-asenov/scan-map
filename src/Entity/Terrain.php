@@ -27,6 +27,11 @@ class Terrain
     private $zipName;
 
     /**
+     * @ORM\Column(type="string")
+     */
+    private $name;
+
+    /**
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
      */
@@ -44,7 +49,7 @@ class Terrain
         $formattedDate = $now->format('YmdHisv');
 
         do {
-            $name = $user->getId() . "-" . uniqid($formattedDate) . "-" . $helper->random_str() . ".zip";
+            $name = $user->getId() . "-" . uniqid($formattedDate) . "-" . $helper->random_str();
             $this->zipName = $name;
         } while (file_exists('zip/' . $name));
 
@@ -107,6 +112,18 @@ class Terrain
                 $terrainKey->setTerrain(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): self
+    {
+        $this->name = $name;
 
         return $this;
     }

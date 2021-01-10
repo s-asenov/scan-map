@@ -16,6 +16,15 @@ function MapReducer(state, action) {
         loading: !payload,
         loaded: payload,
       };
+    case "alert":
+      return {
+        ...state,
+        loading: false,
+        loaded: false,
+        showAlert: payload,
+      };
+    case "reset":
+      return payload;
     default:
       throw new Error();
   }

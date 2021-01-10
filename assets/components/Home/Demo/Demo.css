@@ -3,6 +3,11 @@
     url("../../../images/demo.jpg") no-repeat center;
   color: #ffffff;
   padding: 10rem 0rem;
+
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .home-demo .btn {

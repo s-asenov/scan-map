@@ -5,6 +5,9 @@ const initialValue = {
   loading: false,
   setLoaded: () => {},
   setLoading: () => {},
+  reset: () => {},
+  showAlert: false,
+  setShowAlert: () => {},
 };
 
 const MapContext = React.createContext(initialValue);

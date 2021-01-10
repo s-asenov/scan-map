@@ -19,7 +19,7 @@ class ZipService
     {
         $zip = new \ZipArchive();
 
-        $zip->open($this->directory.$this->name, \ZipArchive::CREATE);
+        $zip->open($this->directory.$this->name.".zip", \ZipArchive::CREATE);
 
         foreach ($files as $type => $content) {
             $this->addFile($zip, $type, $content);

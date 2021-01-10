@@ -1,6 +1,7 @@
 import React from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
+import { HashLink } from "react-router-hash-link";
 import "./Footer.css";
 
 function Footer() {
@@ -41,7 +42,7 @@ function Footer() {
             <ul>
               <h4 className="footer-title">Бързи връзки</h4>
               <li>
-                <a href="/#about-us">За нас</a>
+                <HashLink to="/#about-us">За нас</HashLink>
               </li>
               <li>
                 <NavLink to="/demo">Демо</NavLink>

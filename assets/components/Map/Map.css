@@ -1,3 +1,7 @@
 [id*="canvas"] {
   display: none;
 }
+
+#map {
+  height: 90vh;
+}

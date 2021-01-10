@@ -3,9 +3,9 @@ import "./NavBar.css";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
 import { Button, Image } from "react-bootstrap";
-import logo from "../../images/search.png";
 import { NavLink, useHistory } from "react-router-dom";
 import { getAuth, removeAuth } from "../../helpers/auth";
+import { HashLink } from "react-router-hash-link";
 
 function NavBar() {
   const history = useHistory();
@@ -21,10 +21,10 @@ function NavBar() {
       return (
         <React.Fragment>
           <Nav.Link as={NavLink} to="/map">
-            Map
+            Карта
           </Nav.Link>
-          <Nav.Link as={NavLink} to="/maps">
-            My maps
+          <Nav.Link as={NavLink} to="/terrains">
+            Моите карти
           </Nav.Link>
         </React.Fragment>
       );
@@ -43,24 +43,26 @@ function NavBar() {
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav>
           <Nav.Link as={NavLink} to="/">
-            Home
+            Начало
           </Nav.Link>
-          <Nav.Link href="/#about-us">About us</Nav.Link>
+          <Nav.Link as={HashLink} to="/#about-us">
+            За нас
+          </Nav.Link>
           <NavLinks />
         </Nav>
         <div className="buttons">
           {!isAuth ? (
             <React.Fragment>
               <Button as={NavLink} to="/login" variant="login">
-                Login
+                Вход
               </Button>
               <Button as={NavLink} to="/register" variant="register">
-                Register
-              </Button>{" "}
+                Регистрация
+              </Button>
             </React.Fragment>
           ) : (
             <Button onClick={() => logout()} variant="outline-light">
-              Logout
+              Изход
             </Button>
           )}
         </div>

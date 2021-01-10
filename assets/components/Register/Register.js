@@ -30,7 +30,7 @@ const validate = (values, props) => {
     errors.firstName = "Too short";
   } else if (values.firstName.length > 30) {
     errors.firstName = "Too long";
-  } else if (!/^[a-z ,.'-]+$/i.test(values.firstName)) {
+  } else if (!/^[a-z \u0400-\u04FF ,.'-]+$/i.test(values.firstName)) {
     errors.firstName = "Special characters are forbidden!";
   }
 
@@ -40,7 +40,7 @@ const validate = (values, props) => {
     errors.lastName = "Too short";
   } else if (values.lastName.length > 30) {
     errors.lastName = "Too long";
-  } else if (!/^[a-z ,.'-]+$/i.test(values.lastName)) {
+  } else if (!/^[a-z \u0400-\u04FF ,.'-]+$/i.test(values.lastName)) {
     errors.lastName = "Special characters are forbidden!";
   }
 
@@ -80,53 +80,54 @@ function Register() {
   const { touched, errors, handleSubmit, values, handleChange } = formik;
 
   return (
-    <Form onSubmit={handleSubmit}>
+    <Form className="security-form" onSubmit={handleSubmit}>
+      <h2 className="font-weight-bold text-center">Регистрация</h2>
       <Form.Group controlId="email">
-        <Form.Label>Email address</Form.Label>
+        <Form.Label>Имейл</Form.Label>
         <Form.Control
           type="email"
           value={values.email}
-          placeholder="Enter email"
+          placeholder="Въведете имейл"
           isInvalid={touched.email && errors.email}
           onChange={handleChange}
         />
         <FormInvalidFeedback error={errors.email} />
       </Form.Group>
       <Form.Group controlId="firstName">
-        <Form.Label>First name</Form.Label>
+        <Form.Label>Име</Form.Label>
         <Form.Control
           type="text"
           value={values.firstName}
-          placeholder="Enter first name"
+          placeholder="Въведете име"
           isInvalid={touched.firstName && errors.firstName}
           onChange={handleChange}
         />
         <FormInvalidFeedback error={errors.firstName} />
       </Form.Group>
       <Form.Group controlId="lastName">
-        <Form.Label>Last name</Form.Label>
+        <Form.Label>Фамилия</Form.Label>
         <Form.Control
           type="text"
           value={values.lastName}
-          placeholder="Enter last name"
+          placeholder="Въведете фамилия"
           isInvalid={touched.lastName && errors.lastName}
           onChange={handleChange}
         />
         <FormInvalidFeedback error={errors.lastName} />
       </Form.Group>
       <Form.Group controlId="password">
-        <Form.Label>Password</Form.Label>
+        <Form.Label>Парола</Form.Label>
         <Form.Control
           type="password"
           value={values.password}
           onChange={handleChange}
-          placeholder="Password"
+          placeholder="Въведете парола"
           isInvalid={touched.password && errors.password}
         />
         <FormInvalidFeedback error={errors.password} />
       </Form.Group>
       <Button variant="primary" type="submit">
-        Submit
+        Регистрация
       </Button>
     </Form>
   );

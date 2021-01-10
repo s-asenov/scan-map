@@ -60,13 +60,14 @@ function Login() {
   const { touched, errors, handleSubmit, values, handleChange } = formik;
 
   return (
-    <Form onSubmit={handleSubmit}>
+    <Form className="security-form" onSubmit={handleSubmit}>
+      <h2 className="font-weight-bold text-center">Вход</h2>
       <Form.Group controlId="email">
-        <Form.Label>Email address</Form.Label>
+        <Form.Label>Имейл</Form.Label>
         <Form.Control
           type="email"
           value={values.email}
-          placeholder="Enter email"
+          placeholder="Въведете имейл"
           isInvalid={touched.email && errors.email}
           onChange={handleChange}
         />
@@ -76,21 +77,22 @@ function Login() {
         <FormInvalidFeedback error={errors.email} />
       </Form.Group>
       <Form.Group controlId="password">
-        <Form.Label>Password</Form.Label>
+        <Form.Label>Парола</Form.Label>
         <Form.Control
           type="password"
           value={values.password}
           onChange={handleChange}
-          placeholder="Password"
+          placeholder="Въведете парола"
           isInvalid={touched.password && errors.password}
         />
         <FormInvalidFeedback error={errors.password} />
+        <p className="mb-2">
+          Нямате профил? <NavLink to="/register">Регистрирай се!</NavLink>
+        </p>
       </Form.Group>
-      <Form.Text>
-        Don't have a profile? <NavLink to="/register">Sign up!</NavLink>
-      </Form.Text>
+
       <Button variant="primary" type="submit">
-        Submit
+        Вход
       </Button>
     </Form>
   );

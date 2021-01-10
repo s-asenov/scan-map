@@ -10,6 +10,7 @@ import AuthRoute from "./components/Routes/AuthRoute";
 import Register from "./components/Register/Register";
 import { createBrowserHistory } from "history";
 import httpService from "./helpers/api/apiInterceptor";
+import Terrains from "./components/Terrains/Terrains";
 
 const history = createBrowserHistory();
 httpService.setupInterceptors(history);
@@ -20,6 +21,9 @@ function App() {
       <Switch>
         <AuthRoute path="/map">
           <Map />
+        </AuthRoute>
+        <AuthRoute exact path="/terrains">
+          <Terrains />
         </AuthRoute>
         <MyRoute path="/users">
           <h2>users</h2>
