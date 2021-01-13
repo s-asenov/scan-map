@@ -39,14 +39,17 @@ function NavBar() {
         {/* <Image src={logo} rounded height="54" width="54" /> */}
         Terrain Flora Drawer
       </Navbar.Brand>
-      <Navbar.Toggle aria-controls="basic-navbar-nav" />
-      <Navbar.Collapse id="basic-navbar-nav">
+      <Navbar.Toggle aria-controls="navbar" />
+      <Navbar.Collapse id="navbar">
         <Nav>
           <Nav.Link as={NavLink} to="/">
             Начало
           </Nav.Link>
           <Nav.Link as={HashLink} to="/#about-us">
             За нас
+          </Nav.Link>
+          <Nav.Link as={NavLink} to="/demo">
+            Демо
           </Nav.Link>
           <NavLinks />
         </Nav>

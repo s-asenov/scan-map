@@ -58,7 +58,7 @@ function AboutUs() {
           <Col md="6">
             {!state.first && !state.second && (
               <Image
-                className="terrain mt-4"
+                className="aboutus-image mt-4"
                 src={terrain}
                 style={{ width: "100%", minHeight: "300px" }}
               />

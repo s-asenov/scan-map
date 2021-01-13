@@ -1,0 +1,41 @@
+.terrain {
+  max-width: 25%;
+  padding: 0.5rem 1.25rem;
+}
+
+.terrain img {
+  width: 100%;
+  height: 200px;
+}
+
+.terrain-name {
+  font-weight: 600;
+  overflow: hidden !important;
+  text-overflow: ellipsis;
+  width: 60%;
+  white-space: nowrap;
+}
+
+.terrain-btns svg {
+  cursor: pointer;
+}
+
+.key {
+}
+
+.key p {
+  overflow: hidden !important;
+  text-overflow: ellipsis;
+  width: 80%;
+  white-space: nowrap;
+}
+
+.key h3 {
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0;
+  font-size: 1rem;
+  background-color: #f7f7f7;
+  border-bottom: 1px solid #ebebeb;
+  border-top-left-radius: calc(0.3rem - 1px);
+  border-top-right-radius: calc(0.3rem - 1px);
+}

@@ -38,6 +38,11 @@ class Terrain
     private $user;
 
     /**
+     * @ORM\Column(type="string")
+     */
+    private $imageDirectory;
+
+    /**
      * @ORM\OneToMany(targetEntity=TerrainKey::class, mappedBy="terrain", orphanRemoval=true)
      */
     private $terrainKeys;
@@ -124,6 +129,18 @@ class Terrain
     public function setName(string $name): self
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function getImageDirectory(): ?string
+    {
+        return $this->imageDirectory;
+    }
+
+    public function setImageDirectory(string $imageDirectory): self
+    {
+        $this->imageDirectory = $imageDirectory;
 
         return $this;
     }

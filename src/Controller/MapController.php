@@ -5,13 +5,12 @@ namespace App\Controller;
 
 
 use App\Entity\Terrain;
-use App\Entity\TerrainKey;
 use App\Repository\TerrainKeyRepository;
-use App\Repository\TerrainRepository;
 use App\Serializer\Normalizer\PlantNormalizer;
+use App\Service\ImageUploader;
 use App\Service\PlantsFromZoneRetriever;
-use App\Service\PlantsInfoRetriever;
 use App\Service\ZipService;
+use App\Util\UploadedBase64File;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Finder\Finder;
@@ -33,13 +32,15 @@ class MapController extends AbstractController
     /**
      * @Route("/api/map", name="api_map_save")
      */
-    public function saveZip(Request $request, PlantsFromZoneRetriever $retriever, EntityManagerInterface $em): JsonResponse
+    public function saveZip(ImageUploader $uploader, Request $request, PlantsFromZoneRetriever $retriever, EntityManagerInterface $em): JsonResponse
     {
         $form = $request->request->all();
 
         $lat = $form['lat'];
         $lng = $form['lng'];
-        $image = $form['jpg'];
+        $elevationModel = $form['images']['elevation'];
+        $gmImage = $form['images']['gmImage'];
+
         $name = $form['name'];
 
         try {
@@ -63,6 +64,12 @@ class MapController extends AbstractController
         $terrain->setName($name);
         $fileName = $terrain->getZipName();
 
+
+        $file = new UploadedBase64File($gmImage, $fileName);
+        $uploadedFileName = $uploader->upload($file);
+
+        $terrain->setImageDirectory($uploadedFileName);
+
         $em->persist($terrain);
         $em->flush();
 
@@ -70,7 +77,7 @@ class MapController extends AbstractController
         $zipService = new ZipService($zipDir, $fileName);
         $zipService->addFiles([
             'json' => $base64,
-            'jpg' => $image
+            'jpg' => $elevationModel
         ]);
 
         return new JsonResponse([
@@ -105,7 +112,7 @@ class MapController extends AbstractController
         foreach ($finder as $file) {
             $fileName = $file->getFilename();
 
-            if ($fileName == $terrainKey->getTerrain()->getZipName()) {
+            if ($fileName == $terrainKey->getTerrain()->getZipName().".zip") {
                 $response = new BinaryFileResponse($file);
                 $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT);
 
@@ -115,6 +122,7 @@ class MapController extends AbstractController
 
         return new JsonResponse([
             'status' => "error",
+            'file' => "not found"
         ]);
     }
 }

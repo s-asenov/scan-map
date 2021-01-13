@@ -29,15 +29,20 @@ class TerrainNormalizer implements NormalizerInterface, CacheableSupportsMethodI
         $keys = [];
 
         foreach ($object->getTerrainKeys() as $terrainKey) {
-            $keys[] = $this->keysNormalizer->normalize($terrainKey);
+            if ($terrainKey->getExpiringOn() > new \DateTime()) {
+                $keys[] = $this->keysNormalizer->normalize($terrainKey);
+            }
         }
 
         $data = [
             'id' => $object->getId(),
             'zipName' => $object->getZipName(),
             'user' => $object->getUser()->getId(),
+            'name' => $object->getName(),
+            'imageDirectory' => $object->getImageDirectory(),
             'terrainKeys' => $keys
         ];
+
         return $data;
     }
 

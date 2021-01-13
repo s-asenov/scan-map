@@ -117,16 +117,19 @@ function Map() {
           //   elementType: "geometry",
           //   stylers: [{ visibility: "off" }],
           // },
+          {
+            featureType: "road",
+            stylers: [{ visibility: "off" }],
+          },
         ];
-
         const { initMap, initRect } = init();
 
         const map = initMap(document.getElementById("map"), {
           center: { lat: 42.5, lng: 23 },
           zoom: 9,
-          mapTypeId: "satellite",
-          maxZoom: 9,
-          minZoom: 3,
+          mapTypeId: "hybrid",
+          maxZoom: 11,
+          minZoom: 4,
           disableDefaultUI: true,
           styles,
         });

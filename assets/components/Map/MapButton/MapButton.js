@@ -1,14 +1,14 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import "./MapButton.css";
 import { Button } from "react-bootstrap";
 import apiInstance from "../../../helpers/api/instance";
 import MapContext from "../../Utils/context/MapContext";
 import calculateDismensions from "../utils/canvas";
 import { getFilename, getUniqImagesPos } from "../utils/helpers";
+import html2canvas from "html2canvas";
 
 function MapButton({ rectangle }) {
   const context = useContext(MapContext);
-  const [error, setError] = useState(null);
 
   const handleRequest = async (rLatLng, unique, ctx) => {
     context.setLoading(true);
@@ -70,26 +70,44 @@ function MapButton({ rectangle }) {
 
     const unique = getUniqImagesPos(filenames);
 
-    handleRequest(rLatLng, unique, ctx).then((result) => {
-      const { base64, unique } = result;
+    const ne = rectangle.getPos().ne;
+    const sw = rectangle.getPos().sw;
 
-      if (unique.count === 1 && unique.images[0].includes("default.jpg")) {
-        alert("Please refrain to mainland.");
+    html2canvas(document.getElementById("map"), {
+      useCORS: true,
+      x: sw.x - 50,
+      y: ne.y + 40,
+      width: ne.x - sw.x + 150,
+      height: sw.y - ne.y + 100,
+      scrollY: window.screenY,
+    }).then((gmCanvas) => {
+      const dataUrl = gmCanvas.toDataURL("image/jpeg");
+      const gmImage = dataUrl.split("base64,")[1];
 
-        return;
-      }
+      handleRequest(rLatLng, unique, ctx).then((result) => {
+        const { base64, unique } = result;
 
-      apiInstance
-        .post("map", {
-          lat: center.lat(),
-          lng: center.lng(),
-          jpg: base64,
-          name: terrainName,
-        })
-        .then((response) => {
-          context.setLoaded(true);
-          console.log(response.data);
-        });
+        if (unique.count === 1 && unique.images[0].includes("default.jpg")) {
+          alert("Please refrain to mainland.");
+
+          return;
+        }
+
+        apiInstance
+          .post("map", {
+            lat: center.lat(),
+            lng: center.lng(),
+            images: {
+              elevation: base64,
+              gmImage: gmImage,
+            },
+            name: terrainName,
+          })
+          .then((response) => {
+            context.setLoaded(true);
+            console.log(response.data);
+          });
+      });
     });
   };
 

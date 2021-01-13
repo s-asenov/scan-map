@@ -11,6 +11,7 @@ import Register from "./components/Register/Register";
 import { createBrowserHistory } from "history";
 import httpService from "./helpers/api/apiInterceptor";
 import Terrains from "./components/Terrains/Terrains";
+import Demo from "./components/Demo/Demo";
 
 const history = createBrowserHistory();
 httpService.setupInterceptors(history);
@@ -25,9 +26,9 @@ function App() {
         <AuthRoute exact path="/terrains">
           <Terrains />
         </AuthRoute>
-        <MyRoute path="/users">
-          <h2>users</h2>
-        </MyRoute>
+        <AuthRoute exact path="/demo">
+          <Demo />
+        </AuthRoute>
         <MyRoute exact path="/">
           <Home />
         </MyRoute>

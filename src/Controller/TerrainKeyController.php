@@ -22,7 +22,7 @@ class TerrainKeyController extends AbstractController
      * @param TerrainRepository $repository
      * @return JsonResponse
      */
-    public function addKey(int $id, EntityManagerInterface $em, TerrainRepository $repository): JsonResponse
+    public function addKey(int $id, EntityManagerInterface $em, TerrainRepository $repository, TerrainKeysNormalizer $normalizer): JsonResponse
     {
         $terrain = $repository->find($id);
 
@@ -37,9 +37,11 @@ class TerrainKeyController extends AbstractController
         $em->persist($terrainKey);
         $em->flush();
 
+        $normalized = $normalizer->normalize($terrainKey);
+
         return new JsonResponse([
             'status' => "success",
-            'key' => "saved"
+            'key' => $normalized
         ]);
     }
 

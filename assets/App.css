@@ -6,3 +6,7 @@
   border-radius: 1rem;
   background-color: #c4c4c4;
 }
+
+.flex-1 {
+  flex: 1;
+}

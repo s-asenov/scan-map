@@ -77,7 +77,7 @@ function ContactForm() {
         <FormInvalidFeedback error={errors.lastName} />
       </Form.Group>
       <Button variant="primary" type="submit">
-        Submit
+        Изпращане
       </Button>
     </Form>
   );
