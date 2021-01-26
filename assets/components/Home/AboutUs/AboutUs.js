@@ -8,10 +8,10 @@ import Row from "react-bootstrap/Row";
 import Image from "react-bootstrap/Image";
 import Button from "react-bootstrap/Button";
 /** React Bootstrap Imports */
-
 import TechnologyItem from "./TechnologyItem";
-
 import gray from "../../../images/gray.jpg";
+import team1 from "../../../images/team1.jpg";
+import team2 from "../../../images/team2.jpg";
 import TechnologyReducer from "../../Utils/reducers/Home/technologyReducer";
 import terrain from "../../../images/unity.jpg";
 import technologies from "./technologies";
@@ -40,14 +40,14 @@ function AboutUs() {
             </p>
             <Row className="justify-content-around people">
               <div className="person">
-                <Image src={gray} height="180" width="120" />
+                <Image src={team1} height="180" width="120" />
                 <p className="font-weight-bold">Слави Крумов Асенов</p>
                 <Button name="first" onClick={handleClick}>
                   Виж технологии!
                 </Button>
               </div>
               <div className="person">
-                <Image src={gray} height="180" width="120" />
+                <Image src={team2} height="180" width="120" />
                 <p className="font-weight-bold">Алекс Руменов Янев</p>
                 <Button name="second" onClick={handleClick}>
                   Виж технологии!

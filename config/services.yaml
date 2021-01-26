@@ -9,6 +9,8 @@ parameters:
     app.geonames: '%env(resolve:GEONAMES_ACC)%'
     app.zip_directory: '%kernel.project_dir%/zip/'
     app.image_directory: '%kernel.project_dir%/public/uploads'
+    app.models_directory: '%kernel.project_dir%/public/models/'
+
 services:
     # default configuration for services in *this* file
     _defaults:

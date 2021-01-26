@@ -7,9 +7,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
+ * The entity responsible for holding the necessary information about the plant.
+ *
  * @ORM\Entity(repositoryClass=PlantRepository::class)
  * @ORM\Table(name="`plants`")
- * @UniqueEntity(fields={"scientificName", "commonName"})
+ * @UniqueEntity(fields={"scientificName"})
  */
 class Plant
 {
@@ -21,7 +23,7 @@ class Plant
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="string", length=255, nullable=true, unique=true)
      */
     private $scientificName;
 
@@ -36,7 +38,7 @@ class Plant
     private $imageUrl;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="text", nullable=true)
      */
     private $information;
 
@@ -62,19 +64,8 @@ class Plant
 
     public function setInformation(string $information): self
     {
+//        $this->information = empty($information) ?  '' : $information;
         $this->information = $information;
-
-        return $this;
-    }
-
-    public function getScientificName(): ?string
-    {
-        return $this->scientificName;
-    }
-
-    public function setScientificName(?string $scientificName): self
-    {
-        $this->scientificName = $scientificName;
 
         return $this;
     }
@@ -99,6 +90,18 @@ class Plant
     public function setImageUrl(?string $imageUrl): self
     {
         $this->imageUrl = $imageUrl;
+
+        return $this;
+    }
+
+    public function getScientificName(): ?string
+    {
+        return $this->scientificName;
+    }
+
+    public function setScientificName(?string $scientificName): self
+    {
+        $this->scientificName = $scientificName;
 
         return $this;
     }

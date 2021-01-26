@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useFormik } from "formik";
 import "./Register.css";
 import axios from "axios";
@@ -7,6 +7,8 @@ import Button from "react-bootstrap/Button";
 import { setAuth } from "../../helpers/auth";
 import { useHistory } from "react-router-dom";
 import FormInvalidFeedback from "../Utils/FormInvalidFeedback";
+import httpService from "../../helpers/api/apiInterceptor";
+import AuthContext from "../Utils/context/AuthContext";
 
 const initialValues = {
   email: "",
@@ -16,6 +18,8 @@ const initialValues = {
 };
 
 const validate = (values, props) => {
+  Object.keys(values).map((k) => (values[k] = values[k].trim()));
+
   const errors = {};
 
   if (!values.email) {
@@ -57,6 +61,7 @@ const validate = (values, props) => {
 
 function Register() {
   const history = useHistory();
+  const context = useContext(AuthContext);
 
   const formik = useFormik({
     initialValues,
@@ -65,8 +70,12 @@ function Register() {
       axios
         .post("/api/register", values)
         .then((response) => {
-          setAuth(response.data.user.apiToken);
-          history.push("/");
+          const user = response.data.user;
+          let admin = user.roles.includes("ROLE_SUPER_ADMIN");
+          context.setUser(true, admin);
+
+          httpService.setupInterceptors(history);
+          history.push("/verify");
         })
         .catch((error) => {
           const response = error.response;

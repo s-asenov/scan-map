@@ -53,7 +53,7 @@ async function loadImgFromCanvas(canvasA, promises) {
   };
 }
 
-function calculateDismensions(unique, ctx, corners) {
+async function calculateDismensions(unique, ctx, corners) {
   const { topRight, topLeft, botRight, botLeft } = corners;
   const { floor, ceil } = Math;
 
@@ -129,7 +129,7 @@ function calculateDismensions(unique, ctx, corners) {
       promises.push(promise);
     });
 
-    const base64 = loadImgFromCanvas(ctx.canvas, promises);
+    const base64 = await loadImgFromCanvas(ctx.canvas, promises);
 
     return base64;
   } else if (unique.count === 2) {
@@ -174,11 +174,9 @@ function calculateDismensions(unique, ctx, corners) {
         promises.push(promise);
       });
 
-      const base64 = loadImgFromCanvas(ctx.canvas, promises).then((r) => {
-        return r;
-      });
+      const base64 = await loadImgFromCanvas(ctx.canvas, promises);
 
-      // return base64;
+      return base64;
     } else {
       //first square
       const x1 = topLeft.lng - Math.floor(topLeft.lng);
@@ -218,7 +216,7 @@ function calculateDismensions(unique, ctx, corners) {
         promises.push(promise);
       });
 
-      const base64 = loadImgFromCanvas(ctx.canvas, promises);
+      const base64 = await loadImgFromCanvas(ctx.canvas, promises);
 
       return base64;
     }
@@ -240,7 +238,7 @@ function calculateDismensions(unique, ctx, corners) {
     let promise = putImageData(image, options, ctx);
     promises.push(promise);
 
-    const base64 = loadImgFromCanvas(ctx.canvas, promises);
+    const base64 = await loadImgFromCanvas(ctx.canvas, promises);
 
     return base64;
   }

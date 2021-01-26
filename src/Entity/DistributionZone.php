@@ -8,9 +8,11 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * List distributions zones. Zones are following the WGSRPD convention.
- * Every zone has its unique id got from.
- * @link https://trefle.io
+ * Distribution Zones are part of the WGSRPD convention.
+ * Every zone has its unique id used in the trefle API.
+ *
+ * @link https://github.com/tdwg/wgsrpd
+ * @link https://trefle.io/
  *
  * @ORM\Entity(repositoryClass=DistributionZoneRepository::class)
  * @ORM\Table(name="`distribution_zones`")
@@ -43,6 +45,11 @@ class DistributionZone
      * @ORM\OneToMany(targetEntity=DistributionZonePlant::class, mappedBy="distributionZone", orphanRemoval=true)
      */
     private $distributionZonePlants;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $fetched;
 
     public function __construct()
     {
@@ -142,6 +149,18 @@ class DistributionZone
                 $distributionZonePlant->setDistributionZone(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getFetched(): ?bool
+    {
+        return $this->fetched;
+    }
+
+    public function setFetched(bool $fetched): self
+    {
+        $this->fetched = $fetched;
 
         return $this;
     }

@@ -2,6 +2,8 @@ import React from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
+import { FaGlobe } from "react-icons/fa";
+import { MdContactMail } from "react-icons/md";
 import "./Footer.css";
 
 function Footer() {
@@ -9,7 +11,18 @@ function Footer() {
     <div id="footer">
       <Container>
         <Row className="py-5">
-          <Col md="4" className="links"></Col>
+          <Col md="4" className="links">
+            <div className="mt-3">
+              <FaGlobe size="2rem" color="#4b0082" />
+              <p className="d-inline ml-2">гр. Перник, ул. Г. Мамарчев, 2</p>
+            </div>
+            <div className="mt-3">
+              <MdContactMail size="2rem" color="#aaaaaa" />
+              <a href="mailto:support@flora.noit.eu" className="ml-2">
+                mailto:support@flora.noit.eu
+              </a>
+            </div>
+          </Col>
           <Col md="4" className="links">
             <ul>
               <h4 className="footer-title">Източници</h4>
@@ -68,8 +81,10 @@ function Footer() {
           padding: "1rem 0",
         }}
       >
-        НОИТ 2021 Разпределени уеб приложения | Алекс Янев и Слави Асенов | ПГИ
-        - гр. Перник
+        <p>
+          НОИТ 2021 Разпределени уеб приложения | Алекс Янев и Слави Асенов |
+          ПГИ - гр. Перник
+        </p>
       </div>
     </div>
   );

@@ -16,11 +16,13 @@
   margin: 0;
 }
 
-#footer a {
+#footer a,
+#footer p {
   color: #aaaaaa;
 }
 
-#footer a:hover {
+#footer a:hover,
+#footer p:hover {
   color: #dddddd;
 }
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import apiInstance from "../../helpers/api/instance";
+import apiInstance from "../../helpers/api/apiInstance";
 import gray from "../../images/gray.jpg";
 import { IoKeySharp } from "react-icons/io5";
 import { IoIosListBox } from "react-icons/io";
@@ -22,7 +22,7 @@ const TerrainList = ({ keys }) => {
   };
 
   return (
-    <Popover.Content>
+    <Popover.Content className="key-list">
       {keys.map((key, index) => (
         <div key={index} className="d-flex key">
           <p className={`terrain-${key.id} float-left`}>{key.id}</p>
@@ -61,7 +61,7 @@ const Terrain = (props) => {
   };
 
   return (
-    <Col md="4" className="terrain position-relative">
+    <Col md="3" className="terrain">
       <Image
         rounded
         src={`uploads/${imageDirectory}`}

@@ -2,16 +2,21 @@
 
 namespace App\Util;
 
-class MyHelper {
+/**
+ * Class MyHelper
+ *
+ * The class will contain helpful functions.
+ *
+ * @package App\Util
+ */
+class MyHelper
+{
     public function formatDate(\DateTimeInterface $date)
     {
         return date_format($date, 'Y-m-d H:i:s');
     }
 
-    public function random_str(
-        int $length = 20,
-        string $keyspace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    ): string {
+    public function random_str(int $length = 20, string $keyspace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'): string {
         if ($length < 1) {
             throw new \RangeException("Length must be a positive integer");
         }

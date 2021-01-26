@@ -3,63 +3,67 @@
 
 namespace App\Controller;
 
-
-use App\Entity\DistributionZone;
 use App\Entity\User;
 use App\Serializer\Normalizer\UserNormalizer;
+use App\Service\EmailVerifier;
 use App\Util\FormHelper;
+use App\Util\MyHelper;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelperInterface;
 
 /**
- * @Route("/api", name="api_")\
+ * @Route("/api", name="api_")
  *
  * Class SecurityController
  * @package App\Controller
  */
-class SecurityController extends AbstractController
+class SecurityController extends MyController
 {
     private $normalizer;
     private $em;
+    private $verifyEmailHelper;
+    private $mailer;
+    private $emailVerifier;
 
-    public function __construct(UserNormalizer $normalizer, EntityManagerInterface $em)
+    public function __construct(EmailVerifier $emailVerifier, VerifyEmailHelperInterface $helper, MailerInterface $mailer, UserNormalizer $normalizer, EntityManagerInterface $em)
     {
         $this->normalizer = $normalizer;
         $this->em = $em;
+        $this->verifyEmailHelper = $helper;
+        $this->mailer = $mailer;
+        $this->emailVerifier = $emailVerifier;
     }
 
     /**
-     * @Route("/register", name="register")
+     * @Route("/register", name="register", methods={"POST"})
      */
-    public function register(Request $request, FormHelper $formHelper, UserPasswordEncoderInterface $passwordEncoder, ValidatorInterface $validator)
+    public function register(MyHelper $myHelper, Request $request, FormHelper $formHelper, UserPasswordEncoderInterface $passwordEncoder, ValidatorInterface $validator): JsonResponse
     {
         $form = $request->request->all();
 
         if (!$formHelper->checkFormData(['firstName', 'lastName', 'email', 'password'], $form)) {
-            return new JsonResponse($formHelper::MISSING_CREDENTIALS);
+            return new JsonResponse(["status" => $formHelper::MISSING_CREDENTIALS], Response::HTTP_BAD_REQUEST);
         }
 
         $user = new User();
         $user->setFirstName($form["firstName"])
             ->setLastName($form["lastName"])
             ->setEmail($form["email"])
-            ->setPassword($form["password"]);
+            ->setPassword($form["password"])
+            ->setApiToken($myHelper->random_str(255));
 
-        $errors = $validator->validate($user);
+        $errors = $formHelper->validate($validator, $user);
 
-        if (count($errors) > 0) {
-            $messages = [];
-
-            foreach ($errors as $error) {
-                $messages[$error->getPropertyPath()] = $error->getMessage();
-            }
-
-            return new JsonResponse($messages, 400);
+        if (is_array($errors)) {
+            return new JsonResponse($errors, Response::HTTP_BAD_REQUEST);
         }
 
         $user->setPassword($passwordEncoder->encodePassword($user, $form["password"]));
@@ -67,19 +71,54 @@ class SecurityController extends AbstractController
         $this->em->persist($user);
         $this->em->flush();
 
-        $userArray = $this->normalizer->normalize($user);
-        $success = [
-            'status' => "success",
-            'user' => $userArray
-        ];
+        $this->emailVerifier->sendEmail($user);
 
-        return new JsonResponse($success, 200);
+        $userArray = $this->normalizer->normalize($user);
+
+        setcookie('x-token', $user->getApiToken(), 0, '/', null, true, true);
+
+        return new JsonResponse([
+            'status' => FormHelper::META_SUCCESS,
+            'user' => $userArray
+        ]);
     }
 
     /**
-     * @Route("/login", name="login")
+     * @Route("/send/verify", name="verification_send", methods={"POST"})
      */
-    public function login()
+    public function sendVerificationEmail(): JsonResponse
+    {
+        $this->emailVerifier->sendEmail($this->getUser());
+
+        return new JsonResponse([
+            'status' => FormHelper::META_SUCCESS
+        ]);
+    }
+
+    /**
+     * @Route("/verify", name="registration_confirmation_route", methods={"GET"})
+     * @param Request $request
+     * @return RedirectResponse
+     */
+    public function verifyUserEmail(Request $request): RedirectResponse
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        $user = $this->getUser();
+
+        $this->emailVerifier->verifyEmail($user, $request->getUri());
+
+        $user->setRoles(['VERIFIED']);
+
+        $this->em->persist($user);
+        $this->em->flush();
+
+        return $this->redirectToRoute('app_homepage');
+    }
+
+    /**
+     * @Route("/login", name="login", methods={"POST"})
+     */
+    public function login(): JsonResponse
     {
         $user = $this->getUser();
         $user->setLastSeen(new \DateTime());
@@ -88,35 +127,38 @@ class SecurityController extends AbstractController
         $this->em->flush();
 
         $userArray = $this->normalizer->normalize($this->getUser());
-        $success = [
-            'status' => "success",
-            'user' => $userArray
-        ];
 
-        return new JsonResponse($success, 200);
+        return new JsonResponse([
+            'status' => FormHelper::META_SUCCESS,
+            'user' => $userArray
+        ]);
     }
 
     /**
      * @Route("/logout", name="logout", methods={"GET"})
      */
-    public function logout()
+    public function logout(): JsonResponse
     {
-        throw new \Exception('This should not be accessed!');
+        if (isset($_COOKIE['x-token'])) {
+            unset($_COOKIE['x-token']); 
+            setcookie('x-token', null, -1, '/'); 
+        }
+
+        return new JsonResponse([
+            'status' => FormHelper::META_SUCCESS
+        ]);
     }
 
     /**
-     * @Route("/user", name="user")
+     * @Route("/user", name="user", methods={"GET"})
      */
-    public function getCurrentUser()
+    public function getCurrentUser(): JsonResponse
     {
         $userArray = $this->normalizer->normalize($this->getUser());
-        $success = [
-            'status' => "success",
+
+        return new JsonResponse([
+            'status' => FormHelper::META_SUCCESS,
             'user' => $userArray
-        ];
-
-        return new JsonResponse($success, 200);
+        ], 200);
     }
-
-
 }

@@ -1,19 +1,22 @@
-import apiInstance from "./api/instance";
+import apiInstance from "./api/apiInstance";
 
-function isAuth() {
-  //async
-  // const request = await apiInstance.post("/user");
+async function getAuth() {
+  let responseCode;
+  let admin;
 
-  // if (request.status === 200) {
-  //   return true;
-  // } else {
-  //   return false;
-  // }
-  return !!localStorage.getItem("x-token");
-}
+  try {
+    const request = await apiInstance.get("/user");
+    responseCode = request.status;
+    admin = request.data.user.roles.includes("ROLE_SUPER_ADMIN");
+  } catch (error) {
+    responseCode = error.response.status;
+    admin = false;
+  }
 
-function getAuth() {
-  return localStorage.getItem("x-token");
+  return {
+    auth: responseCode === 200,
+    admin: admin,
+  };
 }
 
 function setAuth(value) {
@@ -21,7 +24,8 @@ function setAuth(value) {
 }
 
 function removeAuth() {
-  localStorage.removeItem("x-token");
+  apiInstance.get("/logout");
+  //check if status is 200 - unnecessary for now
 }
 
-export { isAuth, getAuth, setAuth, removeAuth };
+export { getAuth, setAuth, removeAuth };

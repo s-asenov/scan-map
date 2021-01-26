@@ -31,7 +31,8 @@ class UserNormalizer implements NormalizerInterface, CacheableSupportsMethodInte
             'createdOn' => $object->getCreatedAt(),
             'lastSeen' => $object->getLastSeen(),
             'apiToken' => $object->getApiToken(),
-            'roles' => $object->getRoles()
+            'roles' => $object->getRoles(),
+            'isVerified' => (int) $object->getIsVerified()
         ];
 
         return $data;

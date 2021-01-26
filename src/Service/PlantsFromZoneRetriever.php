@@ -7,8 +7,6 @@ namespace App\Service;
 use App\Entity\DistributionZone;
 use App\Entity\DistributionZonePlant;
 use App\Entity\Plant;
-use App\Repository\DistributionZoneRepository;
-use App\Repository\PlantRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
@@ -19,101 +17,114 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class PlantsFromZoneRetriever
 {
+    const PLANTS_PER_PAGE = 20; //trefle`s pagination
+
     private $trefleApi;
     private $geonamesApi;
     private $repository;
     private $plantRepository;
     private $em;
-    private $zone;
+    private $zoneId;
+    private $zonePlantRepository;
 
     public function __construct(EntityManagerInterface $em, HttpClientInterface $trefleApi, HttpClientInterface $geonamesApi)
     {
         $this->trefleApi = $trefleApi;
         $this->geonamesApi = $geonamesApi;
-        $this->repository = $em->getRepository(DistributionZone::class);;
-        $this->plantRepository = $em->getRepository(Plant::class);;
         $this->em = $em;
+        $this->repository = $em->getRepository(DistributionZone::class);
+        $this->plantRepository = $em->getRepository(Plant::class);
+        $this->zonePlantRepository = $em->getRepository(DistributionZonePlant::class);
     }
 
     /**
-     * @param $lat
-     * @param $lng
-     * @return mixed|null
+     * The method creates an initial call to the plants api and
+     * loops through the rest of the pages, if there are any.
+     *
+     * @param DistributionZone $zone
+     * @return array
+     *
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function getPlants($lat, $lng)
+    public function getPlants(DistributionZone $zone): array
     {
-        $batchSize = 1000; //bulk inserts with doctrine
-
-        $zone = $this->getDistributionZone($lat, $lng);
-
         if ($zone === false) {
-            return null;
+            return [];
         }
 
-        $this->zone = $zone;
-        $zoneId = $zone->getId();
-
-        $request = $this->getPlantsFromPage("distributions/{$zoneId}/plants");
-
-        $plants = $request['plants'];
-        $total = $request['total'];
-
-        $zonePlants = $this->getPlantsInZone($zoneId);
-
-        if ($total === count($zonePlants)) {
+        /*
+         * If the total count meta is the same as number of saved plants in zone
+         * return the already saved.
+         */
+        if ($zone->getFetched()) {
             $plants = [];
+            $zonePlants = $zone->getDistributionZonePlants();
 
             foreach ($zonePlants as $zonePlant) {
                 $plant = $zonePlant->getPlant();
 
                 $plants[$plant->getScientificName()] = $plant;
             }
+
             return $plants;
         }
 
-        $pages = ceil($total / 20);
-        $count = count($plants);
+        $batchSize = 500;
+
+        $this->zoneId = $zone->getId();
+
+        $request = $this->getPlantsFromPage("distributions/{$this->zoneId}/plants", []);
+
+        $plants = $request['plants'];
+        $total = $request['total'];
+
+
+        $pages = ceil($total / self::PLANTS_PER_PAGE);
+        $count = $request['persisted'];
 
         if ($pages > 1) {
             for ($i = 2; $i<=$pages; $i++) {
-                $response = $this->getPlantsFromPage("distributions/{$zoneId}/plants?page={$i}");
+                $response = $this->getPlantsFromPage("distributions/{$this->zoneId}/plants?page={$i}", $plants);
                 $responsePlants = $response['plants'];
 
-                $count += count($responsePlants);
-
-                if ($count % $batchSize === 0) {
-                    $this->em->flush();
-//                    $this->em->clear();
-                }
+                $count += $response['persisted'];
 
                 foreach ($responsePlants as $key => $value) {
                     $plants[$key] = $value;
                 }
-            }
-        }
 
-        $this->em->flush();
-//        $this->em->clear();
+                if ($count > $batchSize) {
+                    $count = 0;
+                    $this->em->flush();
+                    $this->em->clear();
+                }
+            }
+            $this->em->flush();
+            $this->em->clear();
+        }
 
         return $plants;
     }
 
+
     /**
-     * @param $lat
-     * @param $lng
-     * @return DistributionZone|bool
+     * The method send a request to the geonames api and determines the distribution zone.
+     *
+     *
+     * @param string $lat
+     * @param string $lng
+     * @return false|DistributionZone
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    private function getDistributionZone($lat, $lng)
+    public function getDistributionZone(string $lat, string $lng)
     {
         $response = $this->geonamesApi->request('GET', "countrySubdivisionJSON?lat={$lat}&lng={$lng}");
         $data = $response->toArray();
@@ -134,108 +145,158 @@ class PlantsFromZoneRetriever
         } elseif ($countryZone) {
             $zone = $countryZone;
         } else {
-            return false;
+            $zone = false;
         }
 
         return $zone;
     }
 
+    /**
+     * Basic shortcut method returning all existing plants in distribution zone.
+     * @deprecated use the array collection property in distribution zone
+     * @see DistributionZone::getDistributionZonePlants()
+     *
+     * @param int $zone
+     * @return mixed
+     */
     private function getPlantsInZone(int $zone)
     {
-        return $this->em->getRepository(DistributionZonePlant::class)->findByDistributionZone($zone);
+        return $this->zonePlantRepository->findByDistributionZone($zone);
     }
 
-    private function getPlantsFromPage(string $url)
+    /**
+     * The method makes request to the trefle(plants) api and
+     * calls the persisting function.
+     *
+     * @param string $url
+     * @param array $parsed
+     * @return array of the Plants entities|objects and the total number of plants.
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     * @see persistPlantInZone()
+     *
+     */
+    private function getPlantsFromPage(string $url, array $parsed): array
     {
+        $persisted = 0;
         $response = $this->trefleApi->request('GET', $url);
         $data = $response->toArray();
 
+        /*
+         * Every response has data containing the plants and
+         * total meta containing the number of all plants in the zone.
+         */
         $body = $data['data'];
         $total = $data['meta']['total'];
 
         $plants = [];
 
+        //Get the scientific names in separate array and use them to determine if they are already existing.
         $scientificNames = array_column($body, 'scientific_name');
 
-        //first
-        $existingPlants = $this->plantRepository->findByScientificName($scientificNames);
-
-
         foreach ($body as $item) {
-            $existing = $this->plantInArray($existingPlants, $item);
+            $persist = $this->persistPlantInZone($scientificNames, $item, $parsed + $plants);
+            $persisted += $persist['persisted'];
 
-            if (!$existing) {
-                $plant = new Plant();
-
-                $plant->setScientificName($item['scientific_name'])
-                    ->setCommonName($item['common_name'])
-                    ->setImageUrl($item['image_url'])
-                    ->setInformation("");
-
-                $this->em->persist($plant);
-
-                $distributionPlant = new DistributionZonePlant();
-                $distributionPlant->setPlant($plant)
-                    ->setDistributionZone($this->zone);
-
-                $this->em->persist($distributionPlant);
-
-            } else {
-                $plant = $existing;
-
-                $test = $this->em->getRepository(DistributionZonePlant::class)->findOneBy([
-                    'distributionZone' => $this->zone->getId(),
-                    'plant' => $existing
-                ]);
-
-                if (!$test) {
-                    $distributionPlant = new DistributionZonePlant();
-                    $distributionPlant->setPlant($plant)
-                        ->setDistributionZone($this->zone);
-
-                    $this->em->persist($distributionPlant);
-                }
-            }
-
+            $plant = $persist['plant'];
             $plants[$item['scientific_name']] = $plant;
-
         }
 
         return [
             'plants' => $plants,
-            'total' => $total
+            'total' => $total,
+            'persisted' => $persisted
         ];
     }
 
     /**
-     * @param Plant[]|object[] $existingPlants
-     * @param array $item
+     * The method responsible for saving the required information for the plants in the DB
+     * such as: scientificName, commonName and imageUrl.
+     *
+     * @param array $scientificNames
+     * @param $item
+     * @param array $parsedPlants
+     * @return Plant|mixed|object
+     */
+    private function persistPlantInZone(array $scientificNames, $item, array $parsedPlants)
+    {
+        $persisted = 0;
+
+        $existingPlants = $this->plantRepository->findByScientificName($scientificNames);
+
+        /**
+         * @var $zone DistributionZone
+         * @var $existing bool|Plant
+         */
+        $zone = $this->em->getRepository(DistributionZone::class)->find($this->zoneId);
+        $existing = $this->plantInArray($existingPlants, $item, $parsedPlants);
+
+        /*
+         * If the plant does not exist create the new entities and persist them,
+         * otherwise make a relation between the plant and distribution zones.
+         */
+        if (!$existing) {
+            $plant = new Plant();
+
+            $plant->setScientificName($item['scientific_name'])
+                ->setCommonName($item['common_name'])
+                ->setImageUrl($item['image_url']);
+
+            $this->em->persist($plant);
+
+            $distributionPlant = new DistributionZonePlant();
+            $distributionPlant->setPlant($plant)
+                ->setDistributionZone($zone);
+
+            $this->em->persist($distributionPlant);
+
+            $persisted = 2;
+        } else {
+            $plant = $existing;
+
+            if ($existing->getId() !== null) {
+                $zonePlant = $this->zonePlantRepository->findOneBy([
+                    'distributionZone' => $this->zoneId,
+                    'plant' => $existing->getId()
+                ]);
+
+                if (!$zonePlant) {
+                    $distributionPlant = new DistributionZonePlant();
+                    $distributionPlant->setPlant($plant)
+                        ->setDistributionZone($zone);
+
+                    $this->em->persist($distributionPlant);
+                    $persisted = 1;
+                }
+            }
+        }
+
+        return [
+            'plant' => $plant,
+            'persisted' => $persisted
+        ];
+    }
+
+    /**
+     * @param Plant[]|object[] $existingPlants Array of the Plants entities, which are being searched.
+     * @param array $plant The plant which is searched in the array.
+     * @param array $parsedPlants
      * @return false|mixed
      */
-    private function plantInArray(array $existingPlants, array $item)
+    private function plantInArray(array $existingPlants, array $plant, array $parsedPlants)
     {
-        $exists = array_key_exists($item['scientific_name'], $existingPlants);
+        $searched = $existingPlants + $parsedPlants;
+
+//        $exists = array_key_exists($plant['scientific_name'], $searched);
+        $exists = isset($searched[$plant['scientific_name']]);
 
         if ($exists) {
-            return $existingPlants[$item['scientific_name']];
+            return $searched[$plant['scientific_name']];
         } else {
             return false;
         }
-
-//        $key = array_search($item['scientific_name'], array_column($existingPlants, 'scientificName'));
-//
-//        if ($key !== false) {
-//            return $existingPlants[$key];
-//        } else {
-//            return false;
-//        }
-
-//        foreach ($existingPlants as $existingPlant) {
-//            if ($existingPlant->getScientificName() === $item['scientific_name']) {
-//                return $existingPlant;
-//            }
-//        }
-//        return false;
-
     }
 }

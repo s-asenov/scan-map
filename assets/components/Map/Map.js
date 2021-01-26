@@ -163,7 +163,7 @@ function Map() {
         setRect(rectangle);
       })
       .catch((e) => {
-        console.log(e);
+        // console.log(e);
       });
   }, []);
 

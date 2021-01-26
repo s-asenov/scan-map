@@ -7,6 +7,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
+ * The entity adding the plant to the specific zone it is found.
+ *
  * @ORM\Entity(repositoryClass=DistributionZonePlantRepository::class)
  * @UniqueEntity(fields={"distributionZone", "plant"})
  */

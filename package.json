@@ -1,38 +1,45 @@
 {
-    "devDependencies": {
-        "@symfony/stimulus-bridge": "^1.1.0",
-        "@symfony/webpack-encore": "^0.32.1",
-        "core-js": "^3.8.2",
-        "node-sass": "^4.14.1",
-        "regenerator-runtime": "^0.13.2",
-        "sass-loader": "^9.0.3",
-        "stimulus": "^2.0.0",
-        "webpack-notifier": "^1.6.0"
-    },
-    "license": "UNLICENSED",
-    "private": true,
-    "scripts": {
-        "dev-server": "encore dev-server",
-        "dev": "encore dev",
-        "watch": "encore dev --watch",
-        "build": "encore production --progress"
-    },
-    "dependencies": {
-        "@babel/preset-react": "^7.12.10",
-        "@googlemaps/js-api-loader": "^1.11.1",
-        "@popperjs/core": "^2.6.0",
-        "axios": "^0.21.1",
-        "bootstrap": "^4.5.3",
-        "dotenv-webpack": "^6.0.0",
-        "formik": "^2.2.6",
-        "html2canvas": "^1.0.0-rc.7",
-        "prop-types": "^15.7.2",
-        "react": "^17.0.1",
-        "react-bootstrap": "^1.4.3",
-        "react-dom": "^17.0.1",
-        "react-icons": "^4.1.0",
-        "react-js-pagination": "^3.0.3",
-        "react-router-dom": "^5.2.0",
-        "react-router-hash-link": "^2.3.1"
-    }
+  "devDependencies": {
+    "@symfony/stimulus-bridge": "^1.1.0",
+    "@symfony/webpack-encore": "^0.32.1",
+    "core-js": "^3.8.3",
+    "node-sass": "^4.14.1",
+    "regenerator-runtime": "^0.13.2",
+    "sass-loader": "^9.0.3",
+    "stimulus": "^2.0.0",
+    "webpack-notifier": "^1.6.0",
+    "workbox-webpack-plugin": "^6.0.2"
+  },
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "dev-server": "encore dev-server",
+    "dev": "encore dev",
+    "watch": "encore dev --watch",
+    "build": "encore production --progress"
+  },
+  "dependencies": {
+    "@babel/preset-react": "^7.12.10",
+    "@googlemaps/js-api-loader": "^1.11.1",
+    "@popperjs/core": "^2.6.0",
+    "axios": "^0.21.1",
+    "bootstrap": "^4.6.0",
+    "dotenv-webpack": "^6.0.0",
+    "formik": "^2.2.6",
+    "html2canvas": "^1.0.0-rc.7",
+    "prop-types": "^15.7.2",
+    "react": "^17.0.1",
+    "react-bootstrap": "^1.4.3",
+    "react-dom": "^17.0.1",
+    "react-icons": "^4.1.0",
+    "react-js-pagination": "^3.0.3",
+    "react-router-dom": "^5.2.0",
+    "react-router-hash-link": "^2.3.1"
+  },
+  "browserslist": [
+    "> 0.5%",
+    "last 2 versions",
+    "Firefox ESR",
+    "not dead"
+  ]
 }

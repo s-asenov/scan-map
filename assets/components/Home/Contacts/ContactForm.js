@@ -11,11 +11,37 @@ const initialValues = {
   text: "",
 };
 
+const validate = (values) => {
+  Object.keys(values).map((k) => (values[k] = values[k].trim()));
+
+  const errors = {};
+
+  if (!values.from) {
+    errors.from = "Required";
+  } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.from)) {
+    errors.from = "Invalid email address";
+  }
+
+  if (!values.firstName) {
+    errors.subject = "Required";
+  }
+
+  if (!values.text) {
+    errors.text = "Required";
+  }
+  if (values.text.length < 2) {
+    errors.text = "Too short";
+  }
+
+  return errors;
+};
+
 function ContactForm() {
   const history = useHistory();
 
   const formik = useFormik({
     initialValues,
+    validate,
     onSubmit: (values, props) => {
       axios
         .post("/email", values)
@@ -74,7 +100,7 @@ function ContactForm() {
           isInvalid={touched.text && errors.text}
           onChange={handleChange}
         />
-        <FormInvalidFeedback error={errors.lastName} />
+        <FormInvalidFeedback error={errors.text} />
       </Form.Group>
       <Button variant="primary" type="submit">
         Изпращане

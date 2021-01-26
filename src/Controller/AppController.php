@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class AppController extends AbstractController
 {
     /**
-     * @Route("/email", name="email_send")
+     * @Route("/email", name="email_send", methods={"POST"})
      */
     public function sendMail(Request $request, MailerInterface $mailer, FormHelper $helper)
     {
@@ -24,8 +24,8 @@ class AppController extends AbstractController
 
         if (!$helper->checkFormData(['from', 'subject', 'text'], $form)) {
             return new JsonResponse([
-                'status' => $helper::META_ERROR,
-                'meta' => $helper::MISSING_CREDENTIALS
+                'status' => FormHelper::META_ERROR,
+                'meta' => FormHelper::MISSING_CREDENTIALS
             ]);
         }
 
@@ -39,19 +39,37 @@ class AppController extends AbstractController
             $mailer->send($email);
         } catch (TransportExceptionInterface $e) {
             return new JsonResponse([
-                'status' => $helper::META_ERROR,
+                'status' => FormHelper::META_ERROR,
                 'meta' => "not sent"
             ], 400);
         }
 
         return new JsonResponse([
-            'status' => $helper::META_SUCCESS,
+            'status' => FormHelper::META_SUCCESS,
             'meta' => "sent"
         ]);
     }
+
     /**
-     * @Route ("/", name="app_homepage")
-     * @Route("/{reactRoute}", name="app_react")
+     * @Route ("/register", name="app_register", methods={"GET"})
+     */
+    public function registerPage()
+    {
+        return $this->render('react/react.html.twig');
+    }
+
+    /**
+     * @Route ("/login", name="app_login", methods={"GET"})
+     */
+    public function loginPage()
+    {
+        return $this->render('react/react.html.twig');
+    }
+
+    /**
+     * @Route ("/", name="app_homepage", methods={"GET"})
+     * @Route ("/admin/{reactRoute}", name="app_admin", methods={"GET"})
+     * @Route("/{reactRoute}", name="app_react", methods={"GET"})
      */
     public function index()
     {

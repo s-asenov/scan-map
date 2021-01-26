@@ -2,7 +2,6 @@
 
 namespace App\Security;
 
-use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,24 +15,20 @@ use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 
 class LoginAuthenticator extends AbstractGuardAuthenticator
 {
-    /**
-     * @var UserPasswordEncoderInterface
-     */
     private $passwordEncoder;
     private $token;
 
     public function __construct(UserPasswordEncoderInterface $passwordEncoder)
     {
-
         $this->passwordEncoder = $passwordEncoder;
     }
 
-    public function supports(Request $request)
+    public function supports(Request $request): bool
     {
-        return $request->attributes->get('_route') === "api_login" && !$request->headers->has("AUTH-TOKEN");
+        return $request->attributes->get('_route') === "api_login" && !$request->cookies->has("x-token");
     }
 
-    public function getCredentials(Request $request)
+    public function getCredentials(Request $request): array
     {
         $form = $request->toArray();
         
@@ -43,7 +38,7 @@ class LoginAuthenticator extends AbstractGuardAuthenticator
         ];
     }
 
-    public function getUser($credentials, UserProviderInterface $userProvider)
+    public function getUser($credentials, UserProviderInterface $userProvider): ?UserInterface
     {
         $user = $userProvider->loadUserByUsername($credentials['email']);
 
@@ -52,36 +47,37 @@ class LoginAuthenticator extends AbstractGuardAuthenticator
         }
 
         $this->token = $user->getApiToken();
+
         return $user;
     }
 
-    public function checkCredentials($credentials, UserInterface $user)
+    public function checkCredentials($credentials, UserInterface $user): bool
     {
         return $this->passwordEncoder->isPasswordValid($user, $credentials['password']);
     }
 
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
+    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): JsonResponse
     {
         return new JsonResponse('Login failed', Response::HTTP_BAD_REQUEST);
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $providerKey)
     {
-        // setcookie('x-token', $this->token, 0, '/', null, true, true);
+        setcookie('x-token', $this->token, 0, '/', null, true, true);
 
         return null;
     }
 
-    public function start(Request $request, AuthenticationException $authException = null)
+    public function start(Request $request, AuthenticationException $authException = null): JsonResponse
     {
-        if ($request->headers->has('AUTH-TOKEN')) {
+        if ($request->cookies->has('AUTH-TOKEN')) {
             return new JsonResponse('User already logged in!', Response::HTTP_UNAUTHORIZED);
         } else {
             return new JsonResponse('Login failed!', Response::HTTP_BAD_REQUEST);
         }
     }
 
-    public function supportsRememberMe()
+    public function supportsRememberMe(): bool
     {
         return false;
     }

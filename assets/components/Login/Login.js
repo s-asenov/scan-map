@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import "./Login.css";
 import { useFormik } from "formik";
 import Form from "react-bootstrap/Form";
@@ -7,6 +7,8 @@ import axios from "axios";
 import { NavLink, useHistory } from "react-router-dom";
 import { setAuth } from "../../helpers/auth";
 import FormInvalidFeedback from "../Utils/FormInvalidFeedback";
+import httpService from "../../helpers/api/apiInterceptor";
+import AuthContext from "../Utils/context/AuthContext";
 
 const initialValues = {
   email: "",
@@ -14,6 +16,8 @@ const initialValues = {
 };
 
 const validate = (values, props) => {
+  Object.keys(values).map((k) => (values[k] = values[k].trim()));
+
   const errors = {};
 
   if (!values.email) {
@@ -35,6 +39,7 @@ const validate = (values, props) => {
 
 function Login() {
   const history = useHistory();
+  const context = useContext(AuthContext);
 
   const formik = useFormik({
     initialValues,
@@ -43,8 +48,17 @@ function Login() {
       axios
         .post("/api/login", values)
         .then((response) => {
-          setAuth(response.data.user.apiToken);
-          history.push("/");
+          const user = response.data.user;
+          let admin = user.roles.includes("ROLE_SUPER_ADMIN");
+
+          context.setUser(true, admin);
+          httpService.setupInterceptors(history);
+
+          if (!user.isVerified) {
+            history.push("/verify");
+          } else {
+            history.push("/");
+          }
         })
         .catch((error) => {
           const response = error.response;
@@ -71,9 +85,6 @@ function Login() {
           isInvalid={touched.email && errors.email}
           onChange={handleChange}
         />
-        <Form.Text className="text-muted">
-          We'll never share your email with anyone else.
-        </Form.Text>
         <FormInvalidFeedback error={errors.email} />
       </Form.Group>
       <Form.Group controlId="password">

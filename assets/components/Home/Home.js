@@ -1,7 +1,5 @@
-import React, { useContext } from "react";
-import { Container } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { isAuth } from "../../helpers/auth";
 import AboutUs from "./AboutUs/AboutUs";
 import Advantages from "./Advantages/Advantages";
 import Contacts from "./Contacts/Contacts";
@@ -11,14 +9,20 @@ import "./Home.css";
 
 function Home() {
   const location = useLocation();
+  const [unauthorized, setUnauthorized] = useState(location.unauthorized);
 
-  if (location.redirected) {
-    console.log("redirected");
-  }
+  useEffect(() => {
+    if (unauthorized) {
+      setTimeout(() => {
+        setUnauthorized(false);
+      }, 2000);
+    }
+  }, []);
 
   return (
     <React.Fragment>
-      <Heading isAuth={isAuth()} />
+      {unauthorized && <h1>Unathorized</h1>}
+      <Heading />
       <Advantages />
       <AboutUs />
       <Demo />

@@ -13,8 +13,17 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
+/**
+ * Class PlantsInfoRetriever
+ *
+ * The class responsible for adding information in the plant entity.
+ * Call the wikipedia api and parses the necessary data.
+ *
+ * @package App\Service
+ */
 class PlantsInfoRetriever
 {
+    const WIKI_EXTRACTS_LIMIT = 20;
     private $wikiApi;
     private $em;
 
@@ -25,41 +34,60 @@ class PlantsInfoRetriever
     }
 
     /**
-     * @param Plant[] $plants
-     * @return array
+     * @param array $pl all plants from zone
+     * @return array of all plants with update information
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function getInfo(array $plants): array
+    public function getInfo(array $pl): array
     {
-        $batchSize = 1000;
-        $count = 0;
+        /*
+         * Filter an array of plants for which we need to get the data.
+         */
+        $filter = function (Plant $plant)
+        {
+            return $plant->getInformation() === null;
+        };
 
-        $plantsChunks = array_chunk($plants, 50, true);
+        $plants = array_filter($pl, $filter);
+
+        /**
+         * Split the array into chunks to match the wikipedia api limit.
+         */
+        $plantsChunks = array_chunk($plants, self::WIKI_EXTRACTS_LIMIT, true);
 
         foreach ($plantsChunks as $chunk) {
-            $names = implode("|", array_column($chunk, 'scientificName'));
+            /*
+             * Wiki api separates the different pages by |
+             */
+            $names = implode("|", array_keys($chunk));
+//            $names = implode("|", array_column($chunk, 'scientificName'));
 
             $response = $this->wikiApi->request('GET', "?titles={$names}&prop=extracts&exintro&explaintext");
 
             $data = $response->toArray();
 
             $pages = array_values($data['query']['pages']); //changing keys 0, 1, 2
-//            $normalized = $data['query']['normalized'];
 
-            $count += count($pages);
+//            $count += count($pages);
 
             foreach ($pages as $key => $page) {
+                /*
+                 * Check if wikipedia api changes the name and get the new one if there is one.
+                 */
                 if (isset($data['query']['normalized'])) {
                     $initName = $data['query']['normalized'][$key]['from'];
                 } else {
                     $initName = $page['title'];
                 }
-//                $initName = $normalized[$key]['from'];
 
+                /*
+                 * Check if the page exists and there is information,
+                 * otherwise set the info to empty string showing that the plant has already been searched.
+                 */
                 if (!isset($page['pageid']) || $page['pageid'] < 0 || !isset($page['extract'])) {
                     $info = "";
                 } else {
@@ -71,20 +99,13 @@ class PlantsInfoRetriever
                  */
                 $plant = $plants[$initName];
                 $plant->setInformation($info);
-
-                $this->em->persist($plant);
-
-                if ($count % $batchSize === 0) {
-                    $this->em->flush();
-                    $this->em->clear();
-                }
             }
         }
 
-        $this->em->flush();
-        $this->em->clear();
+//        $this->em->flush();
+//        $this->em->clear();
 
-        return $plants;
+        return $plants + $pl;
     }
 
 

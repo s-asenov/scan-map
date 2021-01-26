@@ -1,22 +1,38 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import "./NavBar.css";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
 import { Button, Image } from "react-bootstrap";
 import { NavLink, useHistory } from "react-router-dom";
-import { getAuth, removeAuth } from "../../helpers/auth";
+import { removeAuth } from "../../helpers/auth";
 import { HashLink } from "react-router-hash-link";
+import AuthContext from "../Utils/context/AuthContext";
 
-function NavBar() {
+function NavBar(props) {
   const history = useHistory();
-  const isAuth = getAuth();
+  const context = useContext(AuthContext);
+  const { isAuth, isAdmin } = context;
 
   const logout = () => {
     removeAuth();
+
+    context.removeUser();
     history.replace("/");
   };
 
-  const NavLinks = () => {
+  const AdminLinks = () => {
+    if (isAdmin) {
+      return (
+        <Nav.Link as={NavLink} to="/admin">
+          Admin Dashboard
+        </Nav.Link>
+      );
+    } else {
+      return null;
+    }
+  };
+
+  const AuthLinks = () => {
     if (isAuth) {
       return (
         <React.Fragment>
@@ -27,6 +43,29 @@ function NavBar() {
             Моите карти
           </Nav.Link>
         </React.Fragment>
+      );
+    } else {
+      return null;
+    }
+  };
+
+  const AuthButtons = () => {
+    if (isAuth === false) {
+      return (
+        <React.Fragment>
+          <Button as={NavLink} to="/login" variant="login">
+            Вход
+          </Button>
+          <Button as={NavLink} to="/register" variant="register">
+            Регистрация
+          </Button>
+        </React.Fragment>
+      );
+    } else if (isAuth) {
+      return (
+        <Button onClick={() => logout()} variant="outline-light">
+          Изход
+        </Button>
       );
     } else {
       return null;
@@ -51,23 +90,11 @@ function NavBar() {
           <Nav.Link as={NavLink} to="/demo">
             Демо
           </Nav.Link>
-          <NavLinks />
+          <AuthLinks />
+          <AdminLinks />
         </Nav>
         <div className="buttons">
-          {!isAuth ? (
-            <React.Fragment>
-              <Button as={NavLink} to="/login" variant="login">
-                Вход
-              </Button>
-              <Button as={NavLink} to="/register" variant="register">
-                Регистрация
-              </Button>
-            </React.Fragment>
-          ) : (
-            <Button onClick={() => logout()} variant="outline-light">
-              Изход
-            </Button>
-          )}
+          <AuthButtons />
         </div>
       </Navbar.Collapse>
     </Navbar>

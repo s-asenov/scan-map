@@ -32,16 +32,20 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string", length=180)
      * @Assert\NotBlank(message="First name should not be blank.")
+     * @Assert\Length(min=2)
      */
     private $firstName;
 
     /**
      * @ORM\Column(type="string", length=180)
      * @Assert\NotBlank(message="Last name should not be blank.")
+     * @Assert\Length(min=2)
      */
     private $lastName;
 
     /**
+     * All users except the admins have only got ROLE_USER.
+     *
      * @ORM\Column(type="json")
      */
     private $roles = [];
@@ -73,7 +77,6 @@ class User implements UserInterface
     {
         $this->createdAt = new \DateTime();
         $this->lastSeen = new \DateTime();
-        $this->apiToken = random_str(255);
     }
 
     public function getId(): ?int
@@ -117,14 +120,13 @@ class User implements UserInterface
 
     public function setRoles(array $roles): self
     {
-        $this->roles = $roles;
+        $allRoles = $roles + $this->roles;
+
+        $this->roles = $allRoles;
 
         return $this;
     }
 
-    /**
-     * @see UserInterface
-     */
     public function getPassword(): string
     {
         return (string) $this->password;
@@ -212,5 +214,10 @@ class User implements UserInterface
         $this->apiToken = $apiToken;
 
         return $this;
+    }
+
+    public function getIsVerified(): bool
+    {
+        return in_array('VERIFIED', $this->roles);
     }
 }

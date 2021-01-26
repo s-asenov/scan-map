@@ -9,6 +9,9 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
+ * The terrain entity contains user`s generated terrain in the map section of the website.
+ * @link https://flora.noit.eu/map
+ *
  * @ORM\Entity(repositoryClass=TerrainRepository::class)
  * @ORM\Table(name="`terrains`")
  */

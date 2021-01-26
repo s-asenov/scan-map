@@ -1,10 +1,11 @@
 import { Button } from "react-bootstrap";
-import React from "react";
+import React, { useContext } from "react";
 import "./Heading.css";
 import { NavLink } from "react-router-dom";
-import PropTypes from "prop-types";
+import AuthContext from "../../Utils/context/AuthContext";
 
 function Heading(props) {
+  const context = useContext(AuthContext);
   return (
     <div
       id="heading"
@@ -18,20 +19,22 @@ function Heading(props) {
         Приложението съдържа авторски 3D модели на част от необятната растителна
         Вселена.
       </p>
-      <Button
-        className="my-4"
-        as={NavLink}
-        to={!props.isAuth ? "/register" : "/map"}
-        variant="danger"
-      >
-        {!props.isAuth ? "Започни сега!" : "Към картата!"}
-      </Button>
+      {context.isAuth !== null && (
+        <Button
+          className="my-4"
+          as={NavLink}
+          to={!context.isAuth ? "/register" : "/map"}
+          variant="danger"
+        >
+          {!context.isAuth ? "Започни сега!" : "Към картата!"}
+        </Button>
+      )}
     </div>
   );
 }
 
-Heading.propTypes = {
-  isAuth: PropTypes.bool.isRequired,
-};
+// Heading.propTypes = {
+//   isAuth: PropTypes.bool.isRequired,
+// };
 
 export default Heading;

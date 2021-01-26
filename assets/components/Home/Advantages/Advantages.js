@@ -4,8 +4,6 @@ import Col from "react-bootstrap/Col";
 import "./Advantages.css";
 import Row from "react-bootstrap/Row";
 import { GiSpellBook, GiClick, GiGears } from "react-icons/gi";
-import svg from "../../../images/wave.png";
-import Image from "react-bootstrap/Image";
 
 const info = [
   {
@@ -33,10 +31,10 @@ function Advantage(props) {
 
   return (
     <Col lg="4" className="d-flex">
-      <div className="py-4 px-5 advantage d-flex flex-column align-items-center justify-content-start">
+      <div className="py-4 px-5 advantage">
         {item.image}
         <h3>{item.heading}</h3>
-        <p>{item.info}</p>
+        <p className="text-muted">{item.info}</p>
       </div>
     </Col>
   );

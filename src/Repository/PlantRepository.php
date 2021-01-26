@@ -21,8 +21,9 @@ class PlantRepository extends ServiceEntityRepository
 
     public function findByScientificName($value)
     {
-        return $this->createQueryBuilder('p')
-            ->andWhere('p.scientificName IN (:val)')
+        $qb = $this->createQueryBuilder('p');
+
+        return $qb->add('where', $qb->expr()->in('p.scientificName', ':val'))
             ->setParameter('val', $value)
             ->indexBy('p', 'p.scientificName')
             ->getQuery()

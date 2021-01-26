@@ -1,6 +1,5 @@
 .security-form {
   flex: 1;
-  width: 50%;
   margin: 2rem auto;
   padding: 4rem 2rem;
   border-radius: 1rem;
@@ -9,4 +8,10 @@
 
 .flex-1 {
   flex: 1;
+}
+
+@media only screen and (min-width: 992px) {
+  .security-form {
+    width: 60%;
+  }
 }

@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import "./MapButton.css";
 import { Button } from "react-bootstrap";
-import apiInstance from "../../../helpers/api/instance";
+import apiInstance from "../../../helpers/api/apiInstance";
 import MapContext from "../../Utils/context/MapContext";
 import calculateDismensions from "../utils/canvas";
 import { getFilename, getUniqImagesPos } from "../utils/helpers";
@@ -12,10 +12,8 @@ function MapButton({ rectangle }) {
 
   const handleRequest = async (rLatLng, unique, ctx) => {
     context.setLoading(true);
-    const topLeft = rLatLng.nw;
-    const topRight = rLatLng.ne;
-    const botLeft = rLatLng.sw;
-    const botRight = rLatLng.se;
+
+    const { nw: topLeft, ne: topRight, sw: botLeft, se: botRight } = rLatLng;
 
     const corners = {
       topLeft,
@@ -42,7 +40,9 @@ function MapButton({ rectangle }) {
     if (terrainName.length > 255) {
       terrainName = prompt("Името не трябва да е по-дълго от 255 символа!");
       return;
-    } else if (!/^[a-z \u0400-\u04FF ,.'-]+$/i.test(terrainName)) {
+    }
+
+    if (!/^[a-z \u0400-\u04FF 0-9 ,.'-]+$/i.test(terrainName)) {
       terrainName = prompt("Името не приема специални символи!");
       return;
     }

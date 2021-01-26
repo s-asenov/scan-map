@@ -11,8 +11,9 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 /**
  * Class ImageUploader
  *
+ * Simple file uploader.
  *
- * @author Slavi Asenov <slavi_asenov2002@abv.bg>
+ * @package App\Service
  */
 class ImageUploader
 {

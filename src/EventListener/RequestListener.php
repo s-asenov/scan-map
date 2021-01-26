@@ -7,6 +7,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
+/**
+ * Class RequestListener
+ *
+ * The listener catches the request made to the api and
+ * decode the json content to array.
+ *
+ * @package App\EventListener
+ */
 class RequestListener
 {
     /**

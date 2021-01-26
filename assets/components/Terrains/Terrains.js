@@ -1,5 +1,5 @@
 import React, { useEffect, useReducer, useState } from "react";
-import apiInstance from "../../helpers/api/instance";
+import apiInstance from "../../helpers/api/apiInstance";
 import Pagination from "react-js-pagination";
 import "./Terrains.css";
 import TerrainReducer from "../Utils/reducers/List/Terrain/TerrainReducer";
@@ -44,30 +44,32 @@ function Terrains() {
     var url = new URL(urlString);
     var stringPage = url.searchParams.get("page");
 
-    apiInstance
-      .post("terrains")
-      .then((response) => {
-        const data = response.data.terrains;
+    if (_isMounted) {
+      apiInstance
+        .get("terrains")
+        .then((response) => {
+          const data = response.data.terrains;
 
-        const existingPages = Math.ceil(data.length / itemsPerPage);
-        const currentPage =
-          parseInt(stringPage) > existingPages ? 1 : parseInt(stringPage);
+          const existingPages = Math.ceil(data.length / itemsPerPage);
+          const currentPage =
+            parseInt(stringPage) > existingPages ? 1 : parseInt(stringPage);
 
-        if (_isMounted) {
+          if (_isMounted) {
+            dispatch({
+              type: SET_TERRAINS,
+              payload: {
+                terrains: data,
+                page: currentPage || page,
+              },
+            });
+          }
+        })
+        .catch((err) => {
           dispatch({
-            type: SET_TERRAINS,
-            payload: {
-              terrains: data,
-              page: currentPage || page,
-            },
+            type: SET_LOADED,
           });
-        }
-      })
-      .catch((err) => {
-        dispatch({
-          type: SET_LOADED,
         });
-      });
+    }
 
     return () => (_isMounted = false);
   }, []);

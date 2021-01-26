@@ -2,6 +2,7 @@ doctrine:
     dbal:
         url: '%env(resolve:DATABASE_URL)%'
         server_version: 'mariadb-10.4.14'
+        logging: false
         charset: utf8
         default_table_options:
             charset: utf8
