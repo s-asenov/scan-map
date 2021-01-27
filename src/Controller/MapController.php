@@ -5,15 +5,11 @@ namespace App\Controller;
 
 
 use App\Entity\DistributionZone;
-use App\Entity\DistributionZonePlant;
-use App\Entity\Plant;
 use App\Entity\Terrain;
 use App\Entity\TerrainKey;
 use App\Entity\User;
-use App\Repository\TerrainKeyRepository;
 use App\Service\ImageUploader;
 use App\Service\PlantsFromZoneRetriever;
-use App\Service\PlantsInfoRetriever;
 use App\Service\ZipSaver;
 use App\Service\ZipService;
 use App\Util\FormHelper;
@@ -45,18 +41,17 @@ class MapController extends AbstractController
 
     /**
      * @Route("/api/map", name="api_map_save", methods={"POST"})
-     * @param PlantsInfoRetriever $infoRetriever
      * @param ImageUploader $uploader
      * @param Request $request
      * @param PlantsFromZoneRetriever $retriever
      * @return JsonResponse
      */
-    public function saveZip(PlantsInfoRetriever $infoRetriever, ImageUploader $uploader, Request $request, PlantsFromZoneRetriever $retriever): JsonResponse
+    public function saveZip(ImageUploader $uploader, Request $request, PlantsFromZoneRetriever $retriever): JsonResponse
     {
         $form = $request->request->all();
 
         if (!$this->formHelper->checkFormData(['name', 'lat', 'lng', 'images' => ['elevation', 'gmImage']], $form)) {
-            return new JsonResponse(["status" => FormHelper::MISSING_CREDENTIALS], 400);
+            return new JsonResponse(["status" => FormHelper::MISSING_CREDENTIALS], Response::HTTP_BAD_REQUEST);
         }
 
         $lat = $form['lat'];
@@ -76,6 +71,7 @@ class MapController extends AbstractController
         try {
             $zone = $retriever->getDistributionZone($lat, $lng);
 
+            //remove the keys of the array, for now
             $plants = array_values($retriever->getPlants($zone));
 
             if (!$zone->getFetched()) {
@@ -136,7 +132,7 @@ class MapController extends AbstractController
             return new JsonResponse([
                 'status' => FormHelper::META_ERROR,
                 'key' => "expired"
-            ]);
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         $zipDir = $this->getParameter('app.zip_directory');
@@ -152,6 +148,6 @@ class MapController extends AbstractController
         return new JsonResponse([
             'status' => FormHelper::META_ERROR,
             'file' => "not found"
-        ]);
+        ], Response::HTTP_UNAUTHORIZED);
     }
 }

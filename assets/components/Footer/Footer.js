@@ -19,7 +19,7 @@ function Footer() {
             <div className="mt-3">
               <MdContactMail size="2rem" color="#aaaaaa" />
               <a href="mailto:support@flora.noit.eu" className="ml-2">
-                mailto:support@flora.noit.eu
+                support@flora.noit.eu
               </a>
             </div>
           </Col>

@@ -7,6 +7,9 @@ namespace App\Service;
 use App\Entity\DistributionZone;
 use App\Entity\DistributionZonePlant;
 use App\Entity\Plant;
+use App\Repository\DistributionZonePlantRepository;
+use App\Repository\DistributionZoneRepository;
+use App\Repository\PlantRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
@@ -21,11 +24,20 @@ class PlantsFromZoneRetriever
 
     private $trefleApi;
     private $geonamesApi;
+    /**
+     * @var DistributionZoneRepository
+     */
     private $repository;
+    /**
+     * @var PlantRepository
+     */
     private $plantRepository;
+    /**
+     * @var DistributionZonePlantRepository
+     */
+    private $zonePlantRepository;
     private $em;
     private $zoneId;
-    private $zonePlantRepository;
 
     public function __construct(EntityManagerInterface $em, HttpClientInterface $trefleApi, HttpClientInterface $geonamesApi)
     {
@@ -41,7 +53,7 @@ class PlantsFromZoneRetriever
      * The method creates an initial call to the plants api and
      * loops through the rest of the pages, if there are any.
      *
-     * @param DistributionZone $zone
+     * @param DistributionZone|bool $zone
      * @return array
      *
      * @throws ClientExceptionInterface
@@ -50,7 +62,7 @@ class PlantsFromZoneRetriever
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function getPlants(DistributionZone $zone): array
+    public function getPlants($zone): array
     {
         if ($zone === false) {
             return [];
@@ -84,14 +96,14 @@ class PlantsFromZoneRetriever
 
 
         $pages = ceil($total / self::PLANTS_PER_PAGE);
-        $count = $request['persisted'];
+        $count = $request['batchCount'];
 
         if ($pages > 1) {
             for ($i = 2; $i<=$pages; $i++) {
                 $response = $this->getPlantsFromPage("distributions/{$this->zoneId}/plants?page={$i}", $plants);
                 $responsePlants = $response['plants'];
 
-                $count += $response['persisted'];
+                $count += $response['batchCount'];
 
                 foreach ($responsePlants as $key => $value) {
                     $plants[$key] = $value;
@@ -113,7 +125,6 @@ class PlantsFromZoneRetriever
 
     /**
      * The method send a request to the geonames api and determines the distribution zone.
-     *
      *
      * @param string $lat
      * @param string $lng
@@ -152,24 +163,11 @@ class PlantsFromZoneRetriever
     }
 
     /**
-     * Basic shortcut method returning all existing plants in distribution zone.
-     * @deprecated use the array collection property in distribution zone
-     * @see DistributionZone::getDistributionZonePlants()
-     *
-     * @param int $zone
-     * @return mixed
-     */
-    private function getPlantsInZone(int $zone)
-    {
-        return $this->zonePlantRepository->findByDistributionZone($zone);
-    }
-
-    /**
      * The method makes request to the trefle(plants) api and
      * calls the persisting function.
      *
      * @param string $url
-     * @param array $parsed
+     * @param array $persistedObjects The already persisted objects from previous requests.
      * @return array of the Plants entities|objects and the total number of plants.
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
@@ -179,9 +177,9 @@ class PlantsFromZoneRetriever
      * @see persistPlantInZone()
      *
      */
-    private function getPlantsFromPage(string $url, array $parsed): array
+    private function getPlantsFromPage(string $url, array $persistedObjects): array
     {
-        $persisted = 0;
+        $batchCount = 0;
         $response = $this->trefleApi->request('GET', $url);
         $data = $response->toArray();
 
@@ -198,8 +196,8 @@ class PlantsFromZoneRetriever
         $scientificNames = array_column($body, 'scientific_name');
 
         foreach ($body as $item) {
-            $persist = $this->persistPlantInZone($scientificNames, $item, $parsed + $plants);
-            $persisted += $persist['persisted'];
+            $persist = $this->persistPlantInZone($scientificNames, $item, $persistedObjects + $plants);
+            $batchCount += $persist['batchCount'];
 
             $plant = $persist['plant'];
             $plants[$item['scientific_name']] = $plant;
@@ -208,7 +206,7 @@ class PlantsFromZoneRetriever
         return [
             'plants' => $plants,
             'total' => $total,
-            'persisted' => $persisted
+            'batchCount' => $batchCount
         ];
     }
 
@@ -216,14 +214,14 @@ class PlantsFromZoneRetriever
      * The method responsible for saving the required information for the plants in the DB
      * such as: scientificName, commonName and imageUrl.
      *
-     * @param array $scientificNames
-     * @param $item
-     * @param array $parsedPlants
+     * @param array $scientificNames The list of all the scientific names of the current request.
+     * @param array $item The plant array from the json response.
+     * @param array $parsedPlants The current persisted entities from previous requests
      * @return Plant|mixed|object
      */
-    private function persistPlantInZone(array $scientificNames, $item, array $parsedPlants)
+    private function persistPlantInZone(array $scientificNames, array $item, array $parsedPlants)
     {
-        $persisted = 0;
+        $batchCount = 0;
 
         $existingPlants = $this->plantRepository->findByScientificName($scientificNames);
 
@@ -253,10 +251,14 @@ class PlantsFromZoneRetriever
 
             $this->em->persist($distributionPlant);
 
-            $persisted = 2;
+            $batchCount = 2;
         } else {
             $plant = $existing;
 
+            /*
+             * If the existing id is null it means it is not inserted in db
+             * and there are already persisted entities
+             */
             if ($existing->getId() !== null) {
                 $zonePlant = $this->zonePlantRepository->findOneBy([
                     'distributionZone' => $this->zoneId,
@@ -269,21 +271,21 @@ class PlantsFromZoneRetriever
                         ->setDistributionZone($zone);
 
                     $this->em->persist($distributionPlant);
-                    $persisted = 1;
+                    $batchCount = 1;
                 }
             }
         }
 
         return [
             'plant' => $plant,
-            'persisted' => $persisted
+            'batchCount' => $batchCount
         ];
     }
 
     /**
      * @param Plant[]|object[] $existingPlants Array of the Plants entities, which are being searched.
      * @param array $plant The plant which is searched in the array.
-     * @param array $parsedPlants
+     * @param array $parsedPlants The current persisted entities from previous requests
      * @return false|mixed
      */
     private function plantInArray(array $existingPlants, array $plant, array $parsedPlants)
