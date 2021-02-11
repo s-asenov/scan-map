@@ -3,12 +3,12 @@ import { useFormik } from "formik";
 import "./Register.css";
 import axios from "axios";
 import Form from "react-bootstrap/Form";
-import Button from "react-bootstrap/Button";
-import { setAuth } from "../../helpers/auth";
-import { useHistory } from "react-router-dom";
+import { NavLink, useHistory } from "react-router-dom";
 import FormInvalidFeedback from "../Utils/FormInvalidFeedback";
 import httpService from "../../helpers/api/apiInterceptor";
 import AuthContext from "../Utils/context/AuthContext";
+import { myValidate } from "../Utils/validation/messages";
+import IndigoButton from "app/assets/components/Buttons/IndigoButton";
 
 const initialValues = {
   email: "",
@@ -22,38 +22,41 @@ const validate = (values, props) => {
 
   const errors = {};
 
-  if (!values.email) {
-    errors.email = "Required";
-  } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
-    errors.email = "Invalid email address";
+  const validateEmail = myValidate(values.email);
+  const validateFirstName = myValidate(values.firstName);
+  const validateLastName = myValidate(values.lastName);
+  const validatePass = myValidate(values.password);
+
+  const emailErr = validateEmail.REQUIRED() || validateEmail.EMAIL();
+  const firstNameErr =
+    validateFirstName.REQUIRED() ||
+    validateFirstName.MIN(2) ||
+    validateFirstName.MAX(30) ||
+    validateFirstName.SPECIAL_CHARACTERS();
+  const lastNameErr =
+    validateLastName.REQUIRED() ||
+    validateLastName.MIN(2) ||
+    validateLastName.MAX(30) ||
+    validateLastName.SPECIAL_CHARACTERS();
+  const passErr =
+    validatePass.REQUIRED() ||
+    validateLastName.MIN(6) ||
+    validateLastName.MAX(30);
+
+  if (emailErr) {
+    errors.email = emailErr;
   }
 
-  if (!values.firstName) {
-    errors.firstName = "Required";
-  } else if (values.firstName.length < 2) {
-    errors.firstName = "Too short";
-  } else if (values.firstName.length > 30) {
-    errors.firstName = "Too long";
-  } else if (!/^[a-z \u0400-\u04FF ,.'-]+$/i.test(values.firstName)) {
-    errors.firstName = "Special characters are forbidden!";
+  if (firstNameErr) {
+    errors.firstName = firstNameErr;
   }
 
-  if (!values.lastName) {
-    errors.lastName = "Required";
-  } else if (values.lastName.length < 2) {
-    errors.lastName = "Too short";
-  } else if (values.lastName.length > 30) {
-    errors.lastName = "Too long";
-  } else if (!/^[a-z \u0400-\u04FF ,.'-]+$/i.test(values.lastName)) {
-    errors.lastName = "Special characters are forbidden!";
+  if (lastNameErr) {
+    errors.lastName = lastNameErr;
   }
 
-  if (!values.password) {
-    errors.password = "Required";
-  } else if (values.password.length < 6) {
-    errors.password = "Too short";
-  } else if (values.password.length > 30) {
-    errors.password = "Too long";
+  if (passErr) {
+    errors.password = passErr;
   }
 
   return errors;
@@ -90,7 +93,9 @@ function Register() {
 
   return (
     <Form className="security-form" onSubmit={handleSubmit}>
-      <h2 className="font-weight-bold text-center">Регистрация</h2>
+      <h2 className="font-weight-bold text-center overflow-hidden">
+        Регистрация
+      </h2>
       <Form.Group controlId="email">
         <Form.Label>Имейл</Form.Label>
         <Form.Control
@@ -134,10 +139,13 @@ function Register() {
           isInvalid={touched.password && errors.password}
         />
         <FormInvalidFeedback error={errors.password} />
+        <p>
+          Вече сте регистрирани? <NavLink to="/login">Влезте!</NavLink>
+        </p>
       </Form.Group>
-      <Button variant="primary" type="submit">
+      <IndigoButton variant="primary" type="submit" block>
         Регистрация
-      </Button>
+      </IndigoButton>
     </Form>
   );
 }

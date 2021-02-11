@@ -1,14 +1,14 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import "./Login.css";
 import { useFormik } from "formik";
 import Form from "react-bootstrap/Form";
-import Button from "react-bootstrap/Button";
 import axios from "axios";
-import { NavLink, useHistory } from "react-router-dom";
-import { setAuth } from "../../helpers/auth";
-import FormInvalidFeedback from "../Utils/FormInvalidFeedback";
-import httpService from "../../helpers/api/apiInterceptor";
-import AuthContext from "../Utils/context/AuthContext";
+import { NavLink, useHistory, useLocation } from "react-router-dom";
+import FormInvalidFeedback from "app/assets/components/Utils/FormInvalidFeedback";
+import httpService from "app/assets/helpers/api/apiInterceptor";
+import AuthContext from "app/assets/components/Utils/context/AuthContext";
+import { myValidate } from "app/assets/components/Utils/validation/messages";
+import IndigoButton from "app/assets/components/Buttons/IndigoButton";
 
 const initialValues = {
   email: "",
@@ -20,18 +20,19 @@ const validate = (values, props) => {
 
   const errors = {};
 
-  if (!values.email) {
-    errors.email = "Required";
-  } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
-    errors.email = "Invalid email address";
+  const validateEmail = myValidate(values.email);
+  const validatePass = myValidate(values.password);
+
+  const emailErr = validateEmail.REQUIRED() || validateEmail.EMAIL();
+  const passErr =
+    validatePass.REQUIRED() || validatePass.MIN(6) || validatePass.MAX(30);
+
+  if (emailErr) {
+    errors.email = emailErr;
   }
 
-  if (!values.password) {
-    errors.password = "Required";
-  } else if (values.password.length < 6) {
-    errors.password = "Too short";
-  } else if (values.password.length > 30) {
-    errors.password = "Too long";
+  if (passErr) {
+    errors.password = passErr;
   }
 
   return errors;
@@ -39,7 +40,26 @@ const validate = (values, props) => {
 
 function Login() {
   const history = useHistory();
+  const location = useLocation();
+
   const context = useContext(AuthContext);
+  const [unauthorized, setUnathorized] = useState(
+    localStorage.getItem("unauth") !== null
+  );
+
+  useEffect(() => {
+    if (location.unauthorized) {
+      localStorage.setItem("unauth", ""); //add to localstorage to access it after the component refresh
+      context.removeUser();
+    }
+
+    const timeout = setTimeout(() => {
+      localStorage.removeItem("unauth");
+      setUnathorized(false);
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, [location.unauthorized]);
 
   const formik = useFormik({
     initialValues,
@@ -75,7 +95,7 @@ function Login() {
 
   return (
     <Form className="security-form" onSubmit={handleSubmit}>
-      <h2 className="font-weight-bold text-center">Вход</h2>
+      <h2 className="font-weight-bold text-center overflow-hidden">Вход</h2>
       <Form.Group controlId="email">
         <Form.Label>Имейл</Form.Label>
         <Form.Control
@@ -97,14 +117,20 @@ function Login() {
           isInvalid={touched.password && errors.password}
         />
         <FormInvalidFeedback error={errors.password} />
-        <p className="mb-2">
-          Нямате профил? <NavLink to="/register">Регистрирай се!</NavLink>
+        <p>
+          Нямате профил? <NavLink to="/register">Регистрирайте се!</NavLink>
         </p>
       </Form.Group>
-
-      <Button variant="primary" type="submit">
+      {unauthorized && (
+        <div
+          style={{ color: "#dc3545", fontSize: "80%", marginBottom: "1rem" }}
+        >
+          Сесията е изтекла!
+        </div>
+      )}
+      <IndigoButton variant="primary" type="submit" block>
         Вход
-      </Button>
+      </IndigoButton>
     </Form>
   );
 }

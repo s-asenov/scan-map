@@ -47,4 +47,24 @@ class DistributionZoneRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    public function getFetchedCount()
+    {
+        return $this->createQueryBuilder('d')
+            ->select('count(d.name)')
+            ->where('d.fetched = :fetched')
+            ->setParameter('fetched', true)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function getMostFetched()
+    {
+        return $this->createQueryBuilder('dz')
+            ->select('count(dz.id) as count, dz.name')
+            ->orderBy('count', 'DESC')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getResult();
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\DistributionZonePlant;
+use App\Entity\Plant;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
@@ -31,16 +32,26 @@ class DistributionZonePlantRepository extends ServiceEntityRepository
         ;
     }
 
-
-    /*
-    public function findOneBySomeField($value): ?DistributionZonePlant
+    public function getMostPlantsInDistributionZone()
     {
-        return $this->createQueryBuilder('d')
-            ->andWhere('d.exampleField = :val')
-            ->setParameter('val', $value)
+        return $this->createQueryBuilder('dzp')
+            ->select('count(dzp.id) as count')
+            ->groupBy('dzp.distributionZone')
+            ->orderBy('count', 'DESC')
+            ->setMaxResults(1)
             ->getQuery()
-            ->getOneOrNullResult()
-        ;
+            ->getSingleScalarResult();
     }
-    */
+
+    public function getMostSeenPlants()
+    {
+        return $this->createQueryBuilder('dzp')
+            ->select('count(dzp.id) as count, p.scientificName, p.commonName')
+            ->leftJoin(Plant::class, "p", "WITH", "dzp.id = p.id")
+            ->groupBy('dzp.plant')
+            ->orderBy('count', 'DESC')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getResult();
+    }
 }

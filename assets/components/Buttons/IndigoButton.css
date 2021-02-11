@@ -1,0 +1,13 @@
+.btn-indigo {
+  font-weight: 500;
+  border: 2px solid var(--indigo);
+  background-color: var(--indigo);
+  color: #ffffff;
+}
+
+.btn-indigo:hover {
+  color: #ffffff;
+  border-color: #4808b1;
+  background-color: #4808b1;
+  /* box-shadow: 2px 2px 4px #6612f1; */
+}

@@ -7,12 +7,27 @@ function rgbToHex(r, g, b) {
   return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
+/**
+ * Fixes float value to 2 digits after the coma
+ *
+ * @param {number} x
+ *
+ * @returns {number}
+ */
 function fix(x) {
   return parseFloat(Number.parseFloat(x).toFixed(2));
 }
 
+/**
+ * Convert a number to string with the expected digits.
+ *
+ * @param {number} n the number
+ * @param {number} expected the ammount of digits expected - ex. 002=>3, 02=>1 so on.
+ *
+ * @returns {string}
+ */
 function addN(n, expected) {
-  var string = n.toString();
+  let string = n.toString();
 
   while (expected > string.length) {
     string = "0" + string;
@@ -21,6 +36,9 @@ function addN(n, expected) {
   return string;
 }
 
+/**
+ * Every SRTMGL3 filename has its unique name containing the coordinates it represents,
+ */
 function getFilename(location) {
   const { lat, lng } = location;
   let filename = "";
@@ -40,6 +58,13 @@ function getFilename(location) {
   return filename + ".jpg";
 }
 
+/**
+ * Gets the count and positioning of the SRTMGL3 images.
+ *
+ * @param {Array} images
+ *
+ * @returns {Array} of the unique images.
+ */
 function getUniqImagesPos(images) {
   let unique = [...new Set(images)];
   let length = unique.length;
@@ -67,7 +92,7 @@ function getUniqImagesPos(images) {
       return {
         images: unique,
         count: length,
-        direction: "vertival",
+        direction: "vertical",
       };
     }
   } else {

@@ -74,12 +74,13 @@ class MapController extends AbstractController
             //remove the keys of the array, for now
             $plants = array_values($retriever->getPlants($zone));
 
-            if (!$zone->getFetched()) {
-                // The Zone is no longer watched from the entity manager so we need to access it again by finding it.
-                $saveZone = $this->em->getRepository(DistributionZone::class)->find($zone->getId());
-                $saveZone->setFetched(true);
-                $this->em->persist($saveZone);
-            }
+            /**
+             * The Zone is no longer watched from the entity manager so we need to access it again by finding it.
+             * @var $saveZone DistributionZone
+             */
+            $saveZone = $this->em->getRepository(DistributionZone::class)->find($zone->getId());
+            $saveZone->incrementFetched();
+            $this->em->persist($saveZone);
         } catch (ClientExceptionInterface |
         TransportExceptionInterface |
         ServerExceptionInterface |
@@ -141,6 +142,7 @@ class MapController extends AbstractController
         if ($file) {
             $response = new BinaryFileResponse($file);
             $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT);
+            $response->headers->set('Content-Type', 'application/zip');
 
             return $response;
         }

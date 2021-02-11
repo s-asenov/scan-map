@@ -1,5 +1,7 @@
 import React from "react";
-import { Col, Container, Row } from "react-bootstrap";
+import Col from "react-bootstrap/Col";
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
 import { NavLink } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
 import { FaGlobe } from "react-icons/fa";
@@ -13,11 +15,11 @@ function Footer() {
         <Row className="py-5">
           <Col md="4" className="links">
             <div className="mt-3">
-              <FaGlobe size="2rem" color="#4b0082" />
+              <FaGlobe size="2em" color="#4b0082" />
               <p className="d-inline ml-2">гр. Перник, ул. Г. Мамарчев, 2</p>
             </div>
             <div className="mt-3">
-              <MdContactMail size="2rem" color="#aaaaaa" />
+              <MdContactMail size="2em" color="#aaaaaa" />
               <a href="mailto:support@flora.noit.eu" className="ml-2">
                 support@flora.noit.eu
               </a>
@@ -81,10 +83,10 @@ function Footer() {
           padding: "1rem 0",
         }}
       >
-        <p>
-          НОИТ 2021 Разпределени уеб приложения | Алекс Янев и Слави Асенов |
+        НОИТ 2021 Разпределени уеб приложения | Алекс Янев и Слави Асенов |{" "}
+        <a href="https://pgi-pernik.bg-schools.com/" target="_blank">
           ПГИ - гр. Перник
-        </p>
+        </a>
       </div>
     </div>
   );

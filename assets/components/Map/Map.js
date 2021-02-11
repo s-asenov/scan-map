@@ -7,7 +7,7 @@ import MapReducer from "../Utils/reducers/Map/MapReducer";
 import { LOADED, LOADING } from "../Utils/reducers/Map/MapActions";
 import LoadingModal from "./LoadingModal/LoadingModal";
 import { useLocation } from "react-router-dom";
-import LoadingAlert from "./LoadingAlert";
+import LoadingAlert from "./LoadingAlert/LoadingAlert";
 
 const initialState = {
   loading: false,

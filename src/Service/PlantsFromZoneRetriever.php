@@ -94,7 +94,6 @@ class PlantsFromZoneRetriever
         $plants = $request['plants'];
         $total = $request['total'];
 
-
         $pages = ceil($total / self::PLANTS_PER_PAGE);
         $count = $request['batchCount'];
 
@@ -109,6 +108,7 @@ class PlantsFromZoneRetriever
                     $plants[$key] = $value;
                 }
 
+                //can't use Modulo ($count % $batchSize) here
                 if ($count > $batchSize) {
                     $count = 0;
                     $this->em->flush();

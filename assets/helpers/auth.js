@@ -19,13 +19,9 @@ async function getAuth() {
   };
 }
 
-function setAuth(value) {
-  localStorage.setItem("x-token", value);
-}
-
 function removeAuth() {
   apiInstance.get("/logout");
   //check if status is 200 - unnecessary for now
 }
 
-export { getAuth, setAuth, removeAuth };
+export { getAuth, removeAuth };

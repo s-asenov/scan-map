@@ -1,7 +1,15 @@
-import axios from "axios";
 import { BASE_URL } from "../../../helpers/base";
 import { fix, getUniqImagesPos } from "./helpers";
 
+const defaultImageSize = 1201;
+
+/**
+ * Draws the image to the canvas and returns a promise.
+ *
+ * @param {String} image
+ * @param {Object} options
+ * @param {CanvasRenderingContext2D} ctx
+ */
 function putImageData(image, options, ctx) {
   const url = BASE_URL + "uncompressed/" + image;
   let promise = new Promise((resolve, reject) => {
@@ -33,6 +41,14 @@ function putImageData(image, options, ctx) {
   return promise;
 }
 
+/**
+ * Creates the final canvas and returns the base64 data url of it.
+ *
+ * @param {HTMLCanvasElement} canvasA
+ * @param {Array} promises
+ *
+ * @returns {Object}
+ */
 async function loadImgFromCanvas(canvasA, promises) {
   const arr = await Promise.all(promises);
   const unique = getUniqImagesPos(arr);
@@ -53,6 +69,16 @@ async function loadImgFromCanvas(canvasA, promises) {
   };
 }
 
+/**
+ * Does the required calculations which determine where the coordinates
+ * lie on the images.
+ *
+ * @param {Array} unique
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Object} corners
+ *
+ * @returns {Object}
+ */
 async function calculateDismensions(unique, ctx, corners) {
   const { topRight, topLeft, botRight, botLeft } = corners;
   const { floor, ceil } = Math;
@@ -120,8 +146,8 @@ async function calculateDismensions(unique, ctx, corners) {
       },
     ];
 
-    ctx.canvas.width = (options[0].sw + options[1].sw) * 1201 - 1;
-    ctx.canvas.height = (options[0].sh + options[2].sh) * 1201;
+    ctx.canvas.width = (options[0].sw + options[1].sw) * defaultImageSize - 1;
+    ctx.canvas.height = (options[0].sh + options[2].sh) * defaultImageSize;
 
     let promises = [];
     unique.images.forEach((image, index) => {
@@ -165,8 +191,8 @@ async function calculateDismensions(unique, ctx, corners) {
         },
       ];
 
-      ctx.canvas.width = (options[0].sw + options[1].sw) * 1201 - 1;
-      ctx.canvas.height = options[0].sh * 1201;
+      ctx.canvas.width = (options[0].sw + options[1].sw) * defaultImageSize - 1;
+      ctx.canvas.height = options[0].sh * defaultImageSize;
 
       let promises = [];
       unique.images.forEach((image, index) => {
@@ -179,17 +205,17 @@ async function calculateDismensions(unique, ctx, corners) {
       return base64;
     } else {
       //first square
-      const x1 = topLeft.lng - Math.floor(topLeft.lng);
-      const y1 = Math.ceil(topLeft.lat) - topLeft.lat;
+      const x1 = topLeft.lng - floor(topLeft.lng);
+      const y1 = ceil(topLeft.lat) - topLeft.lat;
 
       const sh1 = 1 - y1;
-      const sw1 = 1 - (x1 + Math.ceil(topRight.lng) - topRight.lng);
+      const sw1 = 1 - (x1 + ceil(topRight.lng) - topRight.lng);
 
       //second square
-      const x2 = botLeft.lng - Math.floor(botLeft.lng);
+      const x2 = botLeft.lng - floor(botLeft.lng);
       const y2 = 0;
-      const sh2 = Math.ceil(botLeft.lat) - botLeft.lat;
-      const sw2 = 1 - (x2 + Math.ceil(botRight.lng) - botRight.lng);
+      const sh2 = ceil(botLeft.lat) - botLeft.lat;
+      const sw2 = 1 - (x2 + ceil(botRight.lng) - botRight.lng);
 
       const options = [
         {
@@ -207,8 +233,8 @@ async function calculateDismensions(unique, ctx, corners) {
         },
       ];
 
-      ctx.canvas.width = options[0].sw * 1201;
-      ctx.canvas.height = (options[0].sh + options[1].sh) * 1201;
+      ctx.canvas.width = options[0].sw * defaultImageSize;
+      ctx.canvas.height = (options[0].sh + options[1].sh) * defaultImageSize;
 
       let promises = [];
       unique.images.forEach((image, index) => {
@@ -223,16 +249,16 @@ async function calculateDismensions(unique, ctx, corners) {
   } else {
     const image = unique.images[0];
 
-    const x = topLeft.lng - Math.floor(topLeft.lng);
-    const y = Math.ceil(topLeft.lat) - topLeft.lat;
+    const x = topLeft.lng - floor(topLeft.lng);
+    const y = ceil(topLeft.lat) - topLeft.lat;
 
-    const sw = 1 - (x + (Math.ceil(topRight.lng) - topRight.lng));
-    const sh = 1 - (y + (botLeft.lat - Math.floor(botLeft.lat)));
+    const sw = 1 - (x + (ceil(topRight.lng) - topRight.lng));
+    const sh = 1 - (y + (botLeft.lat - floor(botLeft.lat)));
 
     const options = { x: fix(x), y: fix(y), sw: fix(sw), sh: fix(sh) };
 
-    ctx.canvas.width = options.sw * 1201;
-    ctx.canvas.height = options.sh * 1201;
+    ctx.canvas.width = options.sw * defaultImageSize;
+    ctx.canvas.height = options.sh * defaultImageSize;
 
     let promises = [];
     let promise = putImageData(image, options, ctx);

@@ -4,14 +4,25 @@
   padding: 4rem 2rem;
   border-radius: 1rem;
   background-color: #c4c4c4;
+  width: 66%;
 }
 
 .flex-1 {
   flex: 1;
 }
 
+.cursor-pointer {
+  cursor: pointer;
+}
+
 @media only screen and (min-width: 992px) {
   .security-form {
-    width: 60%;
+    width: 50%;
+  }
+}
+
+@media only screen and (min-width: 1200px) {
+  .security-form {
+    width: 33%;
   }
 }

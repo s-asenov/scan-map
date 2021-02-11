@@ -7,6 +7,8 @@ export default {
         return response;
       },
       (error) => {
+        const safePaths = ["/login", "/register", "/", "/demo"];
+
         if (error.response.status === 403) {
           if (error.response.data.email) {
             history.push("/verify");
@@ -18,12 +20,11 @@ export default {
           }
         } else if (
           error.response.status === 401 &&
-          window.location.pathname !== "/login" &&
-          window.location.pathname !== "/register"
+          !safePaths.includes(window.location.pathname)
         ) {
           history.push({
-            pathname: "/",
-            redirected: true,
+            pathname: "/login",
+            unauthorized: true,
           });
         }
 

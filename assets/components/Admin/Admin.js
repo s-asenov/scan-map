@@ -1,6 +1,10 @@
 import React, { useEffect } from "react";
 import { Redirect, Route, Switch, useRouteMatch } from "react-router-dom";
 
+/**
+ * The Admin component will be responsible for all necessary admin api calls.
+ * @todo
+ */
 function Admin() {
   let { url } = useRouteMatch();
 

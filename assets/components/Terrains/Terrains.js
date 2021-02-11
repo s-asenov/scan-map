@@ -2,13 +2,13 @@ import React, { useEffect, useReducer, useState } from "react";
 import apiInstance from "../../helpers/api/apiInstance";
 import Pagination from "react-js-pagination";
 import "./Terrains.css";
-import TerrainReducer from "../Utils/reducers/List/Terrain/TerrainReducer";
+import TerrainReducer from "../Utils/reducers/List/Terrains/TerrainReducer";
 import {
   SET_CURRENT,
   SET_LOADED,
   SET_MATCHING,
   SET_TERRAINS,
-} from "../Utils/reducers/List/Terrain/TerrainActions";
+} from "../Utils/reducers/List/Terrains/TerrainActions";
 import Row from "react-bootstrap/Row";
 import Spinner from "react-bootstrap/Spinner";
 import InputGroup from "react-bootstrap/InputGroup";
@@ -27,6 +27,7 @@ const initialState = {
 
 function Terrains() {
   let _isMounted = true;
+
   const [state, dispatch] = useReducer(TerrainReducer, initialState);
   const [input, setInput] = useState("");
 
@@ -54,6 +55,13 @@ function Terrains() {
           const currentPage =
             parseInt(stringPage) > existingPages ? 1 : parseInt(stringPage);
 
+          var urlString = window.location.href;
+          var url = new URL(urlString);
+          url.searchParams.set("page", 1);
+
+          const newurl = url.toString();
+          window.history.pushState({ path: newurl }, "", newurl);
+
           if (_isMounted) {
             dispatch({
               type: SET_TERRAINS,
@@ -71,11 +79,13 @@ function Terrains() {
         });
     }
 
-    return () => (_isMounted = false);
+    return () => {
+      _isMounted = false;
+    };
   }, []);
 
   const handlePaginationClick = (page) => {
-    var urlString = window.location.href; //window.location.href
+    var urlString = window.location.href;
     var url = new URL(urlString);
     url.searchParams.set("page", page);
 

@@ -47,7 +47,7 @@ class DistributionZone
     private $distributionZonePlants;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="integer")
      */
     private $fetched;
 
@@ -153,14 +153,21 @@ class DistributionZone
         return $this;
     }
 
-    public function getFetched(): ?bool
+    public function getFetched(): ?int
     {
         return $this->fetched;
     }
 
-    public function setFetched(bool $fetched): self
+    public function setFetched(int $fetched): self
     {
         $this->fetched = $fetched;
+
+        return $this;
+    }
+
+    public function incrementFetched(): self
+    {
+        $this->fetched++;
 
         return $this;
     }

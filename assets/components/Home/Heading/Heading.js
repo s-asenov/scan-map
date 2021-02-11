@@ -1,17 +1,17 @@
-import { Button } from "react-bootstrap";
 import React, { useContext } from "react";
 import "./Heading.css";
 import { NavLink } from "react-router-dom";
 import AuthContext from "../../Utils/context/AuthContext";
+import IndigoButton from "../../Buttons/IndigoButton";
 
-function Heading(props) {
+function Heading() {
   const context = useContext(AuthContext);
   return (
     <div
       id="heading"
       className="d-flex flex-column align-items-center justify-content-center"
     >
-      <h1 id="hero-title">Terrain flora drawer</h1>
+      <h1 id="hero-title">Terrain Flora Drawer</h1>
       <p id="heading-description" className="text-light">
         Проектът представлява интерактивен инструмент за разглеждане и
         запознаване с флората във всяка една точка по света. Целият процес е
@@ -20,21 +20,21 @@ function Heading(props) {
         Вселена.
       </p>
       {context.isAuth !== null && (
-        <Button
+        <IndigoButton
           className="my-4"
           as={NavLink}
           to={!context.isAuth ? "/register" : "/map"}
-          variant="danger"
+          variant="success"
+          style={{
+            fontWeight: "500",
+            borderWidth: "2px",
+          }}
         >
           {!context.isAuth ? "Започни сега!" : "Към картата!"}
-        </Button>
+        </IndigoButton>
       )}
     </div>
   );
 }
-
-// Heading.propTypes = {
-//   isAuth: PropTypes.bool.isRequired,
-// };
 
 export default Heading;

@@ -19,8 +19,10 @@ function Counter(props) {
   const [current, setCurrent] = useState(start);
 
   let period = (duration * 1000) / (end - start);
+
   useEffect(() => {
     let time;
+
     switch (effect) {
       case "in":
         time = easeInQuad(current, 0, period, end - start);
@@ -30,12 +32,15 @@ function Counter(props) {
         time = easeInOutQuad(current, 0, period, end - start);
     }
 
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
+      console.log("start", time, current);
       let number = current;
       if (number < end) {
         setCurrent(++number);
       }
     }, time);
+
+    return () => clearTimeout(timeout);
   }, [current]);
 
   return current.toString();
@@ -51,7 +56,7 @@ Counter.propTypes = {
   duration: Proptypes.number,
   end: Proptypes.number.isRequired,
   start: Proptypes.number,
-  effect: Proptypes.string,
+  effect: Proptypes.oneOf(["in", "in-out", "out"]),
 };
 
 export default Counter;

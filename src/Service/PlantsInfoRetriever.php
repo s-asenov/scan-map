@@ -44,6 +44,9 @@ class PlantsInfoRetriever
      */
     public function getInfo(array $pl): array
     {
+        $batchSize = 500;
+        $i = 0;
+
         /*
          * Filter an array of plants for which we need to get the data.
          */
@@ -99,11 +102,19 @@ class PlantsInfoRetriever
                  */
                 $plant = $plants[$initName];
                 $plant->setInformation($info);
+
+                ++$i;
+
+                if ($i % $batchSize === 0) {
+                    $i = 0;
+                    $this->em->flush();
+                    $this->em->clear();
+                }
             }
         }
 
-//        $this->em->flush();
-//        $this->em->clear();
+        $this->em->flush();
+        $this->em->clear();
 
         return $plants + $pl;
     }

@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Alert, Fade } from "react-bootstrap";
-import MapContext from "../Utils/context/MapContext";
+import MapContext from "../../Utils/context/MapContext";
 import PropTypes from "prop-types";
+import "./LoadingAlert.css";
 
 function LoadingAlert(props) {
   const { map, errorMessage, successMessage } = props;
@@ -15,11 +16,8 @@ function LoadingAlert(props) {
 
   if (context.showAlert && map) {
     alert = (
-      <div
-        id="test"
-        className="position-absolute w-100 h-100 d-flex justify-content-center align-items-center"
-      >
-        <Alert variant="success" className="px-2 py-3">
+      <div id="loading-alert-wrapper">
+        <Alert variant="success" className="px-2 py-3 loading-alert">
           {successMessage}
         </Alert>
       </div>
@@ -28,11 +26,8 @@ function LoadingAlert(props) {
     setTimeout(() => context.setShowAlert(false), 3000);
   } else if (context.showAlert && map === false) {
     alert = (
-      <div
-        id="test"
-        className="position-absolute w-100 h-100 d-flex justify-content-center align-items-center"
-      >
-        <Alert variant="danger" className="px-2 py-3">
+      <div id="loading-alert-wrapper">
+        <Alert variant="danger" className="px-2 py-3 loading-alert">
           {errorMessage}
         </Alert>
       </div>

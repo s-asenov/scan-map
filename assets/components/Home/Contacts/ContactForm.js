@@ -1,9 +1,11 @@
 import axios from "axios";
 import { useFormik } from "formik";
 import React from "react";
-import { Form, Button } from "react-bootstrap";
+import Form from "react-bootstrap/Form";
 import { useHistory } from "react-router-dom";
+import IndigoButton from "../../Buttons/IndigoButton";
 import FormInvalidFeedback from "../../Utils/FormInvalidFeedback";
+import { myValidate } from "../../Utils/validation/messages";
 
 const initialValues = {
   from: "",
@@ -16,21 +18,24 @@ const validate = (values) => {
 
   const errors = {};
 
-  if (!values.from) {
-    errors.from = "Required";
-  } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.from)) {
-    errors.from = "Invalid email address";
+  const validateEmail = myValidate(values.from);
+  const validateSubject = myValidate(values.subject);
+  const validateText = myValidate(values.text);
+
+  const fromErr = validateEmail.REQUIRED() || validateEmail.EMAIL();
+  const subjectErr = validateSubject.REQUIRED();
+  const textErr = validateText.REQUIRED() || validateText.MIN(15);
+
+  if (fromErr) {
+    errors.from = fromErr;
   }
 
-  if (!values.firstName) {
-    errors.subject = "Required";
+  if (subjectErr) {
+    errors.subject = subjectErr;
   }
 
-  if (!values.text) {
-    errors.text = "Required";
-  }
-  if (values.text.length < 2) {
-    errors.text = "Too short";
+  if (textErr) {
+    errors.text = textErr;
   }
 
   return errors;
@@ -102,9 +107,7 @@ function ContactForm() {
         />
         <FormInvalidFeedback error={errors.text} />
       </Form.Group>
-      <Button variant="primary" type="submit">
-        Изпращане
-      </Button>
+      <IndigoButton type="submit">Изпращане</IndigoButton>
     </Form>
   );
 }

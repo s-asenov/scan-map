@@ -3,6 +3,10 @@ import { Redirect, useLocation } from "react-router-dom";
 import MyRoute from "./MyRoute";
 import AuthContext from "../Utils/context/AuthContext";
 
+/**
+ * The AuthRoute component functions as a react router dom Route components with
+ * a authentication implementation using Context API
+ */
 function AuthRoute({ children, ...rest }) {
   const location = useLocation();
   const context = useContext(AuthContext);
@@ -10,7 +14,8 @@ function AuthRoute({ children, ...rest }) {
   const isAuth = context.isAuth;
 
   const isForm =
-    location.pathname === "/login" || location.pathname === "/register";
+    (location.pathname === "/login" && !location.unauthorized) ||
+    location.pathname === "/register";
 
   let render;
 
