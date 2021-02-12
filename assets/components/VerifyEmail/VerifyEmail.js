@@ -8,7 +8,7 @@ function VerifyEmail() {
   const [sent, setSent] = useState(false);
   const [verified, setVerified] = useState({
     loaded: false,
-    verified: 0,
+    verified: false,
   });
 
   useEffect(() => {

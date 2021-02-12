@@ -19,10 +19,12 @@ function AuthRoute({ children, ...rest }) {
 
   let render;
 
-  if (isAuth === false && isForm === false) {
+  if (isAuth === null) {
+    render = <div className="flex-1" />;
+  } else if (isAuth === false && isForm === false) {
     render = <Redirect to="/login" />;
   } else if (isForm === true && isAuth === true) {
-    render = <Redirect to="/" />;
+    render = <Redirect to="/terrains" />;
   } else {
     render = children;
   }

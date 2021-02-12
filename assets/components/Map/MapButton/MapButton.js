@@ -5,12 +5,7 @@ import MapContext from "../../Utils/context/MapContext";
 import calculateDismensions from "../utils/canvas";
 import { getFilename, getUniqImagesPos } from "../utils/helpers";
 import html2canvas from "html2canvas";
-import {
-  FORBIDDEN_CHARACTERS,
-  MAX,
-  myValidate,
-  REQUIRED,
-} from "../../Utils/validation/messages";
+import { myValidate } from "../../Utils/validation/messages";
 import IndigoButton from "../../Buttons/IndigoButton";
 
 function MapButton({ rectangle }) {
@@ -41,40 +36,16 @@ function MapButton({ rectangle }) {
 
     const validateName = myValidate(terrainName);
 
-    const error =
-      validateName.REQUIRED() ||
-      validateName.MAX(200) ||
-      validateName.SPECIAL_CHARACTERS();
+    const error = validateName.REQUIRED() || validateName.MAX(200);
 
     if (error) {
       terrainName = prompt(error);
       return;
     }
 
-    // if (terrainName === null || terrainName === "") {
-    //   terrainName = prompt(REQUIRED());
-    //   return;
-    // }
-
-    // if (terrainName.length > 255) {
-    //   terrainName = prompt(MAX(255));
-    //   return;
-    // }
-
-    // if (!/^[a-z \u0400-\u04FF 0-9 ,.'-]+$/i.test(terrainName)) {
-    //   terrainName = prompt(FORBIDDEN_CHARACTERS());
-    //   return;
-    // }
-
-    /**
-     * Check if the whole rectangle lies on the visible part of the map.
-     */
-    if (
-      rectangle.getPos().ne.y < 0 ||
-      rectangle.getPos().sw.y > document.getElementById("map").offsetHeight - 12
-    ) {
-      rectangle.getMap().setCenter(rectangle.getBounds().getCenter());
-    }
+    //Center the rectangle on the map so we can screenshot the map
+    rectangle.getMap().setCenter(rectangle.getBounds().getCenter());
+    document.getElementById("map").scrollIntoView();
 
     const rLatLng = rectangle.getLatLng();
     const center = rectangle.getBounds().getCenter();
@@ -103,16 +74,15 @@ function MapButton({ rectangle }) {
      * Get the positions in pixels of the North-East(Top-Right) and South-West(Bottom-Left) corners of the google maps rectangle,
      * which will be used for creating the second image used in the terrains list.
      */
-    const ne = rectangle.getPos().ne;
-    const sw = rectangle.getPos().sw;
+    const { ne, sw } = rectangle.getPos();
 
     html2canvas(document.getElementById("map"), {
       useCORS: true,
-      x: sw.x - 50,
-      y: ne.y + 40,
-      width: ne.x - sw.x + 150,
-      height: sw.y - ne.y + 100,
-      scrollY: window.screenY,
+      x: sw.x - 25,
+      y: ne.y,
+      width: 350,
+      height: 300,
+      scrollY: document.getElementById("navbar").offsetHeight,
       logging: false,
     }).then((gmCanvas) => {
       const dataUrl = gmCanvas.toDataURL("image/jpeg");
@@ -122,7 +92,7 @@ function MapButton({ rectangle }) {
         const { base64, unique } = result;
 
         if (unique.count === 1 && unique.images[0].includes("default.jpg")) {
-          alert("Please refrain to mainland.");
+          alert("Моля придържете се към континенталната част.");
 
           return;
         }

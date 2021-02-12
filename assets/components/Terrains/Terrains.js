@@ -52,12 +52,13 @@ function Terrains() {
           const data = response.data.terrains;
 
           const existingPages = Math.ceil(data.length / itemsPerPage);
+
           const currentPage =
             parseInt(stringPage) > existingPages ? 1 : parseInt(stringPage);
 
           var urlString = window.location.href;
           var url = new URL(urlString);
-          url.searchParams.set("page", 1);
+          url.searchParams.set("page", currentPage);
 
           const newurl = url.toString();
           window.history.pushState({ path: newurl }, "", newurl);
@@ -141,7 +142,7 @@ function Terrains() {
         />
       </InputGroup>
 
-      <Row className="mt-5">
+      <Row className="mt-5 mb-2 terrain-row">
         {currentTerrains.length ? (
           currentTerrains.map((terrain, index) => (
             <Terrain key={index} terrain={terrain} />

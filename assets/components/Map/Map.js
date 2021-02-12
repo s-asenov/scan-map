@@ -8,6 +8,7 @@ import { LOADED, LOADING } from "../Utils/reducers/Map/MapActions";
 import LoadingModal from "./LoadingModal/LoadingModal";
 import { useLocation } from "react-router-dom";
 import LoadingAlert from "./LoadingAlert/LoadingAlert";
+import init from "./utils/init";
 
 const initialState = {
   loading: false,
@@ -31,140 +32,99 @@ function Map() {
     setShowAlert: (value) => dispatch({ type: "alert", payload: value }),
   };
 
-  useEffect(() => {
+  useEffect(async () => {
+    let google;
+
     const loader = new Loader({
       apiKey: process.env.GOOGLE_MAPS_API_KEY,
       libraries: ["drawing", "geometry", "places", "visualization"],
     });
 
-    loader
-      .load()
-      .then(() => {
-        const init = () => {
-          const google = window.google;
-          class Rectangle extends google.maps.Rectangle {
-            constructor(options) {
-              super(options);
-            }
+    if (window.google) {
+      google = window.google;
+    } else {
+      try {
+        await loader.load();
+      } catch (err) {
+        throw err;
+      }
 
-            getPos() {
-              const sw = this.getBounds().getSouthWest();
-              const ne = this.getBounds().getNorthEast();
-              const scale = Math.pow(2, this.map.getZoom());
-              const proj = this.map.getProjection();
-              const bounds = this.map.getBounds();
-              const nw = proj.fromLatLngToPoint(
-                new google.maps.LatLng(
-                  bounds.getNorthEast().lat(),
-                  bounds.getSouthWest().lng()
-                )
-              );
+      google = window.google;
+    }
 
-              const point = proj.fromLatLngToPoint(sw);
-              const point1 = proj.fromLatLngToPoint(ne);
+    const styles = [
+      // {
+      //   featureType: "all",
+      //   elementType: "labels",
+      //   stylers: [{ visibility: "off" }],
+      // },
+      // {
+      //   featureType: "road",
+      //   elementType: "geometry",
+      //   stylers: [{ visibility: "off" }],
+      // },
+      {
+        featureType: "road",
+        stylers: [{ visibility: "off" }],
+      },
+    ];
 
-              const nePoint = new google.maps.Point(
-                Math.floor((point1.x - nw.x) * scale),
-                Math.floor((point1.y - nw.y) * scale)
-              );
-              const swPoint = new google.maps.Point(
-                Math.floor((point.x - nw.x) * scale),
-                Math.floor((point.y - nw.y) * scale)
-              );
+    const { initMap, initRect } = init(window.google);
 
-              return {
-                ne: nePoint,
-                sw: swPoint,
-              };
-            }
+    const map = initMap(document.getElementById("map"), {
+      center: { lat: 42.5, lng: 23 },
+      zoom: 9,
+      mapTypeId: "hybrid",
+      maxZoom: 11,
+      minZoom: 4,
+      disableDefaultUI: true,
+      styles,
+    });
 
-            getLatLng() {
-              const ne = this.getBounds().getNorthEast();
-              const sw = this.getBounds().getSouthWest();
+    const rectangle = initRect({
+      strokeColor: "#FF0000",
+      strokeOpacity: 1,
+      strokeWeight: 2,
+      fillColor: "#ffffff",
+      fillOpacity: 0,
+      draggable: true,
+      bounds: {
+        north: 42.85,
+        south: 42.7,
+        east: 22.3,
+        west: 22.1,
+      },
+    });
 
-              const nw = new google.maps.LatLng(ne.lat(), sw.lng());
-              const se = new google.maps.LatLng(sw.lat(), ne.lng());
+    rectangle.setMap(map);
 
-              return {
-                nw: nw.toJSON(),
-                ne: ne.toJSON(),
-                sw: sw.toJSON(),
-                se: se.toJSON(),
-              };
-            }
-          }
+    rectangle.addListener("dragend", () => {
+      const rectPos = rectangle.getPos();
 
-          class MyMap extends google.maps.Map {
-            constructor(div, opt) {
-              super(div, opt);
-            }
-          }
+      if (
+        rectPos.ne.y < 0 ||
+        rectPos.ne.x < 0 ||
+        rectPos.sw.x < 0 ||
+        rectPos.sw.y > document.getElementById("map").offsetHeight - 12
+      ) {
+        map.setCenter(rectangle.getBounds().getCenter());
+      }
+    });
 
-          return {
-            initMap: (div, options) => new MyMap(div, options),
-            initRect: (options) => new Rectangle(options),
-          };
-        };
+    map.addListener("dragend", () => {
+      const rectPos = rectangle.getPos();
 
-        const styles = [
-          // {
-          //   featureType: "all",
-          //   elementType: "labels",
-          //   stylers: [{ visibility: "off" }],
-          // },
-          // {
-          //   featureType: "road",
-          //   elementType: "geometry",
-          //   stylers: [{ visibility: "off" }],
-          // },
-          {
-            featureType: "road",
-            stylers: [{ visibility: "off" }],
-          },
-        ];
-        const { initMap, initRect } = init();
+      if (
+        rectPos.ne.y < 0 ||
+        rectPos.ne.x < 0 ||
+        rectPos.sw.x < 0 ||
+        rectPos.sw.y > document.getElementById("map").offsetHeight - 12
+      ) {
+        map.setCenter(rectangle.getBounds().getCenter());
+      }
+    });
 
-        const map = initMap(document.getElementById("map"), {
-          center: { lat: 42.5, lng: 23 },
-          zoom: 9,
-          mapTypeId: "hybrid",
-          maxZoom: 11,
-          minZoom: 4,
-          disableDefaultUI: true,
-          styles,
-        });
-
-        const rectangle = initRect({
-          strokeColor: "#FF0000",
-          strokeOpacity: 1,
-          strokeWeight: 2,
-          fillColor: "#ffffff",
-          fillOpacity: 0,
-          draggable: true,
-          bounds: {
-            north: 42.85,
-            south: 42.7,
-            east: 22.3,
-            west: 22.1,
-          },
-        });
-        rectangle.setMap(map);
-
-        rectangle.addListener("dragend", () => {
-          if (
-            rectangle.getPos().ne.y < 0 ||
-            rectangle.getPos().sw.y >
-              document.getElementById("map").offsetHeight - 12
-          ) {
-            map.setCenter(rectangle.getBounds().getCenter());
-          }
-        });
-
-        setRect(rectangle);
-      })
-      .catch((e) => {
-        // console.log(e);
-      });
+    setRect(rectangle);
   }, []);
 
   return (

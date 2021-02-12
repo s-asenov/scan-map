@@ -8,7 +8,7 @@ function TerrainKeyReducer(state, action) {
       return {
         ...state,
         keys: payload.keys,
-        loaded: payload.loaded || false,
+        added: payload.added || false,
       };
     }
     case SET_DISABLED: {
@@ -28,7 +28,7 @@ function TerrainKeyReducer(state, action) {
         ...state,
         disabled: payload.disabled,
         show: payload.show,
-        loaded: payload.loaded || false,
+        added: payload.added || null,
       };
     }
     default:

@@ -143,7 +143,7 @@ function Register() {
           Вече сте регистрирани? <NavLink to="/login">Влезте!</NavLink>
         </p>
       </Form.Group>
-      <IndigoButton variant="primary" type="submit" block>
+      <IndigoButton type="submit" block>
         Регистрация
       </IndigoButton>
     </Form>

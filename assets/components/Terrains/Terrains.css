@@ -6,13 +6,14 @@
   height: 200px;
   display: block;
   margin: auto;
+  width: 80%;
 }
 
 .terrain-name {
   font-weight: 600;
   overflow: hidden !important;
   text-overflow: ellipsis;
-  width: 60%;
+  /* width: 60%; */
   white-space: nowrap;
 }
 
@@ -53,6 +54,17 @@
   border-bottom: 1px solid #c4c4c4;
 }
 
+.key.added,
+.key.added svg {
+  color: #ffffff;
+  background-color: var(--primary);
+  font-weight: 600;
+}
+
+.key svg {
+  color: var(--primary);
+}
+
 .key p {
   overflow: hidden !important;
   text-overflow: ellipsis;
@@ -77,16 +89,64 @@
   border-top-right-radius: calc(0.3rem - 1px);
 }
 
-.add-icon[disabled] {
+#add-key-icon[disabled] {
   cursor: not-allowed;
 }
 
-.add-icon path {
+#add-key-icon path {
   pointer-events: none;
 }
 
-@media only screen and (min-width: 768px) {
+.terrain-btns {
+  display: flex;
+  justify-content: end;
+  flex-grow: 1;
+  margin-left: 1.5rem;
+}
+
+.terrain-btns #keys-list-icon {
+  margin-left: 1rem;
+}
+
+.terrain-btns #add-key-icon {
+  margin-left: auto;
+}
+
+.terrain-info {
+  display: flex;
+}
+
+@media only screen and (min-width: 768px) and (max-width: 992px) {
+  .terrain-info {
+    flex-direction: column;
+  }
+
+  .terrain-name {
+    width: 100%;
+  }
+
+  .terrain-btns {
+    justify-content: space-evenly;
+    margin-left: 0;
+  }
+
+  .terrain-btns #add-key-icon,
+  .terrain-btns #keys-list-icon {
+    margin: 0;
+  }
+
   .terrain img {
     width: 100%;
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  .terrain img {
+    width: 60%;
+  }
+
+  .terrain-row {
+    width: 80%;
+    margin: 0 auto;
   }
 }

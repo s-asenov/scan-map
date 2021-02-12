@@ -73,7 +73,7 @@ function NavBar(props) {
   };
 
   return (
-    <Navbar variant="indigo" bg="indigo" expand="lg">
+    <Navbar id="navbar" variant="indigo" bg="indigo" expand="lg">
       <Navbar.Brand as={NavLink} to="/">
         {/* <Image src={logo} rounded height="54" width="54" /> */}
         Terrain Flora Drawer

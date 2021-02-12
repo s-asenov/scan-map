@@ -15,16 +15,16 @@ import {
   SET_SHOW,
 } from "../Utils/reducers/List/TerrainKey/TerrainKeyActions";
 
-const TerrainList = ({ keys, loaded }) => {
+const TerrainList = ({ keys, added }) => {
   const ref = useRef(null);
 
   useEffect(() => {
-    if (loaded) {
+    if (added) {
       const objDiv = ref.current;
 
       objDiv.scrollTop = objDiv.scrollHeight;
     }
-  }, [loaded]);
+  }, [added]);
 
   const handleClipboard = (id) => {
     var range = document.createRange();
@@ -40,11 +40,14 @@ const TerrainList = ({ keys, loaded }) => {
   return (
     <Popover.Content ref={ref} className="key-list">
       {keys.map((key, index) => (
-        <div key={index} className="d-flex key">
+        <div
+          key={index}
+          className={`d-flex key ${key.id === added ? "added" : ""}`}
+        >
           <p className={`terrain-${key.id} float-left`}>{key.id}</p>
           {document.queryCommandSupported("copy") && (
             <FiClipboard
-              color={"#007bff"}
+              // color={key.id === added ? "#ffffff" : "#007bff"}
               style={{
                 marginLeft: "auto",
                 marginRight: "1rem",
@@ -66,18 +69,26 @@ const initialState = {
   show: false,
   disabled: false,
   keys: [],
-  loaded: false,
+  added: null,
 };
 
 const Terrain = (props) => {
+  let timeout = useRef(null);
+
   const [state, dispatch] = useReducer(TerrainKeyReducer, initialState);
 
-  const { show, disabled, keys, loaded } = state;
+  const { show, disabled, keys, added } = state;
   const { id, name, terrainKeys, imageDirectory } = props.terrain;
 
   useEffect(() => {
     dispatch({ type: SET_KEYS, payload: { keys: terrainKeys } });
     dispatch({ type: SET_SHOW, payload: false });
+
+    return () => {
+      if (timeout.current) {
+        clearTimeout(timeout.current);
+      }
+    };
   }, [props.terrain]);
 
   const handleAddKey = (e) => {
@@ -98,20 +109,24 @@ const Terrain = (props) => {
     apiInstance.post(`keys/${id}`).then((response) => {
       dispatch({
         type: SET_KEYS,
-        payload: { keys: [...keys, response.data.key], loaded: true },
+        payload: {
+          keys: [...keys, response.data.key],
+          added: response.data.key.id,
+        },
       });
     });
 
-    setTimeout(() => {
+    timeout.current = setTimeout(() => {
       e.target.removeAttribute("disabled");
       dispatch({
         type: SET_ADD,
         payload: {
           disabled: false,
           show: true,
+          added: null,
         },
       });
-    }, 1500);
+    }, 3000);
   };
 
   return (
@@ -121,37 +136,39 @@ const Terrain = (props) => {
         src={`uploads/${imageDirectory}`}
         onError={(e) => (e.target.src = gray)}
       />
-      <p className="terrain-name mt-2 float-left d-inline-block" title={name}>
-        Име: {name}
-      </p>
-      <div className="float-right mt-2 terrain-btns">
-        <IoKeySharp
-          className="add-icon"
-          color="#FFD700"
-          size="1.75em"
-          onClick={handleAddKey}
-          title="Вземи код!"
-        />
-        <OverlayTrigger
-          trigger="click"
-          placement="top"
-          show={show}
-          onToggle={() => dispatch({ type: SET_SHOW, payload: !show })}
-          overlay={
-            <Popover id="popover" {...props}>
-              <Popover.Title as="h3">Код за избрания терен</Popover.Title>
-              {keys.length ? (
-                <TerrainList keys={keys} loaded={loaded} />
-              ) : (
-                <Popover.Content className="text-ceter">
-                  Нямате валидни кодове! Генерирайте такъв чрез жълтия ключ!
-                </Popover.Content>
-              )}
-            </Popover>
-          }
-        >
-          <IoIosListBox className="ml-2 mr-0" color="#4b0082" size="1.75em" />
-        </OverlayTrigger>
+      <div className="terrain-info">
+        <p className="terrain-name mt-2" title={name}>
+          Име: {name}
+        </p>
+        <div className="mt-2 terrain-btns">
+          <IoKeySharp
+            id="add-key-icon"
+            color="#FFD700"
+            size="1.75em"
+            onClick={handleAddKey}
+            title="Вземи код!"
+          />
+          <OverlayTrigger
+            trigger="click"
+            placement="top"
+            show={show}
+            onToggle={() => dispatch({ type: SET_SHOW, payload: !show })}
+            overlay={
+              <Popover id="popover" {...props}>
+                <Popover.Title as="h3">Код за избрания терен</Popover.Title>
+                {keys.length ? (
+                  <TerrainList keys={keys} added={added} />
+                ) : (
+                  <Popover.Content className="text-ceter">
+                    Нямате валидни кодове! Генерирайте такъв чрез жълтия ключ!
+                  </Popover.Content>
+                )}
+              </Popover>
+            }
+          >
+            <IoIosListBox id="keys-list-icon" color="#4b0082" size="1.75em" />
+          </OverlayTrigger>
+        </div>
       </div>
     </Col>
   );

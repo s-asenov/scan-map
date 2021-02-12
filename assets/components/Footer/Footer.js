@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
@@ -7,8 +7,13 @@ import { HashLink } from "react-router-hash-link";
 import { FaGlobe } from "react-icons/fa";
 import { MdContactMail } from "react-icons/md";
 import "./Footer.css";
+import AuthContext from "../Utils/context/AuthContext";
 
 function Footer() {
+  let context = useContext(AuthContext);
+
+  const isAuth = context.isAuth;
+
   return (
     <div id="footer">
       <Container>
@@ -62,15 +67,20 @@ function Footer() {
               <li>
                 <NavLink to="/demo">Демо</NavLink>
               </li>
-              <li>
-                <NavLink to="/login">Вход</NavLink>
-              </li>
-              <li>
-                <NavLink to="/register">Регистрация</NavLink>
-              </li>
-              <li>
-                <NavLink to="/map">Използвай карта</NavLink>
-              </li>
+              {isAuth === false ? (
+                <React.Fragment>
+                  <li>
+                    <NavLink to="/login">Вход</NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/register">Регистрация</NavLink>
+                  </li>
+                </React.Fragment>
+              ) : (
+                <li>
+                  <NavLink to="/map">Използвай карта</NavLink>
+                </li>
+              )}
             </ul>
           </Col>
         </Row>

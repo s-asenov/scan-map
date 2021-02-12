@@ -128,7 +128,7 @@ function Login() {
           Сесията е изтекла!
         </div>
       )}
-      <IndigoButton variant="primary" type="submit" block>
+      <IndigoButton type="submit" block>
         Вход
       </IndigoButton>
     </Form>
