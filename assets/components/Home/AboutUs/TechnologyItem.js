@@ -12,7 +12,7 @@ const TechnologyItem = ({ state, technologies, index }) => {
       {technologies.map((item, index) => (
         <Col key={index} className="technology py-4 px-2">
           <Image
-            className="technology-image cursor-pointer"
+            className="technology-image"
             src={item.image}
             title={item.name}
           />

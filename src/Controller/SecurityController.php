@@ -44,6 +44,12 @@ class SecurityController extends MyController
 
     /**
      * @Route("/register", name="register", methods={"POST"})
+     * @param MyHelper $myHelper
+     * @param Request $request
+     * @param FormHelper $formHelper
+     * @param UserPasswordEncoderInterface $passwordEncoder
+     * @param ValidatorInterface $validator
+     * @return JsonResponse
      */
     public function register(MyHelper $myHelper, Request $request, FormHelper $formHelper, UserPasswordEncoderInterface $passwordEncoder, ValidatorInterface $validator): JsonResponse
     {

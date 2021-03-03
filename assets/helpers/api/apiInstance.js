@@ -1,8 +1,7 @@
 import axios from "axios";
-import { BASE_URL } from "../base";
 
 const apiInstance = axios.create({
-  baseURL: BASE_URL + "api/",
+  baseURL: process.env.BASE_URL + "api/",
   headers: {
     Application: process.env.APP_SECRET,
   },

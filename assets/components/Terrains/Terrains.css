@@ -1,5 +1,6 @@
 .terrain {
   padding: 0.5rem 1.25rem;
+  position: relative;
 }
 
 .terrain img {
@@ -95,6 +96,18 @@
 
 #add-key-icon path {
   pointer-events: none;
+}
+
+#delete-terrain-icon {
+  color: #ff0000;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
+}
+
+#delete-terrain-icon :hover {
+  color: #830e0e;
 }
 
 .terrain-btns {

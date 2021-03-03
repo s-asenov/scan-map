@@ -51,10 +51,10 @@ function AboutUs() {
               </div>
             </Row>
           </Col>
-          <Col md="6">
+          <Col md="6" className="d-flex align-items-center">
             {!state.first && !state.second && (
               <Image
-                className="aboutus-image mt-4"
+                className="aboutus-image"
                 src={terrain}
                 style={{ width: "100%", minHeight: "300px" }}
               />

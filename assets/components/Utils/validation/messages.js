@@ -15,7 +15,7 @@ const myValidate = (value) => ({
   },
   MAX: (length) => {
     if (value.length > length) {
-      `Полето не трябва да бъде повече от ${length} символа!`;
+      return `Полето не трябва да бъде повече от ${length} символа!`;
     }
   },
   REQUIRED: () => {

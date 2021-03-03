@@ -23,23 +23,34 @@ class PlantsFromZoneRetriever
     const PLANTS_PER_PAGE = 20; //trefle`s pagination
 
     private $trefleApi;
+
     private $geonamesApi;
+
     /**
      * @var DistributionZoneRepository
      */
     private $repository;
+
     /**
      * @var PlantRepository
      */
     private $plantRepository;
+
     /**
      * @var DistributionZonePlantRepository
      */
     private $zonePlantRepository;
+
     private $em;
+
     private $zoneId;
 
-    public function __construct(EntityManagerInterface $em, HttpClientInterface $trefleApi, HttpClientInterface $geonamesApi)
+    /**
+     * @var PlantsInfoRetriever
+     */
+    private $infoRetriever;
+
+    public function __construct(PlantsInfoRetriever $infoRetriever, EntityManagerInterface $em, HttpClientInterface $trefleApi, HttpClientInterface $geonamesApi)
     {
         $this->trefleApi = $trefleApi;
         $this->geonamesApi = $geonamesApi;
@@ -47,6 +58,7 @@ class PlantsFromZoneRetriever
         $this->repository = $em->getRepository(DistributionZone::class);
         $this->plantRepository = $em->getRepository(Plant::class);
         $this->zonePlantRepository = $em->getRepository(DistributionZonePlant::class);
+        $this->infoRetriever = $infoRetriever;
     }
 
     /**
@@ -91,26 +103,37 @@ class PlantsFromZoneRetriever
 
         $request = $this->getPlantsFromPage("distributions/{$this->zoneId}/plants", []);
 
-        $plants = $request['plants'];
+        $plants = $this->infoRetriever->getInfo($request['plants']);
         $total = $request['total'];
 
         $pages = ceil($total / self::PLANTS_PER_PAGE);
         $count = $request['batchCount'];
 
+        $newPlants = [];
+
         if ($pages > 1) {
             for ($i = 2; $i<=$pages; $i++) {
                 $response = $this->getPlantsFromPage("distributions/{$this->zoneId}/plants?page={$i}", $plants);
+
                 $responsePlants = $response['plants'];
 
                 $count += $response['batchCount'];
 
                 foreach ($responsePlants as $key => $value) {
-                    $plants[$key] = $value;
+//                    $plants[$key] = $value;
+                    $newPlants[$key] = $value;
                 }
+
+                $withInfo = $this->infoRetriever->getInfo($newPlants);
+
+                $plants += $withInfo;
 
                 //can't use Modulo ($count % $batchSize) here
                 if ($count > $batchSize) {
+
+                    $newPlants = [];
                     $count = 0;
+
                     $this->em->flush();
                     $this->em->clear();
                 }
@@ -230,6 +253,7 @@ class PlantsFromZoneRetriever
          * @var $existing bool|Plant
          */
         $zone = $this->em->getRepository(DistributionZone::class)->find($this->zoneId);
+
         $existing = $this->plantInArray($existingPlants, $item, $parsedPlants);
 
         /*

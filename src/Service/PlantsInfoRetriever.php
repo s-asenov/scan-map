@@ -50,9 +50,9 @@ class PlantsInfoRetriever
         /*
          * Filter an array of plants for which we need to get the data.
          */
-        $filter = function (Plant $plant)
+        $filter = function ($plant)
         {
-            return $plant->getInformation() === null;
+            return $plant !== null && $plant->getInformation() === null;
         };
 
         $plants = array_filter($pl, $filter);
@@ -105,16 +105,16 @@ class PlantsInfoRetriever
 
                 ++$i;
 
-                if ($i % $batchSize === 0) {
-                    $i = 0;
-                    $this->em->flush();
-                    $this->em->clear();
-                }
+//                if ($i % $batchSize === 0) {
+//                    $i = 0;
+//                    $this->em->flush();
+//                    $this->em->clear();
+//                }
             }
         }
 
-        $this->em->flush();
-        $this->em->clear();
+//        $this->em->flush();
+//        $this->em->clear();
 
         return $plants + $pl;
     }

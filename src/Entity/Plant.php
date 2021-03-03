@@ -11,7 +11,6 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *
  * @ORM\Entity(repositoryClass=PlantRepository::class)
  * @ORM\Table(name="`plants`")
- * @UniqueEntity(fields={"scientificName"})
  */
 class Plant
 {
@@ -23,7 +22,7 @@ class Plant
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true, unique=true)
+     * @ORM\Column(type="string", length=255, unique=true)
      */
     private $scientificName;
 

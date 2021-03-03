@@ -4,6 +4,7 @@ import gray from "../../images/gray.jpg";
 import { IoKeySharp } from "react-icons/io5";
 import { IoIosListBox } from "react-icons/io";
 import { FiClipboard } from "react-icons/fi";
+import { BsFillTrashFill } from "react-icons/bs";
 import Col from "react-bootstrap/Col";
 import Image from "react-bootstrap/Image";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
@@ -14,6 +15,7 @@ import {
   SET_KEYS,
   SET_SHOW,
 } from "../Utils/reducers/List/TerrainKey/TerrainKeyActions";
+import { DELETE } from "../Utils/reducers/List/Terrains/TerrainActions";
 
 const TerrainList = ({ keys, added }) => {
   const ref = useRef(null);
@@ -131,6 +133,12 @@ const Terrain = (props) => {
 
   return (
     <Col md="3" className="terrain">
+      <BsFillTrashFill
+        id="delete-terrain-icon"
+        size="1.75em"
+        title="Изтрий генерирания терен!"
+        onClick={() => props.deleteTerrain(id)}
+      />
       <Image
         rounded
         src={`uploads/${imageDirectory}`}

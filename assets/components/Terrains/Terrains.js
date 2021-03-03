@@ -4,6 +4,7 @@ import Pagination from "react-js-pagination";
 import "./Terrains.css";
 import TerrainReducer from "../Utils/reducers/List/Terrains/TerrainReducer";
 import {
+  DELETE,
   SET_CURRENT,
   SET_LOADED,
   SET_MATCHING,
@@ -43,7 +44,7 @@ function Terrains() {
   useEffect(() => {
     var urlString = window.location.href; //window.location.href
     var url = new URL(urlString);
-    var stringPage = url.searchParams.get("page");
+    var stringPage = url.searchParams.get("page") || "1";
 
     if (_isMounted) {
       apiInstance
@@ -52,18 +53,19 @@ function Terrains() {
           const data = response.data.terrains;
 
           const existingPages = Math.ceil(data.length / itemsPerPage);
-
           const currentPage =
-            parseInt(stringPage) > existingPages ? 1 : parseInt(stringPage);
-
-          var urlString = window.location.href;
-          var url = new URL(urlString);
-          url.searchParams.set("page", currentPage);
-
-          const newurl = url.toString();
-          window.history.pushState({ path: newurl }, "", newurl);
+            parseInt(stringPage) > existingPages || isNaN(parseInt(stringPage))
+              ? 1
+              : parseInt(stringPage);
 
           if (_isMounted) {
+            var urlString = window.location.href;
+            var url = new URL(urlString);
+            url.searchParams.set("page", currentPage);
+
+            const newurl = url.toString();
+            window.history.pushState({ path: newurl }, "", newurl);
+
             dispatch({
               type: SET_TERRAINS,
               payload: {
@@ -110,6 +112,17 @@ function Terrains() {
     });
   };
 
+  const deleteTerrain = (id) => {
+    apiInstance.delete(`/terrains/${id}`).then(() => {
+      if (_isMounted) {
+        dispatch({
+          type: DELETE,
+          payload: id,
+        });
+      }
+    });
+  };
+
   if (!loaded) {
     return (
       <Container className="flex-1 d-flex justify-content-center align-items-center">
@@ -135,17 +148,20 @@ function Terrains() {
         <FormControl
           className="ml-2"
           id="search"
-          aria-label="Small"
+          placeholder="Име на терен"
           value={input}
           onChange={handleInputField}
-          aria-describedby="inputGroup-sizing-sm"
         />
       </InputGroup>
 
       <Row className="mt-5 mb-2 terrain-row">
         {currentTerrains.length ? (
           currentTerrains.map((terrain, index) => (
-            <Terrain key={index} terrain={terrain} />
+            <Terrain
+              key={index}
+              terrain={terrain}
+              deleteTerrain={deleteTerrain}
+            />
           ))
         ) : (
           <div className="text-center font-weight-bold">

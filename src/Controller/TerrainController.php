@@ -10,14 +10,22 @@ use App\Serializer\Normalizer\TerrainNormalizer;
 use App\Util\FormHelper;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
+/**
+ * @Route("/api/terrains", name="api_terrain_")
+ *
+ * Class TerrainController
+ * @package App\Controller
+ */
 class TerrainController extends AbstractController
 {
     /**
-     * @Route("/api/terrains", name="api_user_terrains", methods={"GET"})
+     * @Route("/", name="user_terrains", methods={"GET"})
      * @param TerrainRepository $repository
      * @param TerrainNormalizer $normalizer
      * @return JsonResponse
@@ -44,7 +52,7 @@ class TerrainController extends AbstractController
     }
 
     /**
-     * @Route("/api/terrains/{id}", name="api_user_terrain", methods={"GET"})
+     * @Route("/{id}", name="user_terrain", methods={"GET"})
      * @param Terrain $terrain
      * @param TerrainNormalizer $normalizer
      * @return JsonResponse
@@ -56,7 +64,7 @@ class TerrainController extends AbstractController
             return new JsonResponse([
                 'status' => FormHelper::META_ERROR,
                 "meta" => FormHelper::UNAUTHORIZED
-            ], 401);
+            ], Response::HTTP_UNAUTHORIZED);
         }
 
         $normalized = $normalizer->normalize($terrain);
@@ -68,7 +76,7 @@ class TerrainController extends AbstractController
     }
 
     /**
-     * @Route("/api/terrains/{id}", name="api_user_terrain_delete", methods={"DELETE"})
+     * @Route("/{id}", name="api_user_terrain_delete", methods={"DELETE"})
      * @param Terrain $terrain
      * @param EntityManagerInterface $em
      * @return JsonResponse
@@ -79,15 +87,21 @@ class TerrainController extends AbstractController
             return new JsonResponse([
                 'status' => FormHelper::META_ERROR,
                 "meta" => FormHelper::UNAUTHORIZED
-            ], 401);
+            ], Response::HTTP_UNAUTHORIZED);
         }
+
+        $zipFilePath = $this->getParameter('app.zip_directory') . $terrain->getZipName() . ".zip";
+        $imageFilePath = $this->getParameter( 'app.image_directory') . $terrain->getImageDirectory();
+
+        $filesystem = new Filesystem();
+        $filesystem->remove([$zipFilePath, $imageFilePath]);
 
         $em->remove($terrain);
         $em->flush();
 
         return new JsonResponse([
             'status' => FormHelper::META_SUCCESS,
-            'terrain' => "deleted"
+            'terrain' => FormHelper::META_DELETED
         ]);
     }
 }

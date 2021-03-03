@@ -5,7 +5,7 @@ import Row from "react-bootstrap/Row";
 import "./NotFound.css";
 import Button from "react-bootstrap/Button";
 import { useHistory } from "react-router-dom";
-import Counter from "../Utils/Counter";
+import CountUp from "react-countup";
 
 function NotFound() {
   const history = useHistory();
@@ -15,7 +15,7 @@ function NotFound() {
       <Row>
         <Col md="9" id="countUp" className="mx-auto">
           <div className="number" data-count="404">
-            <Counter end={404} duration={2} />
+            <CountUp end={404} duration={2} />
           </div>
           <div className="text">Page not found</div>
           <div className="text">This may not mean anything.</div>

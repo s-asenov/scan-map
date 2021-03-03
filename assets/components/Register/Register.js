@@ -39,9 +39,7 @@ const validate = (values, props) => {
     validateLastName.MAX(30) ||
     validateLastName.SPECIAL_CHARACTERS();
   const passErr =
-    validatePass.REQUIRED() ||
-    validateLastName.MIN(6) ||
-    validateLastName.MAX(30);
+    validatePass.REQUIRED() || validatePass.MIN(6) || validatePass.MAX(30);
 
   if (emailErr) {
     errors.email = emailErr;

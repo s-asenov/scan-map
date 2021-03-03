@@ -24,17 +24,22 @@
     "@popperjs/core": "^2.6.0",
     "axios": "^0.21.1",
     "bootstrap": "^4.6.0",
+    "chart.js": "^2.9.4",
     "dotenv-webpack": "^6.0.0",
     "formik": "^2.2.6",
     "html2canvas": "^1.0.0-rc.7",
     "prop-types": "^15.7.2",
     "react": "^17.0.1",
     "react-bootstrap": "^1.4.3",
+    "react-chartjs-2": "^2.11.1",
+    "react-countup": "^4.3.3",
     "react-dom": "^17.0.1",
     "react-icons": "^4.2.0",
     "react-js-pagination": "^3.0.3",
     "react-router-dom": "^5.2.0",
-    "react-router-hash-link": "^2.3.1"
+    "react-router-hash-link": "^2.3.1",
+    "react-unity-webgl": "^7.1.10",
+    "react-visibility-sensor": "^5.1.1"
   },
   "browserslist": [
     "> 0.5%",

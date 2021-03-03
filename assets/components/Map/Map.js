@@ -40,6 +40,17 @@ function Map() {
       libraries: ["drawing", "geometry", "places", "visualization"],
     });
 
+    // let google = window.google;
+    // if (!google) {
+    //   try {
+    //     await loader.load();
+    //   } catch (err) {
+    //     throw err;
+    //   }
+
+    //   google = window.google;
+    // }
+
     if (window.google) {
       google = window.google;
     } else {
@@ -89,10 +100,10 @@ function Map() {
       fillOpacity: 0,
       draggable: true,
       bounds: {
-        north: 42.85,
-        south: 42.7,
-        east: 22.3,
-        west: 22.1,
+        north: 42.55,
+        south: 42.4,
+        east: 22.1,
+        west: 21.9,
       },
     });
 

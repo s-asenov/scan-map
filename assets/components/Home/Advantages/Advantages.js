@@ -42,18 +42,15 @@ function Advantage(props) {
 
 function Advantages() {
   return (
-    <React.Fragment>
-      <div className="homepage-section advantage-wrapper">
-        <Container className="heading">
-          <Row className="mx-auto">
-            {info.map((item, index) => (
-              <Advantage key={index} item={item} />
-            ))}
-          </Row>
-        </Container>
-      </div>
-      {/* <Image className="svg" src={svg} width="100%" height="60px" /> */}
-    </React.Fragment>
+    <div className="homepage-section advantage-wrapper">
+      <Container className="heading">
+        <Row className="mx-auto">
+          {info.map((item, index) => (
+            <Advantage key={index} item={item} />
+          ))}
+        </Row>
+      </Container>
+    </div>
   );
 }
 

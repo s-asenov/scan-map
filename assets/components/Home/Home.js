@@ -5,12 +5,14 @@ import Contacts from "./Contacts/Contacts";
 import Demo from "./Demo/Demo";
 import Heading from "./Heading/Heading";
 import "./Home.css";
+import Statistics from "./Statistics/Statistics";
 
 function Home() {
   return (
     <React.Fragment>
       <Heading />
       <Advantages />
+      <Statistics />
       <AboutUs />
       <Demo />
       <Contacts />

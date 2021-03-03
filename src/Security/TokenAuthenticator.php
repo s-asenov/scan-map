@@ -30,7 +30,8 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
      */
     public function supports(Request $request): bool
     {
-        return $request->cookies->has('x-token') && $request->headers->has('Application');
+        return $request->cookies->has('x-token');
+//            && $request->headers->has('Application');
     }
 
     /**
@@ -42,7 +43,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
     public function getCredentials(Request $request): array
     {
         return [
-            'Application' => $request->headers->get('Application'),
+//            'Application' => $request->headers->get('Application'),
             'AUTH-TOKEN' => $request->cookies->get('x-token')
         ];
     }
@@ -76,9 +77,9 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
      */
     public function checkCredentials($credentials, UserInterface $user): bool
     {
-       if ($credentials['Application'] !== $_ENV['APP_SECRET']) {
-           return false;
-       }
+//       if ($credentials['Application'] !== $_ENV['APP_SECRET']) {
+//           return false;
+//       }
 
         return true;
     }
@@ -110,7 +111,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $providerKey): ?JsonResponse
     {
         $currentRoute = $request->attributes->get("_route");
-        $routes = ["api_verification_send", "api_registration_confirmation_route", "api_user", "api_logout"]; //list of routes where email verification is not needed
+        $routes = ["api_registration_confirmation_route", "api_verification_send", "api_registration_confirmation_route", "api_user", "api_logout"]; //list of routes where email verification is not needed
 
         if (!$token->getUser()->getIsVerified() && !in_array($currentRoute, $routes)) {
             return new JsonResponse([

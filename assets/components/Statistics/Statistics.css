@@ -1,0 +1,13 @@
+.chart-wrapper {
+  width: 50%;
+}
+
+.chart-wrapper canvas {
+  margin: auto;
+}
+
+@media only screen and (min-width: 768px) {
+  .chart-wrapper:nth-child(3n) {
+    margin-top: 3.5rem;
+  }
+}

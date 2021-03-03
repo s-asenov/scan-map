@@ -1,7 +1,7 @@
-import { BASE_URL } from "../../../helpers/base";
 import { fix, getUniqImagesPos } from "./helpers";
 
 const defaultImageSize = 1201;
+const targetImageSize = 1081;
 
 /**
  * Draws the image to the canvas and returns a promise.
@@ -11,29 +11,41 @@ const defaultImageSize = 1201;
  * @param {CanvasRenderingContext2D} ctx
  */
 function putImageData(image, options, ctx) {
-  const url = BASE_URL + "uncompressed/" + image;
+  const url = process.env.BASE_URL + "uncompressed/" + image;
   let promise = new Promise((resolve, reject) => {
     let img = new Image();
     img.src = url;
-    img.onload = () => {
-      const myOptions = Object.assign({}, options);
 
+    const myOptions = Object.assign({}, options);
+    img.onload = () => {
       ctx.drawImage(
         img,
-        myOptions[`x`] * img.width,
-        myOptions[`y`] * img.height,
-        myOptions[`sw`] * img.width,
-        myOptions[`sh`] * img.height,
-        myOptions[`dx`] * img.width || 0, //- 1
-        myOptions[`dh`] * img.width || 0, //- 1
-        myOptions[`sw`] * img.width, //myOptions.sw * img.width,
-        myOptions[`sh`] * img.height //myOptions.sh * img.height,);
+        myOptions.x * img.width,
+        myOptions.y * img.height,
+        myOptions.sw * img.width,
+        myOptions.sh * img.height,
+        myOptions.dx * img.width || 0, //- 1
+        myOptions.dh * img.width || 0, //- 1
+        myOptions.sw * img.width, //myOptions.sw * img.width,
+        myOptions.sh * img.height //myOptions.sh * img.height,);
       );
 
       resolve(img.src);
     };
     img.onerror = () => {
       img.src = "/uncompressed/default.jpg";
+
+      ctx.drawImage(
+        img,
+        myOptions.x * img.width,
+        myOptions.y * img.height,
+        myOptions.sw * img.width,
+        myOptions.sh * img.height,
+        myOptions.dx * img.width || 0, //- 1
+        myOptions.dh * img.width || 0, //- 1
+        myOptions.sw * img.width, //myOptions.sw * img.width,
+        myOptions.sh * img.height //myOptions.sh * img.height,);
+      );
       resolve(img.src);
     };
   });
@@ -55,10 +67,10 @@ async function loadImgFromCanvas(canvasA, promises) {
 
   const canvasB = document.createElement("canvas");
   const ctx = canvasB.getContext("2d");
-  canvasB.width = 1081;
-  canvasB.height = 1081;
+  canvasB.width = targetImageSize;
+  canvasB.height = targetImageSize;
 
-  ctx.drawImage(canvasA, 0, 0, 1081, 1081);
+  ctx.drawImage(canvasA, 0, 0, targetImageSize, targetImageSize);
 
   const dataUrl = canvasB.toDataURL("image/jpeg");
   const content = dataUrl.split("base64,")[1];

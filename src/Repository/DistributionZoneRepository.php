@@ -50,21 +50,22 @@ class DistributionZoneRepository extends ServiceEntityRepository
 
     public function getFetchedCount()
     {
-        return $this->createQueryBuilder('d')
+        return (int) $this->createQueryBuilder('d')
             ->select('count(d.name)')
-            ->where('d.fetched = :fetched')
-            ->setParameter('fetched', true)
+            ->where('d.fetched > 0')
             ->getQuery()
             ->getSingleScalarResult();
     }
 
     public function getMostFetched()
     {
-        return $this->createQueryBuilder('dz')
-            ->select('count(dz.id) as count, dz.name')
-            ->orderBy('count', 'DESC')
-            ->setMaxResults(10)
+        return $this->createQueryBuilder('d')
+            ->select('d.fetched as count, d.name')
+            ->where('d.fetched > 0')
+            // ->groupBy('d.fetched')
+            ->orderBy('d.fetched', 'DESC')
             ->getQuery()
             ->getResult();
     }
+    
 }

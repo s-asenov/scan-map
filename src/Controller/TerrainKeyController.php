@@ -17,10 +17,16 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
+/**
+ * @Route("/api/keys", name="api_terrain_keys_")
+ *
+ * Class TerrainKeyController
+ * @package App\Controller
+ */
 class TerrainKeyController extends AbstractController
 {
     /**
-     * @Route("/api/keys/{id}", name="api_key_save", methods={"POST"})
+     * @Route("/{id}", name="api_key_save", methods={"POST"})
      * @param Terrain $terrain
      * @param EntityManagerInterface $em
      * @param TerrainKeysNormalizer $normalizer
@@ -51,7 +57,7 @@ class TerrainKeyController extends AbstractController
     }
 
     /**
-     * @Route("/api/keys", name="api_key_all", methods={"GET"})
+     * @Route("/", name="api_key_all", methods={"GET"})
      * @param TerrainRepository $repository
      * @param TerrainKeyRepository $keyRepository
      * @param TerrainKeysNormalizer $normalizer
@@ -82,7 +88,7 @@ class TerrainKeyController extends AbstractController
     }
 
     /**
-     * @Route("/api/keys/{id}", name="api_key", methods={"GET"})
+     * @Route("/{id}", name="api_key", methods={"GET"})
      * @param TerrainKey $terrainKey
      * @param TerrainKeysNormalizer $normalizer
      * @return JsonResponse

@@ -65,6 +65,7 @@ class ZipService
 
         $finder->files()->in($zipDir);
 
+
         foreach ($finder as $file) {
             $fileName = $file->getFilename();
 

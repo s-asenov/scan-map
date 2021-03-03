@@ -1,4 +1,10 @@
-import { SET_DISABLED, SET_SHOW, SET_KEYS, SET_ADD } from "./TerrainKeyActions";
+import {
+  SET_DISABLED,
+  SET_SHOW,
+  SET_KEYS,
+  SET_ADD,
+  DELETE,
+} from "./TerrainKeyActions";
 
 function TerrainKeyReducer(state, action) {
   const { type, payload } = action;

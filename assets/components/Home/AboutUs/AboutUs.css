@@ -60,6 +60,10 @@
   animation: 1s showBottom;
 }
 
+.technologies.active .technology:nth-last-child(-n + 3) {
+  margin-top: 0.75rem;
+}
+
 .technologies .col {
   min-width: 33%;
   flex-grow: 1;
@@ -68,7 +72,7 @@
 .technology {
   display: flex;
   flex-direction: column;
-  box-shadow: 8px 8px 13px 0px #6c757d;
+  box-shadow: 6px 4px 7px 0px #6c757d;
 }
 
 .technology-image {

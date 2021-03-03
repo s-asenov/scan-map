@@ -23,6 +23,7 @@ import AuthReducer from "./components/Utils/reducers/Auth/AuthReducer";
 import AuthContext from "./components/Utils/context/AuthContext";
 import AdminRoute from "./components/Routes/AdminRoute";
 import Admin from "./components/Admin/Admin";
+import Statistics from "./components/Statistics/Statistics";
 
 const history = createBrowserHistory();
 httpService.setupInterceptors(history); //initial setting up of the interceptor, required when reloading
@@ -69,9 +70,9 @@ function App() {
           <AuthRoute exact path="/terrains">
             <Terrains />
           </AuthRoute>
-          <MyRoute exact path="/demo">
+          <Route exact path="/demo">
             <Demo />
-          </MyRoute>
+          </Route>
           <MyRoute exact path="/">
             <Home />
           </MyRoute>
@@ -87,6 +88,9 @@ function App() {
           <AdminRoute path="/admin">
             <Admin />
           </AdminRoute>
+          <AuthRoute exact path="/stats">
+            <Statistics />
+          </AuthRoute>
           <Route path="*">
             <NotFound />
           </Route>

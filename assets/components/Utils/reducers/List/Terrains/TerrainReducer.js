@@ -1,8 +1,10 @@
+import { changeShownList } from "../../../../../helpers/listHelper";
 import {
   SET_TERRAINS,
   SET_CURRENT,
   SET_MATCHING,
   SET_LOADED,
+  DELETE,
 } from "./TerrainActions";
 
 // function shownDataStartingIndex(page, itemsPerPage) {
@@ -72,6 +74,29 @@ function TerrainReducer(state, action) {
       return {
         ...state,
         loaded: true,
+      };
+    }
+    case DELETE: {
+      //todo refactor
+      const dataIndex = state.terrains.findIndex((item) => item.id === payload);
+
+      if (dataIndex === -1) return;
+      state.terrains.splice(dataIndex, 1);
+
+      if (state.terrains.length % state.itemsPerPage === 0 && state.page > 1) {
+        state.page -= 1;
+      }
+
+      let shownFirstIndex = (state.page - 1) * state.itemsPerPage;
+
+      state.currentTerrains = state.terrains.slice(
+        shownFirstIndex,
+        shownFirstIndex + state.itemsPerPage
+      );
+      state.matchingTerrains = state.terrains;
+
+      return {
+        ...state,
       };
     }
     case "reset":
