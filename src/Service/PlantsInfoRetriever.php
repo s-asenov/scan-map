@@ -44,15 +44,12 @@ class PlantsInfoRetriever
      */
     public function getInfo(array $pl): array
     {
-        $batchSize = 500;
-        $i = 0;
-
         /*
          * Filter an array of plants for which we need to get the data.
          */
         $filter = function ($plant)
         {
-            return $plant !== null && $plant->getInformation() === null;
+            return $plant !== null && $plant->getDescription() === null;
         };
 
         $plants = array_filter($pl, $filter);
@@ -67,15 +64,12 @@ class PlantsInfoRetriever
              * Wiki api separates the different pages by |
              */
             $names = implode("|", array_keys($chunk));
-//            $names = implode("|", array_column($chunk, 'scientificName'));
 
-            $response = $this->wikiApi->request('GET', "?titles={$names}&prop=extracts&exintro&explaintext");
+            $request = $this->wikiApi->request('GET', "?titles={$names}&prop=extracts& exintro&explaintext");
 
-            $data = $response->toArray();
+            $data = $request->toArray();
 
             $pages = array_values($data['query']['pages']); //changing keys 0, 1, 2
-
-//            $count += count($pages);
 
             foreach ($pages as $key => $page) {
                 /*
@@ -97,24 +91,13 @@ class PlantsInfoRetriever
                     $info = $this->removeLineBreaks($page['extract']);
                 }
 
-                /**
-                 * @var Plant
-                 */
-                $plant = $plants[$initName];
-                $plant->setInformation($info);
-
-                ++$i;
-
-//                if ($i % $batchSize === 0) {
-//                    $i = 0;
-//                    $this->em->flush();
-//                    $this->em->clear();
-//                }
+//                /**
+//                 * @var Plant
+//                 */
+//                $plant = $plants[$initName];
+//                $plant->setInformation($info);
             }
         }
-
-//        $this->em->flush();
-//        $this->em->clear();
 
         return $plants + $pl;
     }
@@ -123,5 +106,24 @@ class PlantsInfoRetriever
     private function removeLineBreaks(string $string): string
     {
         return trim(preg_replace('/\s+/', ' ', $string));
+    }
+
+    public function getInfoOfPlant(Plant $plant): string
+    {
+        $name = $plant->getScientificName();
+
+        $request = $this->wikiApi->request('GET', "?titles={$name}&prop=extracts&exintro&explaintext");
+
+        $data = $request->toArray();
+
+        $page = array_values($data['query']['pages'])[0];
+
+        if (!isset($page['pageid']) || $page['pageid'] < 0 || !isset($page['extract'])) {
+            $info = "";
+        } else {
+            $info = $this->removeLineBreaks($page['extract']);
+        }
+
+        return $info;
     }
 }

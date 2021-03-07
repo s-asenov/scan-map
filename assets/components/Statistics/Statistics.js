@@ -110,7 +110,7 @@ function Statistics() {
             title: {
               display: true,
               text: "Най-посещавани региони",
-              fontSize: 18,
+              fontSize: 20,
               fontColor: "#000000",
             },
           }}
@@ -127,7 +127,7 @@ function Statistics() {
             title: {
               display: true,
               text: "Региони с най-много растения",
-              fontSize: 18,
+              fontSize: 20,
               fontColor: "#000000",
             },
           }}
@@ -147,8 +147,17 @@ function Statistics() {
             title: {
               display: true,
               text: "Най-често срещани растения",
-              fontSize: 18,
+              fontSize: 20,
               fontColor: "#000000",
+            },
+            scales: {
+              yAxes: [
+                {
+                  ticks: {
+                    beginAtZero: true,
+                  },
+                },
+              ],
             },
             tooltips: {
               callbacks: {

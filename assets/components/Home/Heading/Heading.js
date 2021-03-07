@@ -19,20 +19,25 @@ function Heading() {
         Приложението съдържа авторски 3D модели на част от необятната растителна
         Вселена.
       </p>
-      {context.isAuth !== null && (
-        <IndigoButton
-          className="my-4"
-          as={NavLink}
-          to={!context.isAuth ? "/register" : "/map"}
-          variant="success"
-          style={{
-            fontWeight: "500",
-            borderWidth: "2px",
-          }}
-        >
-          {!context.isAuth ? "Започни сега!" : "Към картата!"}
-        </IndigoButton>
-      )}
+      <div>
+        <a href={process.env.BASE_URL + "TerrainFloraDrawer.rar"} download>
+          <IndigoButton className="mr-3">Свали приложението!</IndigoButton>
+        </a>
+        {context.isAuth !== null && (
+          <IndigoButton
+            className="my-4"
+            as={NavLink}
+            to={!context.isAuth ? "/register" : "/map"}
+            variant="success"
+            style={{
+              fontWeight: "500",
+              borderWidth: "2px",
+            }}
+          >
+            {!context.isAuth ? "Започни сега!" : "Към картата!"}
+          </IndigoButton>
+        )}
+      </div>
     </div>
   );
 }

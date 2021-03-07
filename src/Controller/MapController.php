@@ -5,15 +5,18 @@ namespace App\Controller;
 
 
 use App\Entity\DistributionZone;
+use App\Entity\Plant;
 use App\Entity\Terrain;
 use App\Entity\TerrainKey;
 use App\Entity\User;
 use App\Service\ImageUploader;
 use App\Service\PlantsFromZoneRetriever;
+use App\Service\PlantsInfoRetriever;
 use App\Service\ZipSaver;
 use App\Service\ZipService;
 use App\Util\FormHelper;
 use App\Util\UploadedBase64File;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -78,9 +81,11 @@ class MapController extends AbstractController
              * The Zone is no longer watched from the entity manager so we need to access it again by finding it.
              * @var $saveZone DistributionZone
              */
-            $saveZone = $this->em->getRepository(DistributionZone::class)->find($zone->getId());
-            $saveZone->incrementFetched();
-            $this->em->persist($saveZone);
+            if ($zone) {
+                $saveZone = $this->em->getRepository(DistributionZone::class)->find($zone->getId());
+                $saveZone->incrementFetched();
+                $this->em->persist($saveZone);
+            }
         } catch (ClientExceptionInterface |
         TransportExceptionInterface |
         ServerExceptionInterface |
@@ -129,7 +134,7 @@ class MapController extends AbstractController
      */
     public function getZip(TerrainKey $terrainKey, ZipService $zipService)
     {
-        if ($terrainKey->getExpiringOn() < new \DateTime()) {
+        if ($terrainKey->getExpiringOn() < new DateTime()) {
             return new JsonResponse([
                 'status' => FormHelper::META_ERROR,
                 'key' => "expired"
@@ -151,5 +156,35 @@ class MapController extends AbstractController
             'status' => FormHelper::META_ERROR,
             'file' => "not found"
         ], Response::HTTP_UNAUTHORIZED);
+    }
+
+    /**
+     * @Route("/plant/{id}", name="plant_name", methods={"GET"})
+     *
+     * @param Plant $plant
+     * @param PlantsInfoRetriever $retriever
+     * @return JsonResponse
+     */
+    public function getPlantInfo(Plant $plant, PlantsInfoRetriever $retriever): JsonResponse
+    {
+        if ($plant->getDescription() !== null) {
+            $info = $plant->getDescription();
+        } else {
+            try {
+                $info = $retriever->getInfoOfPlant($plant);
+            } catch (\Exception $exception) {
+                $info = "";
+            }
+        }
+
+        $plant->setDescription($info);
+
+        $this->em->persist($plant);
+        $this->em->flush();
+
+        return new JsonResponse([
+            'status' => FormHelper::META_SUCCESS,
+            'info' => $info
+        ]);
     }
 }

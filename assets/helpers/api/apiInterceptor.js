@@ -7,25 +7,27 @@ export default {
         return response;
       },
       (error) => {
-        const safePaths = ["/login", "/register", "/", "/demo"];
+        const safePaths = ["/login", "/register", "/", "/demo", "/stats"];
 
-        if (error.response.status === 403) {
-          if (error.response.data.email) {
-            history.push("/verify");
-          } else {
+        if (error.response) {
+          if (error.response.status === 403) {
+            if (error.response.data.email) {
+              history.push("/verify");
+            } else {
+              history.push({
+                pathname: "/",
+                unauthorized: true,
+              });
+            }
+          } else if (
+            error.response.status === 401 &&
+            !safePaths.includes(window.location.pathname)
+          ) {
             history.push({
-              pathname: "/",
+              pathname: "/login",
               unauthorized: true,
             });
           }
-        } else if (
-          error.response.status === 401 &&
-          !safePaths.includes(window.location.pathname)
-        ) {
-          history.push({
-            pathname: "/login",
-            unauthorized: true,
-          });
         }
 
         return Promise.reject(error);

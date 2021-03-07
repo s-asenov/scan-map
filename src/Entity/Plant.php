@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\PlantRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
@@ -32,14 +34,30 @@ class Plant
     private $commonName;
 
     /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $description;
+
+    /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $imageUrl;
 
     /**
-     * @ORM\Column(type="text", nullable=true)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $information;
+    private $modelPath;
+
+    /**
+     * @ORM\OneToMany(targetEntity=DistributionZonePlant::class, mappedBy="plant")
+     */
+    private $distributionZonesPlants;
+
+    public function __construct()
+    {
+        $this->distributionZonesPlants = new ArrayCollection();
+    }
+
 
     public function __get($prop)
     {
@@ -54,19 +72,6 @@ class Plant
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getInformation(): ?string
-    {
-        return $this->information;
-    }
-
-    public function setInformation(string $information): self
-    {
-//        $this->information = empty($information) ?  '' : $information;
-        $this->information = $information;
-
-        return $this;
     }
 
     public function getCommonName(): ?string
@@ -104,4 +109,59 @@ class Plant
 
         return $this;
     }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    public function getModelPath(): ?string
+    {
+        return $this->modelPath;
+    }
+
+    public function setModelPath(?string $modelPath): self
+    {
+        $this->modelPath = $modelPath;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|DistributionZonePlant[]
+     */
+    public function getDistributionZonesPlants(): Collection
+    {
+        return $this->distributionZonesPlants;
+    }
+
+    public function addDistributionZonesPlant(DistributionZonePlant $distributionZonesPlant): self
+    {
+        if (!$this->distributionZonesPlants->contains($distributionZonesPlant)) {
+            $this->distributionZonesPlants[] = $distributionZonesPlant;
+            $distributionZonesPlant->setPlant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDistributionZonesPlant(DistributionZonePlant $distributionZonesPlant): self
+    {
+        if ($this->distributionZonesPlants->removeElement($distributionZonesPlant)) {
+            // set the owning side to null (unless already changed)
+            if ($distributionZonesPlant->getPlant() === $this) {
+                $distributionZonesPlant->setPlant(null);
+            }
+        }
+
+        return $this;
+    }
+
 }

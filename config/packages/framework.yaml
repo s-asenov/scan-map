@@ -1,33 +1,33 @@
 # see https://symfony.com/doc/current/reference/configuration/framework.html
 framework:
-    secret: '%env(APP_SECRET)%'
-    #csrf_protection: true
-    #http_method_override: true
+  secret: "%env(APP_SECRET)%"
+  #csrf_protection: true
+  #http_method_override: true
 
-    # Enables session support. Note that the session will ONLY be started if you read or write from it.
-    # Remove or comment this section to explicitly disable session support.
-    session:
-        handler_id: null
-        cookie_secure: auto
-        cookie_samesite: lax
+  # Enables session support. Note that the session will ONLY be started if you read or write from it.
+  # Remove or comment this section to explicitly disable session support.
+  session:
+    handler_id: null
+    cookie_secure: auto
+    cookie_samesite: lax
 
-    #esi: true
-    #fragments: true
-    php_errors:
-        log: true
+  #esi: true
+  #fragments: true
+  php_errors:
+    log: true
 
-    http_client:
-        scoped_clients:
-            trefle_api:
-                base_uri: 'https://trefle.io/api/v1/'
-                headers:
-                    Authorization: '%env(resolve:TREFLE_TOKEN)%'
-            geonames_api:
-                base_uri: 'http://api.geonames.org/'
-                query:
-                    username: '%env(resolve:GEONAMES_ACC)%'
-            wiki_api:
-                base_uri: 'https://en.wikipedia.org/w/api.php'
-                query:
-                    action: 'query'
-                    format: 'json'
+  http_client:
+    scoped_clients:
+      trefle_api:
+        base_uri: "https://trefle.io/api/v1/"
+        headers:
+          Authorization: "%env(resolve:TREFLE_TOKEN)%"
+      geonames_api:
+        base_uri: "http://api.geonames.org/"
+        query:
+          username: "%env(resolve:GEONAMES_ACC)%"
+      wiki_api:
+        base_uri: "https://en.wikipedia.org/w/api.php"
+        query:
+          action: "query"
+          format: "json"

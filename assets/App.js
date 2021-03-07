@@ -88,9 +88,9 @@ function App() {
           <AdminRoute path="/admin">
             <Admin />
           </AdminRoute>
-          <AuthRoute exact path="/stats">
+          <MyRoute exact path="/stats">
             <Statistics />
-          </AuthRoute>
+          </MyRoute>
           <Route path="*">
             <NotFound />
           </Route>

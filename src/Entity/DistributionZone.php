@@ -171,4 +171,21 @@ class DistributionZone
 
         return $this;
     }
+
+    public function getAllPlants(): array
+    {
+        /**
+         * @var $zonePlants DistributionZonePlant[]|Collection
+         */
+        $zonePlants = $this->distributionZonePlants;
+        $plants = [];
+
+        foreach ($zonePlants as $zonePlant) {
+            $plant = $zonePlant->getPlant();
+
+            $plants[$plant->getScientificName()] = $plant;
+        }
+
+        return $plants;
+    }
 }

@@ -1,3 +1,4 @@
+import { deepCloneObject } from "../../../../../helpers/helper";
 import { changeShownList } from "../../../../../helpers/listHelper";
 import {
   SET_TERRAINS,
@@ -78,25 +79,36 @@ function TerrainReducer(state, action) {
     }
     case DELETE: {
       //todo refactor
+      let newState = deepCloneObject(state);
+
       const dataIndex = state.terrains.findIndex((item) => item.id === payload);
 
       if (dataIndex === -1) return;
-      state.terrains.splice(dataIndex, 1);
+      newState.terrains.splice(dataIndex, 1);
 
-      if (state.terrains.length % state.itemsPerPage === 0 && state.page > 1) {
-        state.page -= 1;
+      if (
+        newState.terrains.length % newState.itemsPerPage === 0 &&
+        newState.page > 1
+      ) {
+        newState.page -= 1;
+
+        var urlString = window.location.href;
+        var url = new URL(urlString);
+        url.searchParams.set("page", newState.page);
+
+        const newurl = url.toString();
+        window.history.pushState({ path: newurl }, "", newurl);
       }
+      let shownFirstIndex = (newState.page - 1) * newState.itemsPerPage;
 
-      let shownFirstIndex = (state.page - 1) * state.itemsPerPage;
-
-      state.currentTerrains = state.terrains.slice(
+      newState.currentTerrains = newState.terrains.slice(
         shownFirstIndex,
-        shownFirstIndex + state.itemsPerPage
+        shownFirstIndex + newState.itemsPerPage
       );
-      state.matchingTerrains = state.terrains;
+      newState.matchingTerrains = newState.terrains;
 
       return {
-        ...state,
+        ...newState,
       };
     }
     case "reset":

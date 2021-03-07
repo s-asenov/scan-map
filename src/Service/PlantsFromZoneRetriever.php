@@ -10,6 +10,7 @@ use App\Entity\Plant;
 use App\Repository\DistributionZonePlantRepository;
 use App\Repository\DistributionZoneRepository;
 use App\Repository\PlantRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
@@ -50,8 +51,14 @@ class PlantsFromZoneRetriever
      */
     private $infoRetriever;
 
+    /**
+     * @var ArrayCollection
+     */
+    private $plants;
+
     public function __construct(PlantsInfoRetriever $infoRetriever, EntityManagerInterface $em, HttpClientInterface $trefleApi, HttpClientInterface $geonamesApi)
     {
+        $this->plants = new ArrayCollection();
         $this->trefleApi = $trefleApi;
         $this->geonamesApi = $geonamesApi;
         $this->em = $em;
@@ -79,70 +86,59 @@ class PlantsFromZoneRetriever
         if ($zone === false) {
             return [];
         }
-
         /*
-         * If the total count meta is the same as number of saved plants in zone
-         * return the already saved.
+         * If the zone is already fetched
+         * return the plants which are already saved.
          */
         if ($zone->getFetched()) {
-            $plants = [];
-            $zonePlants = $zone->getDistributionZonePlants();
+            $plants = $zone->getAllPlants();
 
-            foreach ($zonePlants as $zonePlant) {
-                $plant = $zonePlant->getPlant();
-
-                $plants[$plant->getScientificName()] = $plant;
-            }
+            uksort($plants, [self::class, 'comparePlantNames']);
 
             return $plants;
         }
 
-        $batchSize = 500;
-
         $this->zoneId = $zone->getId();
 
-        $request = $this->getPlantsFromPage("distributions/{$this->zoneId}/plants", []);
-
-        $plants = $this->infoRetriever->getInfo($request['plants']);
+        $request = $this->getPlantsFromPage("distributions/{$this->zoneId}/plants");
+        
         $total = $request['total'];
 
         $pages = ceil($total / self::PLANTS_PER_PAGE);
-        $count = $request['batchCount'];
-
-        $newPlants = [];
+        $insertCount = $request['insertCount'];
 
         if ($pages > 1) {
             for ($i = 2; $i<=$pages; $i++) {
-                $response = $this->getPlantsFromPage("distributions/{$this->zoneId}/plants?page={$i}", $plants);
+                $request = $this->getPlantsFromPage("distributions/{$this->zoneId}/plants?page={$i}");
 
-                $responsePlants = $response['plants'];
-
-                $count += $response['batchCount'];
-
-                foreach ($responsePlants as $key => $value) {
-//                    $plants[$key] = $value;
-                    $newPlants[$key] = $value;
-                }
-
-                $withInfo = $this->infoRetriever->getInfo($newPlants);
-
-                $plants += $withInfo;
+                $insertCount +=  $request['insertCount'];;
 
                 //can't use Modulo ($count % $batchSize) here
-                if ($count > $batchSize) {
-
-                    $newPlants = [];
-                    $count = 0;
+                if ($insertCount > 500) {
+                    $insertCount = 0;
 
                     $this->em->flush();
                     $this->em->clear();
                 }
             }
+
             $this->em->flush();
             $this->em->clear();
         }
 
+        $plants = $this->plants->toArray();
+
+        uksort($plants, [self::class, 'comparePlantNames']);
+
         return $plants;
+    }
+
+    function comparePlantNames(string $a, string $b)
+    {
+        $a = preg_replace('@^(a|an|the) @', '', $a);
+        $b = preg_replace('@^(a|an|the) @', '', $b);
+
+        return strcasecmp($a, $b);
     }
 
 
@@ -190,19 +186,19 @@ class PlantsFromZoneRetriever
      * calls the persisting function.
      *
      * @param string $url
-     * @param array $persistedObjects The already persisted objects from previous requests.
-     * @return array of the Plants entities|objects and the total number of plants.
+     * @return array
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
-     * @see persistPlantInZone()
      *
+     * @see persistPlantInZone()
      */
-    private function getPlantsFromPage(string $url, array $persistedObjects): array
+    private function getPlantsFromPage(string $url): array
     {
-        $batchCount = 0;
+        $insertCount = 0;
+
         $response = $this->trefleApi->request('GET', $url);
         $data = $response->toArray();
 
@@ -212,24 +208,35 @@ class PlantsFromZoneRetriever
          */
         $body = $data['data'];
         $total = $data['meta']['total'];
-
-        $plants = [];
+        
+        /**
+         * Clear all duplicates by scientific name.
+         */
+        foreach($body as $k => $v)
+        {
+            foreach($body as $key => $value)
+            {
+                if($k != $key && $v['scientific_name'] == $value['scientific_name'])
+                {
+                    unset($body[$k]);
+                }
+            }
+        }
 
         //Get the scientific names in separate array and use them to determine if they are already existing.
         $scientificNames = array_column($body, 'scientific_name');
 
-        foreach ($body as $item) {
-            $persist = $this->persistPlantInZone($scientificNames, $item, $persistedObjects + $plants);
-            $batchCount += $persist['batchCount'];
+        $existingPlants = $this->plantRepository->findByScientificName($scientificNames);
 
-            $plant = $persist['plant'];
-            $plants[$item['scientific_name']] = $plant;
+        foreach ($body as $item) {
+            $insert = $this->persistPlantInZone($existingPlants, $item);
+
+            $insertCount += $insert;
         }
 
         return [
-            'plants' => $plants,
-            'total' => $total,
-            'batchCount' => $batchCount
+            'insertCount' => $insertCount,
+            'total' => $total
         ];
     }
 
@@ -237,16 +244,17 @@ class PlantsFromZoneRetriever
      * The method responsible for saving the required information for the plants in the DB
      * such as: scientificName, commonName and imageUrl.
      *
-     * @param array $scientificNames The list of all the scientific names of the current request.
+     * @param array $existingPlants
      * @param array $item The plant array from the json response.
-     * @param array $parsedPlants The current persisted entities from previous requests
-     * @return Plant|mixed|object
+     * @return int
      */
-    private function persistPlantInZone(array $scientificNames, array $item, array $parsedPlants)
+    private function persistPlantInZone(array $existingPlants, array $item): int
     {
-        $batchCount = 0;
+        $insertCount = 0;
 
-        $existingPlants = $this->plantRepository->findByScientificName($scientificNames);
+        foreach ($existingPlants as $name => $existingPlant) {
+            $this->plants->set($name, $existingPlant);
+        }
 
         /**
          * @var $zone DistributionZone
@@ -254,13 +262,13 @@ class PlantsFromZoneRetriever
          */
         $zone = $this->em->getRepository(DistributionZone::class)->find($this->zoneId);
 
-        $existing = $this->plantInArray($existingPlants, $item, $parsedPlants);
+        $existing = $this->plants->get($item['scientific_name']);
 
         /*
          * If the plant does not exist create the new entities and persist them,
          * otherwise make a relation between the plant and distribution zones.
          */
-        if (!$existing) {
+        if ($existing === null) {
             $plant = new Plant();
 
             $plant->setScientificName($item['scientific_name'])
@@ -275,54 +283,38 @@ class PlantsFromZoneRetriever
 
             $this->em->persist($distributionPlant);
 
-            $batchCount = 2;
+            $insertCount = 2;
         } else {
-            $plant = $existing;
+            /**
+             * @return bool
+             * @var $item DistributionZonePlant|null
+             */
+            $filter = function (?DistributionZonePlant $item) {
+                return $item->getDistributionZone()->getId() === $this->zoneId;
+            };
+
+            $existingZonePlant = $existing->getDistributionZonesPlants()->filter($filter);
 
             /*
              * If the existing id is null it means it is not inserted in db
              * and there are already persisted entities
              */
-            if ($existing->getId() !== null) {
-                $zonePlant = $this->zonePlantRepository->findOneBy([
-                    'distributionZone' => $this->zoneId,
-                    'plant' => $existing->getId()
-                ]);
+            if ($existing->getId() !== null && $existingZonePlant->isEmpty()) {
+                $distributionPlant = new DistributionZonePlant();
+                $distributionPlant->setPlant($existing)
+                    ->setDistributionZone($zone);
 
-                if (!$zonePlant) {
-                    $distributionPlant = new DistributionZonePlant();
-                    $distributionPlant->setPlant($plant)
-                        ->setDistributionZone($zone);
+                $existing->addDistributionZonesPlant($distributionPlant);
 
-                    $this->em->persist($distributionPlant);
-                    $batchCount = 1;
-                }
+                $this->em->persist($distributionPlant);
+                $insertCount = 1;
             }
+            $plant = $existing;
+//            }
         }
 
-        return [
-            'plant' => $plant,
-            'batchCount' => $batchCount
-        ];
-    }
+        $this->plants->set($item['scientific_name'], $plant);
 
-    /**
-     * @param Plant[]|object[] $existingPlants Array of the Plants entities, which are being searched.
-     * @param array $plant The plant which is searched in the array.
-     * @param array $parsedPlants The current persisted entities from previous requests
-     * @return false|mixed
-     */
-    private function plantInArray(array $existingPlants, array $plant, array $parsedPlants)
-    {
-        $searched = $existingPlants + $parsedPlants;
-
-//        $exists = array_key_exists($plant['scientific_name'], $searched);
-        $exists = isset($searched[$plant['scientific_name']]);
-
-        if ($exists) {
-            return $searched[$plant['scientific_name']];
-        } else {
-            return false;
-        }
+        return $insertCount;
     }
 }

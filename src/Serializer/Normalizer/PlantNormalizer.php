@@ -22,7 +22,6 @@ class PlantNormalizer implements NormalizerInterface, CacheableSupportsMethodInt
             'scientificName' => $object->getScientificName(),
             'commonName' => $object->getCommonName(),
             'imageUrl' => $object->getImageUrl(),
-            'information' => $object->getInformation(),
         ];
     }
 

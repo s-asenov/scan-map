@@ -1,3 +1,5 @@
+import {deepCloneObject} from "app/assets/helpers/helper";
+
 function StatsReducer(state, action) {
   const { type, payload } = action;
 
@@ -6,19 +8,25 @@ function StatsReducer(state, action) {
       let { chartData, topPlantsChartData, barData } = state;
       let [mostFetched, mostPlantsInZoneWithNames, topPlants] = payload;
 
+      let newChartData= deepCloneObject(chartData);
+
       mostFetched.data.meta.forEach((zone) => {
-        chartData.labels.push(zone.name);
-        chartData.datasets[0].data.push(zone.count);
+        newChartData.labels.push(zone.name);
+        newChartData.datasets[0].data.push(zone.count);
       });
+
+      let newTopPlantsChartData = deepCloneObject(topPlantsChartData);
 
       topPlants.data.meta.forEach((zone) => {
-        topPlantsChartData.labels.push(zone.name);
-        topPlantsChartData.datasets[0].data.push(zone.count);
+        newTopPlantsChartData.labels.push(zone.name);
+        newTopPlantsChartData.datasets[0].data.push(zone.count);
       });
 
+      let newBarData = deepCloneObject(barData);
+
       mostPlantsInZoneWithNames.data.meta.forEach((plant) => {
-        barData.labels.push(plant.name);
-        barData.datasets[0].data.push(plant.count);
+        newBarData.labels.push(plant.name);
+        newBarData.datasets[0].data.push(plant.count);
       });
 
       return {
@@ -26,9 +34,9 @@ function StatsReducer(state, action) {
         mostPlantsInZoneWithNames: mostPlantsInZoneWithNames.data,
         topPlants: topPlants.data,
         loaded: true,
-        chartData: chartData,
-        barData: barData,
-        topPlantsChartData: topPlantsChartData,
+        chartData: newChartData,
+        barData: newBarData,
+        topPlantsChartData: newTopPlantsChartData,
       };
     }
     case "reset":

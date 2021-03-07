@@ -5,7 +5,6 @@ namespace App\Service;
 
 
 use App\Entity\DistributionZone;
-use App\Repository\DistributionZoneRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
@@ -45,7 +44,7 @@ class DistributionZonesUploader
         $min = 1; //first page
         $max = 37; //last page
 
-        for ($i = $min; $i<=$max; $i++) {
+        for ($i = $min; $i <= $max; $i++) {
             $response = $this->client->request('GET', "distributions?page={$i}");
 
             $body = $response->toArray();

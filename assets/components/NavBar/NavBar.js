@@ -7,6 +7,7 @@ import { NavLink, useHistory } from "react-router-dom";
 import { removeAuth } from "../../helpers/auth";
 import { HashLink } from "react-router-hash-link";
 import AuthContext from "../Utils/context/AuthContext";
+import logo from "../../images/logos/logo-white.png";
 
 function NavBar(props) {
   const history = useHistory();
@@ -75,8 +76,8 @@ function NavBar(props) {
   return (
     <Navbar id="navbar" variant="indigo" bg="indigo" expand="lg">
       <Navbar.Brand as={NavLink} to="/">
-        {/* <Image src={logo} rounded height="54" width="54" /> */}
-        Terrain Flora Drawer
+        <Image src={logo} height="60" width="60" />
+        {/* Terrain Flora Drawer */}
       </Navbar.Brand>
       <Navbar.Toggle aria-controls="navbar" />
       <Navbar.Collapse id="navbar">

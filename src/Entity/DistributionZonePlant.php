@@ -22,13 +22,13 @@ class DistributionZonePlant
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity=DistributionZone::class, inversedBy="distributionZonePlants", cascade={"persist"})
+     * @ORM\ManyToOne(targetEntity=DistributionZone::class, inversedBy="distributionZonePlants")
      * @ORM\JoinColumn(nullable=false)
      */
     private $distributionZone;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Plant::class, fetch="EAGER", cascade={"persist"})
+     * @ORM\ManyToOne(targetEntity=Plant::class, fetch="EAGER", inversedBy="distributionZonesPlants")
      * @ORM\JoinColumn(nullable=false)
      */
     private $plant;

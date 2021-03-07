@@ -25,7 +25,7 @@ use Symfony\Component\Serializer\Exception\ExceptionInterface;
 class TerrainController extends AbstractController
 {
     /**
-     * @Route("/", name="user_terrains", methods={"GET"})
+     * @Route("", name="user_terrains", methods={"GET"})
      * @param TerrainRepository $repository
      * @param TerrainNormalizer $normalizer
      * @return JsonResponse
