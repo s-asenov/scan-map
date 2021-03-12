@@ -6,6 +6,8 @@ use App\Repository\DistributionZoneRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\PersistentCollection;
+use JetBrains\PhpStorm\Pure;
 
 /**
  * Distribution Zones are part of the WGSRPD convention.
@@ -23,33 +25,33 @@ class DistributionZone
      * @ORM\Id
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?int $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $name;
+    private ?string $name;
 
     /**
      * @ORM\ManyToOne(targetEntity=DistributionZone::class, inversedBy="children")
      * @ORM\JoinColumn(name="parent_id", referencedColumnName="id")
      */
-    private $parent;
+    private ?DistributionZone $parent;
 
     /**
      * @ORM\OneToMany(targetEntity=DistributionZone::class, mappedBy="parent")
      */
-    private $children;
+    private PersistentCollection|ArrayCollection $children;
 
     /**
      * @ORM\OneToMany(targetEntity=DistributionZonePlant::class, mappedBy="distributionZone", orphanRemoval=true)
      */
-    private $distributionZonePlants;
+    private PersistentCollection|ArrayCollection $distributionZonePlants;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $fetched;
+    private ?int $fetched;
 
     public function __construct()
     {
@@ -94,7 +96,7 @@ class DistributionZone
     }
 
     /**
-     * @return Collection|self[]
+     * @return Collection
      */
     public function getChildren(): Collection
     {
@@ -124,7 +126,7 @@ class DistributionZone
     }
 
     /**
-     * @return Collection|DistributionZonePlant[]
+     * @return Collection
      */
     public function getDistributionZonePlants(): Collection
     {
@@ -153,7 +155,7 @@ class DistributionZone
         return $this;
     }
 
-    public function getFetched(): ?int
+    public function getFetched(): int
     {
         return $this->fetched;
     }

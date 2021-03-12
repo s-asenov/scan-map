@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -20,63 +21,55 @@ class User implements UserInterface
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?int $id;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
-     * @Assert\NotBlank(message="Email should not be blank.")
-     * @Assert\Email(message="{{ value }} is not a valid email address.")
      */
-    private $email;
+    private ?string $email;
 
     /**
      * @ORM\Column(type="string", length=180)
-     * @Assert\NotBlank(message="First name should not be blank.")
-     * @Assert\Length(min=2)
      */
-    private $firstName;
+    private ?string $firstName;
 
     /**
      * @ORM\Column(type="string", length=180)
-     * @Assert\NotBlank(message="Last name should not be blank.")
-     * @Assert\Length(min=2)
      */
-    private $lastName;
+    private ?string $lastName;
 
     /**
      * All users except the admins have only got ROLE_USER.
      *
      * @ORM\Column(type="json")
      */
-    private $roles = [];
+    private array $roles = [];
 
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
-     * @Assert\NotBlank(message="Password should not be blank.")
-     * @Assert\Length(min="6")
      */
-    private $password;
+    private string $password;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $createdAt;
+    private DateTime $createdAt;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $lastSeen;
+    private DateTime $lastSeen;
 
     /**
      * @ORM\Column(type="string")
      */
-    private $apiToken;
+    private ?string $apiToken;
 
     public function __construct()
     {
-        $this->createdAt = new \DateTime();
-        $this->lastSeen = new \DateTime();
+        $this->createdAt = new DateTime();
+        $this->lastSeen = new DateTime();
     }
 
     public function getId(): ?int
@@ -139,21 +132,13 @@ class User implements UserInterface
         return $this;
     }
 
-    /**
-     * @see UserInterface
-     */
     public function getSalt()
     {
         // not needed when using the "bcrypt" algorithm in security.yaml
     }
 
-    /**
-     * @see UserInterface
-     */
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
-        // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
     }
 
     public function getFirstName(): ?string
@@ -180,24 +165,24 @@ class User implements UserInterface
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?DateTime
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    public function setCreatedAt(DateTime $createdAt): self
     {
         $this->createdAt = $createdAt;
 
         return $this;
     }
 
-    public function getLastSeen(): ?\DateTimeInterface
+    public function getLastSeen(): ?DateTime
     {
         return $this->lastSeen;
     }
 
-    public function setLastSeen(\DateTimeInterface $lastSeen): self
+    public function setLastSeen(DateTime $lastSeen): self
     {
         $this->lastSeen = $lastSeen;
 

@@ -36,6 +36,14 @@ services:
   App\Service\ImageUploader:
     arguments: ["%app.image_directory%"]
 
+  App\Service\Entity\ModelsService:
+    arguments:
+      $targetDirectory: "%app.models_directory%"
+
+  App\Service\Entity\TerrainService:
+    arguments:
+      $zipDirectory: "%app.zip_directory%"
+
   App\EventListener\RequestListener:
     tags:
       - {
@@ -43,5 +51,3 @@ services:
           event: kernel.request,
           method: onKernelRequest,
         }
-  # add more service definitions when explicit configuration is needed
-  # please note that last definitions always *replace* previous ones

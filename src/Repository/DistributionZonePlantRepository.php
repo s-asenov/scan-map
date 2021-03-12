@@ -23,16 +23,6 @@ class DistributionZonePlantRepository extends ServiceEntityRepository
     }
 
 
-    public function findByDistributionZone($value)
-    {
-         return $this->createQueryBuilder('p')
-            ->andWhere('p.distributionZone = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-
     public function getMostPlantsInDistributionZone()
     {
         return $this->createQueryBuilder('dzp')

@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\TerrainKeyRepository;
 use App\Util\MyHelper;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -18,33 +20,33 @@ class TerrainKey
      * @ORM\Id
      * @ORM\Column(type="string")
      */
-    private $id;
+    private string $id;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $createdOn;
+    private DateTime $createdOn;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $expiringOn;
+    private DateTime $expiringOn;
 
     /**
      * @ORM\ManyToOne(targetEntity=Terrain::class, inversedBy="terrainKeys")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $terrain;
+    private Terrain $terrain;
 
     public function __construct(int $id)
     {
-        $now = new \DateTime();
+        $now = new DateTime();
         $helper = new MyHelper();
         $formattedDate = $now->format('YmdHisv');
 
-        $this->id = uniqid($formattedDate . $id) . "-" . $helper->random_str();
+        $this->id = uniqid($formattedDate . $id) . "-" . $helper->randomStr();
         $this->createdOn = $now;
-        $this->expiringOn = new \DateTime("+1 hour");
+        $this->expiringOn = new DateTime("+1 hour");
     }
 
     public function getId(): ?string
@@ -52,24 +54,24 @@ class TerrainKey
         return $this->id;
     }
 
-    public function getCreatedOn(): ?\DateTimeInterface
+    public function getCreatedOn(): ?DateTime
     {
         return $this->createdOn;
     }
 
-    public function setCreatedOn(\DateTimeInterface $createdOn): self
+    public function setCreatedOn(DateTime $createdOn): self
     {
         $this->createdOn = $createdOn;
 
         return $this;
     }
 
-    public function getExpiringOn(): ?\DateTimeInterface
+    public function getExpiringOn(): ?DateTime
     {
         return $this->expiringOn;
     }
 
-    public function setExpiringOn(\DateTimeInterface $expiringOn): self
+    public function setExpiringOn(DateTime $expiringOn): self
     {
         $this->expiringOn = $expiringOn;
 

@@ -2,6 +2,7 @@
 
 namespace App\Security;
 
+use App\Util\FormHelper;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,16 +16,14 @@ use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 
 class LoginAuthenticator extends AbstractGuardAuthenticator
 {
-    private $passwordEncoder;
-    private $token;
-
-    public function __construct(UserPasswordEncoderInterface $passwordEncoder)
+    public function __construct(private UserPasswordEncoderInterface $passwordEncoder)
     {
-        $this->passwordEncoder = $passwordEncoder;
     }
 
     public function supports(Request $request): bool
     {
+        $this->hasCookie = $request->cookies->has("x-token");
+
         return $request->attributes->get('_route') === "api_login" && !$request->cookies->has("x-token");
     }
 
@@ -58,7 +57,10 @@ class LoginAuthenticator extends AbstractGuardAuthenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): JsonResponse
     {
-        return new JsonResponse('Login failed', Response::HTTP_BAD_REQUEST);
+        return new JsonResponse([
+            'status' => FormHelper::META_ERROR,
+            'meta' =>'Login failed!'
+        ], Response::HTTP_BAD_REQUEST);
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $providerKey)
@@ -70,10 +72,16 @@ class LoginAuthenticator extends AbstractGuardAuthenticator
 
     public function start(Request $request, AuthenticationException $authException = null): JsonResponse
     {
-        if ($request->cookies->has('AUTH-TOKEN')) {
-            return new JsonResponse('User already logged in!', Response::HTTP_UNAUTHORIZED);
+        if ($request->cookies->has('x-token')) {
+            return new JsonResponse([
+                'status' => FormHelper::META_ERROR,
+                'meta' =>'User already logged in!'
+            ], Response::HTTP_UNAUTHORIZED);
         } else {
-            return new JsonResponse('Login failed!', Response::HTTP_BAD_REQUEST);
+            return new JsonResponse([
+                'status' => FormHelper::META_ERROR,
+                'meta' =>'Login failed!'
+            ], Response::HTTP_BAD_REQUEST);
         }
     }
 

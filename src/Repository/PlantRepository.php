@@ -30,16 +30,12 @@ class PlantRepository extends ServiceEntityRepository
         ;
     }
 
-
-    /*
-    public function findOneBySomeField($value): ?Plant
+    public function findByInput(string $input)
     {
         return $this->createQueryBuilder('p')
-            ->andWhere('p.exampleField = :val')
-            ->setParameter('val', $value)
+            ->orWhere('p.scientificName LIKE :input')
+            ->setParameter('input', '%'.$input.'%')
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
     }
-    */
 }

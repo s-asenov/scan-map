@@ -19,36 +19,7 @@ class DistributionZoneRepository extends ServiceEntityRepository
         parent::__construct($registry, DistributionZone::class);
     }
 
-    // /**
-    //  * @return DistributionZone[] Returns an array of DistributionZone objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('d')
-            ->andWhere('d.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('d.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?DistributionZone
-    {
-        return $this->createQueryBuilder('d')
-            ->andWhere('d.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
-
-    public function getFetchedCount()
+    public function getFetchedCount(): int
     {
         return (int) $this->createQueryBuilder('d')
             ->select('count(d.name)')
@@ -57,12 +28,11 @@ class DistributionZoneRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
-    public function getMostFetched()
+    public function getMostFetched(): mixed
     {
         return $this->createQueryBuilder('d')
             ->select('d.fetched as count, d.name')
             ->where('d.fetched > 0')
-            // ->groupBy('d.fetched')
             ->orderBy('d.fetched', 'DESC')
             ->getQuery()
             ->getResult();

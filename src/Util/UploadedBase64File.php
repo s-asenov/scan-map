@@ -4,6 +4,14 @@ namespace App\Util;
 
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
+/**
+ * Class UploadedBase64File
+ *
+ * The class extends the symfony component UploadedFile class
+ * and makes it work with base64 string.
+ *
+ * @package App\Util
+ */
 class UploadedBase64File extends UploadedFile
 {
     public function __construct(string $base64String, string $originalName)

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Service;
+namespace App\Service\Retriever;
 
 
 use App\Entity\Plant;
@@ -24,14 +24,11 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class PlantsInfoRetriever
 {
     const WIKI_EXTRACTS_LIMIT = 20;
-    private $wikiApi;
-    private $em;
 
-    public function __construct(HttpClientInterface $wikiApi, EntityManagerInterface $em)
-    {
-        $this->wikiApi = $wikiApi;
-        $this->em = $em;
-    }
+    public function __construct(
+        private HttpClientInterface $wikiApi,
+        private EntityManagerInterface $em
+    ) { }
 
     /**
      * @param array $pl all plants from zone
@@ -108,6 +105,18 @@ class PlantsInfoRetriever
         return trim(preg_replace('/\s+/', ' ', $string));
     }
 
+    /**
+     * The method is responsible for getting the extracts of the specific plant
+     * found in wikipedia.
+     *
+     * @param Plant $plant The desired plant.
+     * @return string
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     */
     public function getInfoOfPlant(Plant $plant): string
     {
         $name = $plant->getScientificName();

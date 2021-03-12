@@ -6,6 +6,7 @@ namespace App\Service;
 
 use App\Entity\User;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\RouterInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
@@ -21,17 +22,18 @@ use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelperInterface;
  */
 class EmailVerifier
 {
-    private $mailer;
-    private $verifyEmailHelper;
-    private $router;
+    public function __construct(
+        private RouterInterface $router,
+        private VerifyEmailHelperInterface $verifyEmailHelper,
+        private MailerInterface $mailer)
+    { }
 
-    public function __construct(RouterInterface $router, VerifyEmailHelperInterface $verifyEmailHelper, MailerInterface $mailer)
-    {
-        $this->mailer = $mailer;
-        $this->verifyEmailHelper = $verifyEmailHelper;
-        $this->router = $router;
-    }
-
+    /**
+     * The method is the responsible for sending the email with the signature used for verification.
+     *
+     * @param User $user
+     * @throws TransportExceptionInterface
+     */
     public function sendEmail(User $user): void
     {
         $signatureComponents = $this->verifyEmailHelper->generateSignature(
@@ -56,14 +58,11 @@ class EmailVerifier
     /**
      * @param User $user
      * @param string $uri
-     * @return string|void
+     * @return void
+     * @throws VerifyEmailExceptionInterface
      */
-    public function verifyEmail(User $user, string $uri)
+    public function verifyEmail(User $user, string $uri): void
     {
-        try {
-            $this->verifyEmailHelper->validateEmailConfirmation($uri, $user->getId(), $user->getEmail());
-        } catch (VerifyEmailExceptionInterface $e) {
-            return $this->router->generate('app_login');
-        }
+         $this->verifyEmailHelper->validateEmailConfirmation($uri, $user->getId(), $user->getEmail());
     }
 }

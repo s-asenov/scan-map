@@ -20,8 +20,8 @@ framework:
     scoped_clients:
       trefle_api:
         base_uri: "https://trefle.io/api/v1/"
-        headers:
-          Authorization: "%env(resolve:TREFLE_TOKEN)%"
+        query:
+          token: "%env(resolve:TREFLE_TOKEN)%"
       geonames_api:
         base_uri: "http://api.geonames.org/"
         query:

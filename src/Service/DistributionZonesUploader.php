@@ -5,6 +5,7 @@ namespace App\Service;
 
 
 use App\Entity\DistributionZone;
+use App\Repository\DistributionZoneRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
@@ -21,18 +22,15 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  */
 class DistributionZonesUploader
 {
-    private $client;
-    private $em;
-    private $repository;
-
-    public function __construct(EntityManagerInterface $em, HttpClientInterface $trefleApi)
-    {
-        $this->client = $trefleApi;
-        $this->em = $em;
-        $this->repository = $em->getRepository(DistributionZone::class);
-    }
+    public function __construct(
+        private EntityManagerInterface $em, 
+        private HttpClientInterface $trefleApi,
+        private DistributionZoneRepository $repository
+    ) { }
 
     /**
+     * The method loops through all urls and gets the distribution zone.
+     *
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
@@ -45,7 +43,7 @@ class DistributionZonesUploader
         $max = 37; //last page
 
         for ($i = $min; $i <= $max; $i++) {
-            $response = $this->client->request('GET', "distributions?page={$i}");
+            $response = $this->trefleApi->request('GET', "distributions?page={$i}");
 
             $body = $response->toArray();
 

@@ -15,11 +15,8 @@ use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 
 class TokenAuthenticator extends AbstractGuardAuthenticator
 {
-    private $ur;
-
-    public function __construct(UserRepository $ur)
+    public function __construct(private UserRepository $ur)
     {
-        $this->ur = $ur;
     }
 
     /**
@@ -55,7 +52,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
      * @param UserProviderInterface $userProvider
      * @return User|UserInterface|null
      */
-    public function getUser($credentials, UserProviderInterface $userProvider)
+    public function getUser(mixed $credentials, UserProviderInterface $userProvider): UserInterface|User|null
     {
 //        $user = $userProvider->loadUserByUsername($credentials['AUTH-TOKEN']);
 
@@ -93,11 +90,13 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
      */
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): JsonResponse
     {
-        $data = [
-            'error' => strtr($exception->getMessageKey(), $exception->getMessageData())
-        ];
+        $response = new JsonResponse([
+                'error' => $exception->getMessage()
+        ], Response::HTTP_UNAUTHORIZED);
 
-        return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
+        $response->headers->clearCookie('x-token');
+
+        return $response;
     }
 
     /**

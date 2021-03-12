@@ -9,28 +9,28 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class TerrainKeysNormalizer implements NormalizerInterface, CacheableSupportsMethodInterface
 {
-    private $helper;
+    public function __construct(private MyHelper $helper)
+    { }
 
-    public function __construct(MyHelper $helper)
+    /**
+     * @param mixed $object
+     * @param null $format
+     * @param array $context
+     * @return array
+     */
+    public function normalize(mixed $object, $format = null, array $context = []): array
     {
-        $this->helper = $helper;
-    }
-
-    public function normalize($object, $format = null, array $context = []): array
-    {
-        $data = [
+        return [
             'id' => $object->getId(),
             'terrainId' => $object->getTerrain()->getId(),
             'createdOn' => $this->helper->formatDate($object->getCreatedOn()),
             'expiringOn' => $this->helper->formatDate($object->getExpiringOn())
         ];
-
-        return $data;
     }
 
     public function supportsNormalization($data, $format = null): bool
     {
-        return $data instanceof \App\Entity\TerrainKeys;
+        return $data instanceof TerrainKey;
     }
 
     public function hasCacheableSupportsMethod(): bool

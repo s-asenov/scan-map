@@ -82,9 +82,9 @@ function Login() {
         })
         .catch((error) => {
           const response = error.response;
-          if (response.status === 400) {
+          if (response.status === 400 || response.status === 401) {
             props.setErrors({
-              password: response.data,
+              password: response.data.meta,
             });
           }
         });

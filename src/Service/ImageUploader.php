@@ -17,12 +17,8 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  */
 class ImageUploader
 {
-    private $targetDirectory;
-
-    public function __construct($targetDirectory)
-    {
-        $this->targetDirectory = $targetDirectory;
-    }
+    public function __construct(private string $targetDirectory)
+    { }
 
     public function upload(UploadedBase64File $file): string
     {
@@ -31,16 +27,11 @@ class ImageUploader
         $fileName = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
 
         try {
-            $file->move($this->getTargetDirectory(), $fileName);
+            $file->move($this->targetDirectory, $fileName);
         } catch (FileException $e) {
             throw $e;
         }
 
         return $fileName;
-    }
-
-    public function getTargetDirectory()
-    {
-        return $this->targetDirectory;
     }
 }

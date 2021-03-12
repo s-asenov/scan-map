@@ -5,11 +5,7 @@ namespace App\Controller;
 
 
 use App\Entity\DistributionZone;
-use App\Entity\Terrain;
-use App\Repository\DistributionZonePlantRepository;
-use App\Repository\DistributionZoneRepository;
-use App\Repository\PlantRepository;
-use App\Util\FormHelper;
+use App\Service\Entity\StatisticsService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -22,191 +18,123 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class StatisticsController extends AbstractController
 {
-    /**
-     * @var DistributionZoneRepository
-     */
-    private $dzRepository;
-    /**
-     * @var DistributionZonePlantRepository
-     */
-    private $dzPlantRepository;
-    /**
-     * @var PlantRepository
-     */
-    private $plantRepository;
 
-    public function __construct(DistributionZoneRepository $dzRepository, DistributionZonePlantRepository $dzPlantRepository, PlantRepository $plantRepository)
-    {
-        $this->dzRepository = $dzRepository;
-        $this->dzPlantRepository = $dzPlantRepository;
-        $this->plantRepository = $plantRepository;
-    }
+    public function __construct(
+        private StatisticsService $statisticsService
+    ) { }
 
     /**
-     * @Route("/zones/fetched", name="zone_fetched", methods={"GET"})
+     * The method returns the number of fetched distribution zones.
      *
      * @return JsonResponse
      */
+    #[Route("/zones/fetched", name: "zone_fetched", methods: ["GET"])]
     public function getFetchedCount(): JsonResponse
     {
-        $count = $this->dzRepository->getFetchedCount();
-
-        return new JsonResponse([
-            'status' => FormHelper::META_SUCCESS,
-            'meta' => $count
-        ]);
+        return $this->statisticsService->getFetchedCount();
     }
 
     /**
-     * @Route("/zones/most-fetched", name="most_fetched_zone", methods={"GET"})
+     * The method returns the top 10 most persisted|fetched distribution zones.
      *
      * @return JsonResponse
      */
+    #[Route("/zones/most-fetched", name: "most_fetched_zone", methods: ["GET"])]
     public function getMostFetchedCount(): JsonResponse
     {
-        $count = $this->dzRepository->getMostFetched();
-
-        return new JsonResponse([
-            'status' => FormHelper::META_SUCCESS,
-            'meta' => $count
-        ]);
+        return $this->statisticsService->getMostFetchedCount();
     }
 
     /**
-     * @Route("/terrains", name="terrains", methods={"GET"})
+     * The method returns the number of generated terrains.
      *
      * @return JsonResponse
      */
+    #[Route("/terrains", name: "terrains", methods: ["GET"])]
     public function getTerrainCount(): JsonResponse
     {
-        $count = $this->getDoctrine()->getRepository(Terrain::class)->count([]);
-
-        return new JsonResponse([
-            'status' => FormHelper::META_SUCCESS,
-            'meta' => $count
-        ]);
+        return $this->statisticsService->getTerrainCount();
     }
 
     /**
-     * @Route("/zones/plants-most", name="most_plants", methods={"GET"})
+     * The method returns the distribution zone number of plants.
      *
      * @return JsonResponse
      */
+    #[Route("/zones/plants-most", name: "most_plants", methods: ["GET"])]
     public function getMostPlantsInDistributionZone(): JsonResponse
     {
-        $count = $this->dzPlantRepository->getMostPlantsInDistributionZone();
-
-        return new JsonResponse([
-            'status' => FormHelper::META_SUCCESS,
-            'meta' => $count
-        ]);
+        return $this->statisticsService->getMostPlantsInDistributionZone();
     }
 
     /**
-     * @Route("/zones/plants-top", name="top_zones_by_most_plants", methods={"GET"})
+     * The method returns the top 10 zones with the biggest
+     * amount of plants in the persisted distribution zones.
      *
      * @return JsonResponse
      */
+    #[Route("/zones/plants-top", name: "top_zones_by_most_plants", methods: ["GET"])]
     public function getTopZonesByPlantsCount(): JsonResponse
     {
-        $count = $this->dzPlantRepository->getTopZonesByPlantsCount();
-
-        return new JsonResponse([
-            'status' => FormHelper::META_SUCCESS,
-            'meta' => $count
-        ]);
+        return $this->statisticsService->getTopZonesByPlantsCount();
     }
 
     /**
-     * @Route("/plants/most-seen", name="most_seen_plants", methods={"GET"})
+     * The method returns the top 10 most seen plants with their grouped by
+     * distribution zones.
      *
      * @return JsonResponse
      */
+    #[Route("/plants/most-seen", name: "most_seen_plants", methods: ["GET"])]
     public function getMostSeenPlants(): JsonResponse
     {
-        $count = $this->dzPlantRepository->getMostSeenPlants();
-
-        return new JsonResponse([
-            'status' => FormHelper::META_SUCCESS,
-            'meta' => $count
-        ]);
+        return $this->statisticsService->getMostSeenPlants();
     }
 
     /**
-     * @Route("/plants/most-seen-names", name="most_seen_plants_with_name", methods={"GET"})
+     * The method returns the top 10 most seen plants with
+     * the names of the distribution zones.
      *
      * @return JsonResponse
      */
+    #[Route("/plants/most-seen-names", name: "most_seen_plants_with_name", methods: ["GET"])]
     public function getMostSeenPlantsWithZoneName(): JsonResponse
     {
-        $count = $this->dzPlantRepository->getMostSeenPlantsWithZoneName();
-
-        return new JsonResponse([
-            'status' => FormHelper::META_SUCCESS,
-            'meta' => $count
-        ]);
+        return $this->statisticsService->getMostSeenPlantsWithZoneName();
     }
 
     /**
-     * @Route("/zones/{id}/plants", name="plants_in_zone", methods={"GET"})
+     * The method returns the number of plants in distribution zone.
      *
      * @param DistributionZone $zone
      * @return JsonResponse
      */
+    #[Route("/zones/{id}/plants", name: "plants_in_zone", methods: ["GET"])]
     public function getPlantsFromZone(DistributionZone $zone): JsonResponse
     {
-        $count = $zone->getDistributionZonePlants()->count();
-
-        return new JsonResponse([
-            'status' => FormHelper::META_SUCCESS,
-            'meta' => $count
-        ]);
+        return $this->statisticsService->getPlantsFromZone($zone);
     }
 
     /**
-     * @Route("/plants", name="all_plants", methods={"GET"})
+     * The method returns the number of plants
+     * persisted in the DB.
+     *
+     * @return JsonResponse
      */
+    #[Route("/plants", name: "all_plants", methods: ["GET"])]
     public function getAllPlantsCount(): JsonResponse
     {
-        $count = $this->plantRepository->count([]);
-
-        return new JsonResponse([
-            'status' => FormHelper::META_SUCCESS,
-            'meta' => $count
-        ]);
+        return $this->statisticsService->getAllPlantsCount();
     }
 
     /**
-     * @Route("/zones", name="all_zones", methods={"GET"})
+     * The method returns a list of all distribution zones
+     *
+     * @return JsonResponse
      */
+    #[Route("/zones", name: "all_zones", methods: ["GET"])]
     public function getAllDZCount(): JsonResponse
     {
-        $count = count($this->dzRepository->findAll());
-
-        return new JsonResponse([
-            'status' => FormHelper::META_SUCCESS,
-            'meta' => $count
-        ]);
-    }
-
-    /**
-     * @Route("/all-statistics", name="all_statistics", methods={"GET"})
-     */
-    public function allStatistics(): JsonResponse
-    {
-        $mostPlantsInDz = $this->dzPlantRepository->getMostPlantsInDistributionZone();
-        $fetchedCount = $this->dzRepository->getFetchedCount();
-        $mostFetched = $this->dzRepository->getMostFetched();
-        $mostSeenPlants = $this->dzPlantRepository->getMostSeenPlants();
-
-        return new JsonResponse([
-            'status' => FormHelper::META_SUCCESS,
-            'meta' => [
-                'mostPlantsInDz' => $mostPlantsInDz,
-                'fetchedCount' => $fetchedCount,
-                'mostFetched' => $mostFetched,
-                'mostSeenCounts' => $mostSeenPlants
-            ]
-        ]);
+        return $this->statisticsService->getAllDZ();
     }
 }

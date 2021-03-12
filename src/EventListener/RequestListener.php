@@ -10,19 +10,24 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 /**
  * Class RequestListener
  *
- * The listener catches the request made to the api and
- * decode the json content to array.
+ * The listener catches the request made to the api routes
+ * and adds additional logic
  *
  * @package App\EventListener
  */
 class RequestListener
 {
     /**
+     * The sole reason of the method is to check if the route name
+     * contains "api" meaning it is a request to an api endpoint and
+     * if it has Content-Type set to application/json and if not
+     * throw an exception.
+     *
      * @param RequestEvent $event
      * @return Request
      * @throws Exception
      */
-    public function onKernelRequest(RequestEvent $event)
+    public function onKernelRequest(RequestEvent $event): Request
     {
         $request = $event->getRequest();
 
@@ -31,9 +36,6 @@ class RequestListener
                 throw new AccessDeniedException();
             }
         }
-
-        $data = json_decode($request->getContent(), true);
-        $request->request->replace(is_array($data) ? $data : []);
 
         return $request;
     }

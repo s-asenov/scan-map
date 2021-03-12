@@ -10,12 +10,12 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 class PlantNormalizer implements NormalizerInterface, CacheableSupportsMethodInterface
 {
     /**
-     * @param mixed|Plant $object
+     * @param mixed $object
      * @param null $format
      * @param array $context
      * @return array
      */
-    public function normalize($object, $format = null, array $context = []): array
+    public function normalize(mixed $object, $format = null, array $context = []): array
     {
         return [
             'id' => $object->getId(),

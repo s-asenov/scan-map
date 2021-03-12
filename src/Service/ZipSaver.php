@@ -10,16 +10,12 @@ use Symfony\Component\Serializer\Serializer;
 
 class ZipSaver
 {
-    private $zipDir;
-    private $imageBase64;
-    private $zipName;
 
-    public function __construct(string $zipDir, string $zipName, string $imageBase64)
-    {
-        $this->zipDir = $zipDir;
-        $this->imageBase64 = $imageBase64;
-        $this->zipName = $zipName;
-    }
+    public function __construct(
+        private string $zipDir,
+        private string $zipName,
+        private string $imageBase64
+    ) { }
 
     private function encodePlants(array $plants): string
     {
@@ -27,14 +23,13 @@ class ZipSaver
         $encoder = new JsonEncoder();
         $serializer = new Serializer([$plantNorm], [$encoder]);
 
-        $json = $serializer->serialize($plants,  'json', ['json_encode_options' => \JSON_PRETTY_PRINT]);
-
-        return $json;
+        return $serializer->serialize($plants,  'json', ['json_encode_options' => \JSON_PRETTY_PRINT]);
     }
 
     /**
      * The method calls the zip service method to add the base64 encoded files
-     * in a \ZipArchive.
+     * in a ZipArchive.
+     *
      * @param array $plants
      */
     public function saveZip(array $plants): void

@@ -6,107 +6,60 @@ namespace App\Controller;
 
 use App\Entity\Terrain;
 use App\Entity\TerrainKey;
-use App\Repository\TerrainKeyRepository;
-use App\Repository\TerrainRepository;
-use App\Serializer\Normalizer\TerrainKeysNormalizer;
-use App\Util\FormHelper;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\Entity\TerrainKeyService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 /**
- * @Route("/api/keys", name="api_terrain_keys_")
  *
  * Class TerrainKeyController
+ *
+ * 
+ *
  * @package App\Controller
  */
+#[Route("/api/keys", name: "api_terrain_keys_")]
 class TerrainKeyController extends AbstractController
 {
+    public function __construct(private TerrainKeyService $keyService)
+    {
+    }
+
     /**
-     * @Route("/{id}", name="api_key_save", methods={"POST"})
+     * The method calls the terrain key service which create a new key.
+     *
      * @param Terrain $terrain
-     * @param EntityManagerInterface $em
-     * @param TerrainKeysNormalizer $normalizer
      * @return JsonResponse
      * @throws ExceptionInterface
      */
-    public function addKey(Terrain $terrain, EntityManagerInterface $em, TerrainKeysNormalizer $normalizer): JsonResponse
+    #[Route("/{id}", name: "api_key_save", methods: ["POST"])]
+    public function createKey(Terrain $terrain): JsonResponse
     {
-        if ($terrain->getUser() !== $this->getUser()) {
-            return new JsonResponse([
-                'status' => FormHelper::META_ERROR,
-                'meta' => FormHelper::UNAUTHORIZED
-            ], Response::HTTP_UNAUTHORIZED);
-        }
-
-        $terrainKey = new TerrainKey($this->getUser()->getId());
-        $terrainKey->setTerrain($terrain);
-
-        $em->persist($terrainKey);
-        $em->flush();
-
-        $normalized = $normalizer->normalize($terrainKey);
-
-        return new JsonResponse([
-            'status' => FormHelper::META_SUCCESS,
-            'key' => $normalized
-        ]);
+        return $this->keyService->createKey($terrain, $this->getUser());
     }
 
     /**
-     * @Route("/", name="api_key_all", methods={"GET"})
-     * @param TerrainRepository $repository
-     * @param TerrainKeyRepository $keyRepository
-     * @param TerrainKeysNormalizer $normalizer
+     * The method calls the terrain key service and gets the keys of all user terrains.
+     *
      * @return JsonResponse
-     * @throws ExceptionInterface
      */
-    public function getUserKeys(TerrainRepository $repository, TerrainKeyRepository $keyRepository, TerrainKeysNormalizer $normalizer): JsonResponse
+    #[Route("/", name: "api_keys_all", methods: ["GET"])]
+    public function getUserKeys(): JsonResponse
     {
-        $terrains = $repository->findBy([
-            'user' => $this->getUser()->getId()
-        ]);
-
-        $terrainKeysArray = [];
-
-        foreach ($terrains as $terrain) {
-            $terrainKeys = $terrain->getTerrainKeys();
-
-            foreach ($terrainKeys as $terrainKey) {
-                $normalized = $normalizer->normalize($terrainKey);
-                $terrainKeysArray[] = $normalized;
-            }
-        }
-
-        return new JsonResponse([
-            'status' => FormHelper::META_SUCCESS,
-            'keys' => $terrainKeysArray
-        ]);
+        return $this->keyService->getUserKeys($this->getUser());
     }
 
     /**
-     * @Route("/{id}", name="api_key", methods={"GET"})
+     * The method calls the service and gets the specific key assigned to the user.
+     *
      * @param TerrainKey $terrainKey
-     * @param TerrainKeysNormalizer $normalizer
      * @return JsonResponse
-     * @throws ExceptionInterface
      */
-    public function getKey(TerrainKey $terrainKey, TerrainKeysNormalizer $normalizer): JsonResponse
+    #[Route("/{id}", name: "api_key", methods: ["GET"])]
+    public function getKey(TerrainKey $terrainKey): JsonResponse
     {
-        if ($terrainKey->getTerrain()->getUser() !== $this->getUser()) {
-            return new JsonResponse([
-                'status' => FormHelper::META_ERROR,
-            ]);
-        }
-
-        $normalized = $normalizer->normalize($terrainKey);
-
-        return new JsonResponse([
-            'status' => FormHelper::META_SUCCESS,
-            'key' => $normalized
-        ]);
+        $this->keyService->getKey($terrainKey, $this->getUser());
     }
 }

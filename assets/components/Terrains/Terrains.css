@@ -90,11 +90,11 @@
   border-top-right-radius: calc(0.3rem - 1px);
 }
 
-#add-key-icon[disabled] {
+#add-key-icon[disabled], #delete-terrain-icon[disabled] {
   cursor: not-allowed;
 }
 
-#add-key-icon path {
+#add-key-icon path, #delete-terrain-icon path {
   pointer-events: none;
 }
 

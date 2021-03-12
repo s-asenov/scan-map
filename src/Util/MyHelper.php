@@ -2,21 +2,38 @@
 
 namespace App\Util;
 
+use DateTimeInterface;
+use Exception;
+
 /**
  * Class MyHelper
  *
- * The class will contain helpful functions.
+ * The class will contain helpful used throughout the application
  *
  * @package App\Util
  */
 class MyHelper
 {
-    public function formatDate(\DateTimeInterface $date)
+    /**
+     * Formats the given date time to the corresponding format.
+     *
+     * @param DateTimeInterface $date
+     * @return string|false
+     */
+    public function formatDate(DateTimeInterface $date): string|false
     {
         return date_format($date, 'Y-m-d H:i:s');
     }
 
-    public function random_str(int $length = 20, string $keyspace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'): string {
+    /**
+     * The method is used to generate random strings.
+     *
+     * @param int $length
+     * @param string $keyspace
+     * @return string
+     * @throws Exception
+     */
+    public function randomStr(int $length = 20, string $keyspace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'): string {
         if ($length < 1) {
             throw new \RangeException("Length must be a positive integer");
         }

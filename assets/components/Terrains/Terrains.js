@@ -112,9 +112,18 @@ function Terrains() {
     });
   };
 
-  const deleteTerrain = (id) => {
+  const deleteTerrain = (e, id) => {
+    const hasAttribute = e.target.getAttribute("disabled");
+
+    if (hasAttribute) {
+      return;
+    }
+
+    e.target.setAttribute("disabled", "disabled");
+
     apiInstance.delete(`/terrains/${id}`).then(() => {
       if (_isMounted) {
+        e.target.removeAttribute("disabled");
         dispatch({
           type: DELETE,
           payload: id,

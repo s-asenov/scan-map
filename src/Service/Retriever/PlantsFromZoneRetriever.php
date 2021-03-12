@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Service;
+namespace App\Service\Retriever;
 
 
 use App\Entity\DistributionZone;
@@ -12,6 +12,7 @@ use App\Repository\DistributionZoneRepository;
 use App\Repository\PlantRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ObjectRepository;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -23,69 +24,44 @@ class PlantsFromZoneRetriever
 {
     const PLANTS_PER_PAGE = 20; //trefle`s pagination
 
-    private $trefleApi;
+    private ?int $zoneId;
+    private ArrayCollection $plants;
 
-    private $geonamesApi;
+    private ObjectRepository|DistributionZoneRepository $repository;
+    private PlantRepository|ObjectRepository $plantRepository;
+    private ObjectRepository|DistributionZonePlantRepository $zonePlantRepository;
 
-    /**
-     * @var DistributionZoneRepository
-     */
-    private $repository;
-
-    /**
-     * @var PlantRepository
-     */
-    private $plantRepository;
-
-    /**
-     * @var DistributionZonePlantRepository
-     */
-    private $zonePlantRepository;
-
-    private $em;
-
-    private $zoneId;
-
-    /**
-     * @var PlantsInfoRetriever
-     */
-    private $infoRetriever;
-
-    /**
-     * @var ArrayCollection
-     */
-    private $plants;
-
-    public function __construct(PlantsInfoRetriever $infoRetriever, EntityManagerInterface $em, HttpClientInterface $trefleApi, HttpClientInterface $geonamesApi)
+    public function __construct(
+        private PlantsInfoRetriever $infoRetriever,
+        private EntityManagerInterface $em,
+        private HttpClientInterface $trefleApi,
+        private HttpClientInterface $geonamesApi
+    )
     {
         $this->plants = new ArrayCollection();
-        $this->trefleApi = $trefleApi;
-        $this->geonamesApi = $geonamesApi;
-        $this->em = $em;
         $this->repository = $em->getRepository(DistributionZone::class);
         $this->plantRepository = $em->getRepository(Plant::class);
         $this->zonePlantRepository = $em->getRepository(DistributionZonePlant::class);
-        $this->infoRetriever = $infoRetriever;
     }
 
     /**
      * The method creates an initial call to the plants api and
      * loops through the rest of the pages, if there are any.
      *
-     * @param DistributionZone|bool $zone
+     * @param bool|DistributionZone $zone
      * @return array
-     *
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function getPlants($zone): array
+    public function getPlants(bool|DistributionZone $zone): array
     {
         if ($zone === false) {
             return [];
         }
+
         /*
          * If the zone is already fetched
          * return the plants which are already saved.
@@ -101,7 +77,7 @@ class PlantsFromZoneRetriever
         $this->zoneId = $zone->getId();
 
         $request = $this->getPlantsFromPage("distributions/{$this->zoneId}/plants");
-        
+
         $total = $request['total'];
 
         $pages = ceil($total / self::PLANTS_PER_PAGE);
@@ -113,7 +89,12 @@ class PlantsFromZoneRetriever
 
                 $insertCount +=  $request['insertCount'];;
 
-                //can't use Modulo ($count % $batchSize) here
+                /*
+                 * If the number of inserts is bigger than the set batch - 500,
+                 * insert the persisted entities.
+                 *
+                 * Note: can't use Modulo ($count % $batchSize) here so we use >
+                 */
                 if ($insertCount > 500) {
                     $insertCount = 0;
 
@@ -133,7 +114,7 @@ class PlantsFromZoneRetriever
         return $plants;
     }
 
-    function comparePlantNames(string $a, string $b)
+    public function comparePlantNames(string $a, string $b)
     {
         $a = preg_replace('@^(a|an|the) @', '', $a);
         $b = preg_replace('@^(a|an|the) @', '', $b);
@@ -145,23 +126,27 @@ class PlantsFromZoneRetriever
     /**
      * The method send a request to the geonames api and determines the distribution zone.
      *
+     * Check if it is existing and if it is marked as distribution zone and if so
+     * return the entity.
+     *
      * @param string $lat
      * @param string $lng
-     * @return false|DistributionZone
+     * @return false|DistributionZone Return false if it is non-existing or the entity
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function getDistributionZone(string $lat, string $lng)
-    {
+    public function getDistributionZone(string $lat, string $lng): bool|DistributionZone
+    {;
         $response = $this->geonamesApi->request('GET', "countrySubdivisionJSON?lat={$lat}&lng={$lng}");
         $data = $response->toArray();
 
         $country = $data['countryName'];
         $countryZone = $this->repository->findOneBy(['name' => $country]);
 
+        //adminName1 is the name the geonames api uses for lower level areas such as countries or large states.
         if (!isset($data['adminName1'])) {
             $subDiv = null;
             $subDivZone = null;
@@ -192,8 +177,6 @@ class PlantsFromZoneRetriever
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
-     *
-     * @see persistPlantInZone()
      */
     private function getPlantsFromPage(string $url): array
     {
@@ -208,7 +191,7 @@ class PlantsFromZoneRetriever
          */
         $body = $data['data'];
         $total = $data['meta']['total'];
-        
+
         /**
          * Clear all duplicates by scientific name.
          */
@@ -306,7 +289,7 @@ class PlantsFromZoneRetriever
 
                 $existing->addDistributionZonesPlant($distributionPlant);
 
-                $this->em->persist($distributionPlant);
+//                $this->em->persist($distributionPlant);
                 $insertCount = 1;
             }
             $plant = $existing;

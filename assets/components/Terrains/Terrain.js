@@ -137,7 +137,7 @@ const Terrain = (props) => {
         id="delete-terrain-icon"
         size="1.75em"
         title="Изтрий генерирания терен!"
-        onClick={() => props.deleteTerrain(id)}
+        onClick={(e) => props.deleteTerrain(e, id)}
       />
       <Image
         rounded

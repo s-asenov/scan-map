@@ -10,13 +10,14 @@
 /migrations/
 ###< symfony/framework-bundle ###
 
-/stuff.txt
 /zip
 /public/uncompressed/
 /.idea/
 /.vscode/
 /favicons/
 /public/uploads/
+/public/TerrainFloraDrawer.rar
+/public/models
 
 ###> symfony/webpack-encore-bundle ###
 /node_modules/

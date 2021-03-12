@@ -19,19 +19,19 @@ class DistributionZonePlant
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?int $id;
 
     /**
      * @ORM\ManyToOne(targetEntity=DistributionZone::class, inversedBy="distributionZonePlants")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $distributionZone;
+    private ?DistributionZone $distributionZone;
 
     /**
      * @ORM\ManyToOne(targetEntity=Plant::class, fetch="EAGER", inversedBy="distributionZonesPlants")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $plant;
+    private ?Plant $plant;
 
     public function getId(): ?int
     {

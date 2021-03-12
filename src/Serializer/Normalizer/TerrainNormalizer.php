@@ -3,25 +3,14 @@
 namespace App\Serializer\Normalizer;
 
 use App\Entity\Terrain;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use DateTime;
 use Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 class TerrainNormalizer implements NormalizerInterface, CacheableSupportsMethodInterface
 {
-    private $normalizer;
-    private $keysNormalizer;
-
-    public function __construct(ObjectNormalizer $normalizer, TerrainKeysNormalizer $keysNormalizer)
+    public function __construct(private TerrainKeysNormalizer $keysNormalizer)
     {
-        $this->normalizer = $normalizer;
-        $this->keysNormalizer = $keysNormalizer;
-    }
-
-    function handler($object, $format, $context)
-    {
-        return $object->getId();
     }
 
     public function normalize($object, $format = null, array $context = []): array
@@ -29,12 +18,12 @@ class TerrainNormalizer implements NormalizerInterface, CacheableSupportsMethodI
         $keys = [];
 
         foreach ($object->getTerrainKeys() as $terrainKey) {
-            if ($terrainKey->getExpiringOn() > new \DateTime()) {
+            if ($terrainKey->getExpiringOn() > new DateTime()) {
                 $keys[] = $this->keysNormalizer->normalize($terrainKey);
             }
         }
 
-        $data = [
+        return [
             'id' => $object->getId(),
             'zipName' => $object->getZipName(),
             'user' => $object->getUser()->getId(),
@@ -42,8 +31,6 @@ class TerrainNormalizer implements NormalizerInterface, CacheableSupportsMethodI
             'imageDirectory' => $object->getImageDirectory(),
             'terrainKeys' => $keys
         ];
-
-        return $data;
     }
 
     public function supportsNormalization($data, $format = null): bool

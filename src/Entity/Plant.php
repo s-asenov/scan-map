@@ -6,7 +6,7 @@ use App\Repository\PlantRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Doctrine\ORM\PersistentCollection;
 
 /**
  * The entity responsible for holding the necessary information about the plant.
@@ -21,37 +21,37 @@ class Plant
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?int $id;
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
      */
-    private $scientificName;
+    private ?string $scientificName;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $commonName;
+    private ?string $commonName;
 
     /**
      * @ORM\Column(type="text", nullable=true)
      */
-    private $description;
+    private ?string $description;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $imageUrl;
+    private ?string $imageUrl;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $modelPath;
+    private ?string $modelPath;
 
     /**
-     * @ORM\OneToMany(targetEntity=DistributionZonePlant::class, mappedBy="plant")
+     * @ORM\OneToMany(targetEntity=DistributionZonePlant::class, mappedBy="plant", cascade={"persist", "remove"})
      */
-    private $distributionZonesPlants;
+    private PersistentCollection|ArrayCollection $distributionZonesPlants;
 
     public function __construct()
     {
@@ -103,7 +103,7 @@ class Plant
         return $this->scientificName;
     }
 
-    public function setScientificName(?string $scientificName): self
+    public function setScientificName(string $scientificName): self
     {
         $this->scientificName = $scientificName;
 

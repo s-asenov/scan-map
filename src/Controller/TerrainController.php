@@ -5,103 +5,58 @@ namespace App\Controller;
 
 
 use App\Entity\Terrain;
-use App\Repository\TerrainRepository;
-use App\Serializer\Normalizer\TerrainNormalizer;
-use App\Util\FormHelper;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\Entity\TerrainService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 /**
- * @Route("/api/terrains", name="api_terrain_")
- *
  * Class TerrainController
+ *
  * @package App\Controller
  */
+#[Route("/api/terrains", name: "api_terrain_")]
 class TerrainController extends AbstractController
 {
+    public function __construct(private TerrainService $terrainService)
+    { }
+
     /**
-     * @Route("", name="user_terrains", methods={"GET"})
-     * @param TerrainRepository $repository
-     * @param TerrainNormalizer $normalizer
-     * @return JsonResponse
+     * The method returns all the user terrains.
+     *
      * @throws ExceptionInterface
      */
-    public function getUserTerrains(TerrainRepository $repository, TerrainNormalizer $normalizer): JsonResponse
+    #[Route("", name: "user_terrains", methods: ["GET"])]
+    public function getUserTerrains(): JsonResponse
     {
-        $terrains = $repository->findBy([
-            'user' => $this->getUser()->getId()
-        ]);
-
-        $terrainsArray = [];
-
-        foreach ($terrains as $terrain) {
-            $normalized = $normalizer->normalize($terrain);
-
-            $terrainsArray[] = $normalized;
-        }
-
-        return new JsonResponse([
-            'status' => FormHelper::META_SUCCESS,
-            'terrains' => $terrainsArray
-        ]);
+        return $this->terrainService->getUserTerrains($this->getUser());
     }
 
     /**
-     * @Route("/{id}", name="user_terrain", methods={"GET"})
+     *  The method calls the service method, which gets the user terrain.
+     *
      * @param Terrain $terrain
-     * @param TerrainNormalizer $normalizer
      * @return JsonResponse
      * @throws ExceptionInterface
      */
-    public function getUserTerrain(Terrain $terrain, TerrainNormalizer $normalizer): JsonResponse
+    #[Route("/{id}", name: "get_user_terrain", methods: ["GET"])]
+    public function getUserTerrain(Terrain $terrain): JsonResponse
     {
-        if (!$terrain || $terrain->getUser() !== $this->getUser()) {
-            return new JsonResponse([
-                'status' => FormHelper::META_ERROR,
-                "meta" => FormHelper::UNAUTHORIZED
-            ], Response::HTTP_UNAUTHORIZED);
-        }
-
-        $normalized = $normalizer->normalize($terrain);
-
-        return new JsonResponse([
-            'status' => FormHelper::META_SUCCESS,
-            'terrains' => $normalized
-        ]);
+        return $this->terrainService->getUserTerrain($terrain, $this->getUser());
     }
 
     /**
-     * @Route("/{id}", name="api_user_terrain_delete", methods={"DELETE"})
+     * The method calls the service method, which deletes the user terrain.
+     *
      * @param Terrain $terrain
-     * @param EntityManagerInterface $em
      * @return JsonResponse
      */
-    public function deleteUserTerrain(Terrain $terrain, EntityManagerInterface $em): JsonResponse
+    #[Route("/{id}", name: "delete_user_terrain", methods: ["DELETE"])]
+    public function deleteUserTerrain(Terrain $terrain): JsonResponse
     {
-        if ($terrain->getUser() !== $this->getUser()) {
-            return new JsonResponse([
-                'status' => FormHelper::META_ERROR,
-                "meta" => FormHelper::UNAUTHORIZED
-            ], Response::HTTP_UNAUTHORIZED);
-        }
+        $zipDir = $this->getParameter('app.zip_directory');
 
-        $zipFilePath = $this->getParameter('app.zip_directory') . $terrain->getZipName() . ".zip";
-        $imageFilePath = $this->getParameter( 'app.image_directory') . $terrain->getImageDirectory();
-
-        $filesystem = new Filesystem();
-        $filesystem->remove([$zipFilePath, $imageFilePath]);
-
-        $em->remove($terrain);
-        $em->flush();
-
-        return new JsonResponse([
-            'status' => FormHelper::META_SUCCESS,
-            'terrain' => FormHelper::META_DELETED
-        ]);
+        return $this->terrainService->deleteUserTerrain($terrain, $this->getUser(), $zipDir);
     }
 }

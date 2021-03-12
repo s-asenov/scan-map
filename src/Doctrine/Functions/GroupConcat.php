@@ -3,6 +3,7 @@
 namespace App\Doctrine\Functions;
 
 use Doctrine\ORM\Query\AST\Functions\FunctionNode;
+use Doctrine\ORM\Query\AST\PathExpression;
 use Doctrine\ORM\Query\Lexer;
 use Doctrine\ORM\Query\SqlWalker;
 use Doctrine\ORM\Query\Parser;
@@ -10,8 +11,8 @@ use Doctrine\ORM\Query\Parser;
 
 class GroupConcat extends FunctionNode
 {
-    protected $isDistinct = false;
-    protected $expression = null;
+    protected bool $isDistinct = false;
+    protected ?PathExpression $expression = null;
 
     public function getSql(SqlWalker $sqlWalker): string
     {

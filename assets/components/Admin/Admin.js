@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { Redirect, Route, Switch, useRouteMatch } from "react-router-dom";
+import ModelAdder from "./ModelAdder/ModelAdder";
 
 /**
  * The Admin component will be responsible for all necessary admin api calls.
@@ -16,13 +17,13 @@ function Admin() {
     // <div className="flex-1">
     <Switch>
       <Route exact path={`${url}/`}>
-        <Redirect to={`${url}/dashboard`} />
+        <Redirect to={`${url}/models`} />
       </Route>
       <Route exact path={`${url}/dashboard`}>
         <h3>dashboard</h3>
       </Route>
-      <Route exact path={`${url}/model`}>
-        <h3>to do - page for adding 3d models</h3>
+      <Route exact path={`${url}/models`}>
+        <ModelAdder />
       </Route>
     </Switch>
     // </div>

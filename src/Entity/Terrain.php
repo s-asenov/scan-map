@@ -7,6 +7,7 @@ use App\Util\MyHelper;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\PersistentCollection;
 
 /**
  * The terrain entity contains user`s generated terrain in the map section of the website.
@@ -22,33 +23,33 @@ class Terrain
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?int $id;
 
     /**
      * @ORM\Column(type="string")
      */
-    private $zipName;
+    private string $zipName;
 
     /**
      * @ORM\Column(type="string")
      */
-    private $name;
+    private ?string $name;
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
      */
-    private $user;
+    private User $user;
 
     /**
      * @ORM\Column(type="string")
      */
-    private $imageDirectory;
+    private ?string $imageDirectory;
 
     /**
      * @ORM\OneToMany(targetEntity=TerrainKey::class, mappedBy="terrain", orphanRemoval=true)
      */
-    private $terrainKeys;
+    private PersistentCollection|ArrayCollection $terrainKeys;
 
     public function __construct(User $user)
     {
@@ -57,7 +58,7 @@ class Terrain
         $formattedDate = $now->format('YmdHisv');
 
         do {
-            $name = $user->getId() . "-" . uniqid($formattedDate) . "-" . $helper->random_str();
+            $name = $user->getId() . "-" . uniqid($formattedDate) . "-" . $helper->randomStr();
             $this->zipName = $name;
         } while (file_exists('zip/' . $name));
 
@@ -87,7 +88,7 @@ class Terrain
         return $this->user;
     }
 
-    public function setUser(?User $user): self
+    public function setUser(User $user): self
     {
         $this->user = $user;
 
@@ -95,7 +96,7 @@ class Terrain
     }
 
     /**
-     * @return Collection|TerrainKey[]
+     * @return Collection
      */
     public function getTerrainKeys(): Collection
     {

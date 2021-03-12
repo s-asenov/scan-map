@@ -13,7 +13,7 @@ class MyController extends AbstractController
     /**
      * @return User|UserInterface|null
      */
-    public function getUser()
+    public function getUser(): UserInterface|User|null
     {
         return parent::getUser();
     }
