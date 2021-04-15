@@ -33,5 +33,19 @@ export default {
         return Promise.reject(error);
       }
     );
+
+    apiInstance.interceptors.request.use(
+      (config) => {
+        //todo
+        // if (args.token) {
+        //   config.headers.Authorization = args.token;
+        // }
+
+        return config;
+      },
+      (error) => {
+        return Promise.reject(error);
+      }
+    );
   },
 };

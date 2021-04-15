@@ -39,6 +39,11 @@ function Footer() {
                 </a>
               </li>
               <li>
+                <a href="https://trefle.io/" target="_blank">
+                  Trefle
+                </a>
+              </li>
+              <li>
                 <a
                   href="https://bg.wikipedia.org/wiki/%D0%9D%D0%B0%D1%87%D0%B0%D0%BB%D0%BD%D0%B0_%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0"
                   target="_blank"
@@ -49,11 +54,6 @@ function Footer() {
               <li>
                 <a href="https://www.google.com/maps" target="_blank">
                   Google Maps
-                </a>
-              </li>
-              <li>
-                <a href="https://pgi-pernik.bg-schools.com/" target="_blank">
-                  ПГИ гр. Перник
                 </a>
               </li>
             </ul>

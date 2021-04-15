@@ -12,6 +12,8 @@ use App\Repository\TerrainRepository;
 use App\Serializer\Normalizer\TerrainNormalizer;
 use App\Service\ImageUploader;
 use App\Service\Retriever\PlantsFromZoneRetriever;
+use App\Service\ZipSaver;
+use App\Service\ZipService;
 use App\Util\ApiRequest;
 use App\Util\FormHelper;
 use App\Util\UploadedBase64File;
@@ -228,7 +230,7 @@ class TerrainService
         if ($terrain->getUser() !== $user) {
             return new JsonResponse([
                 'status' => FormHelper::META_ERROR,
-                "meta" => FormHelper::UNAUTHORIZED
+                'meta' => FormHelper::UNAUTHORIZED
             ], Response::HTTP_UNAUTHORIZED);
         }
 

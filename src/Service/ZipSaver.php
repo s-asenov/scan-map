@@ -23,7 +23,7 @@ class ZipSaver
         $encoder = new JsonEncoder();
         $serializer = new Serializer([$plantNorm], [$encoder]);
 
-        return $serializer->serialize($plants,  'json', ['json_encode_options' => \JSON_PRETTY_PRINT]);
+        return $serializer->serialize($plants,  'json');
     }
 
     /**

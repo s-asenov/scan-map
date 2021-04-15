@@ -16,8 +16,10 @@
 /.vscode/
 /favicons/
 /public/uploads/
+/public/demo_build/
 /public/TerrainFloraDrawer.rar
 /public/models
+/old
 
 ###> symfony/webpack-encore-bundle ###
 /node_modules/

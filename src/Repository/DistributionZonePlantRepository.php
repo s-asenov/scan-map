@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\DistributionZone;
 use App\Entity\DistributionZonePlant;
 use App\Entity\Plant;
+use App\Util\MyHelper;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
@@ -76,4 +77,30 @@ class DistributionZonePlantRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @param DistributionZonePlant[] $zonePlants
+     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function bulkInsert(array $zonePlants)
+    {
+        $zone = $zonePlants[0]->getDistributionZone()->getId();
+        $fields = ['id', 'distribution_zone_id', 'plant_id'];
+        $values = [];
+
+        foreach ($zonePlants as $zonePlant) {
+
+            $scientificName = $zonePlant->getPlant()->getScientificName();
+
+            $value = "(NULL, $zone, (SELECT `plants`.`id` FROM `plants` WHERE `plants`.`scientific_name`='$scientificName'))";
+
+            $values[] = $value;
+        }
+
+        $sql = "INSERT INTO distribution_zone_plant (" . implode(",", $fields ) . ") VALUES " .
+            implode(',', $values) . " ON DUPLICATE KEY UPDATE id=id";
+
+        $stmt = $this->_em->getConnection()->prepare($sql);
+        $stmt->execute();
+    }
 }

@@ -10,7 +10,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 class PlantNormalizer implements NormalizerInterface, CacheableSupportsMethodInterface
 {
     /**
-     * @param mixed $object
+     * @param mixed|Plant $object
      * @param null $format
      * @param array $context
      * @return array
@@ -22,6 +22,7 @@ class PlantNormalizer implements NormalizerInterface, CacheableSupportsMethodInt
             'scientificName' => $object->getScientificName(),
             'commonName' => $object->getCommonName(),
             'imageUrl' => $object->getImageUrl(),
+            'modelPath' => $object->getModelPath()
         ];
     }
 

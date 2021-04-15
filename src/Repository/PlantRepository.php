@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Plant;
+use App\Util\MyHelper;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,7 +15,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class PlantRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private MyHelper $helper)
     {
         parent::__construct($registry, Plant::class);
     }
@@ -37,5 +38,43 @@ class PlantRepository extends ServiceEntityRepository
             ->setParameter('input', '%'.$input.'%')
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * @param Plant $plant
+     * @param string $path
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function addModelToPlant(Plant $plant, string $path)
+    {
+        $plant->setModelPath($path);
+
+        $this->_em->persist($plant);
+        $this->_em->flush();
+    }
+
+    /**
+     * @param Plant[] $plants
+     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function bulkInsert(array $plants)
+    {
+        $fields = ['id', 'scientific_name', 'common_name', 'description', 'image_url', 'model_path'];
+        $values = [];
+        $question_marks = [];
+
+        foreach ($plants as $plant) {
+            $question_marks[] = '('  . $this->helper->placeholders("?", count($fields)) . ')';
+
+            array_push($values, null, $plant->getScientificName(), $plant->getCommonName(), $plant->getDescription(), $plant->getImageUrl(), $plant->getModelPath());
+        }
+
+        $sql = "INSERT INTO plants (" . implode(",", $fields ) . ") VALUES " .
+            implode(',', $question_marks) . " ON DUPLICATE KEY UPDATE id=id";
+
+        $stmt = $this->_em->getConnection()->prepare($sql);
+        $stmt->execute($values);
     }
 }

@@ -70,9 +70,9 @@ function App() {
           <AuthRoute exact path="/terrains">
             <Terrains />
           </AuthRoute>
-          <Route exact path="/demo">
+          <MyRoute exact path="/demo">
             <Demo />
-          </Route>
+          </MyRoute>
           <MyRoute exact path="/">
             <Home />
           </MyRoute>

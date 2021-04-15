@@ -73,7 +73,7 @@ function Statistics() {
             <h2 className="mt-2">
               <StatCountUp end={zones} duration={1} />
             </h2>
-            <p>Разгледани региони!</p>
+            <p>Разгледани региона!</p>
           </Col>
           <Col>
             <GiPlantRoots size="2.5em" />

@@ -25,7 +25,7 @@ class DistributionZone
      * @ORM\Id
      * @ORM\Column(type="integer")
      */
-    private ?int $id;
+    private ?int $id = null;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -174,6 +174,9 @@ class DistributionZone
         return $this;
     }
 
+    /**
+     * @return array|Plant[]
+     */
     public function getAllPlants(): array
     {
         /**

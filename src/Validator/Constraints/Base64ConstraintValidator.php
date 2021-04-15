@@ -8,6 +8,14 @@ use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
+/**
+ * Class Base64ConstraintValidator
+ *
+ * The class is called when the Base64Constraint is called.
+ * The whole logic about the constraint is put in the validator class.
+ *
+ * @package App\Validator\Constraints
+ */
 class Base64ConstraintValidator extends ConstraintValidator
 {
     /**

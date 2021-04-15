@@ -14,6 +14,7 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -58,13 +59,21 @@ class UserService
             ]
         ]);
 
+        $data = $this->request->toArray();
+
+        $existing = $this->em->getRepository(User::class)->findOneBy(['email' => $data["email"]]);
+
+        if ($existing) {
+            return new JsonResponse([
+                'email' => "Вече е регистриран потребител с посочения имейл!"
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
         $errors = $this->request->validate($constraint);
         
         if ($errors) {
             return $errors;
         }
-        
-        $data = $this->request->toArray();
 
         $user = new User();
         $user->setFirstName($data["firstName"])
@@ -112,9 +121,9 @@ class UserService
      * @param User $user
      * @throws VerifyEmailExceptionInterface
      */
-    public function verifyEmail(User $user)
+    public function verifyEmail(User $user, Request $request)
     {
-        $this->emailVerifier->verifyEmail($user, $this->request->getUri());
+        $this->emailVerifier->verifyEmail($user, $request->getUri());
 
         $user->setRoles(['VERIFIED']);
 

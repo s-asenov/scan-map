@@ -10,6 +10,7 @@ use App\Entity\Plant;
 use App\Repository\DistributionZonePlantRepository;
 use App\Repository\DistributionZoneRepository;
 use App\Repository\PlantRepository;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ObjectRepository;
@@ -23,9 +24,13 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class PlantsFromZoneRetriever
 {
     const PLANTS_PER_PAGE = 20; //trefle`s pagination
+    const FILE_NAME = "batch.txt";
 
     private ?int $zoneId;
+    private string $uid;
+
     private ArrayCollection $plants;
+    private array $currentBatch;
 
     private ObjectRepository|DistributionZoneRepository $repository;
     private PlantRepository|ObjectRepository $plantRepository;
@@ -36,12 +41,16 @@ class PlantsFromZoneRetriever
         private EntityManagerInterface $em,
         private HttpClientInterface $trefleApi,
         private HttpClientInterface $geonamesApi
-    )
-    {
+    ) {
         $this->plants = new ArrayCollection();
+        $this->currentBatch = [];
+
         $this->repository = $em->getRepository(DistributionZone::class);
         $this->plantRepository = $em->getRepository(Plant::class);
         $this->zonePlantRepository = $em->getRepository(DistributionZonePlant::class);
+        $date = new DateTime();
+
+        $this->uid = uniqid($date->getTimestamp(), true);
     }
 
     /**
@@ -84,10 +93,19 @@ class PlantsFromZoneRetriever
         $insertCount = $request['insertCount'];
 
         if ($pages > 1) {
-            for ($i = 2; $i<=$pages; $i++) {
+            $existingPlants = $zone->getAllPlants();
+            $existingCount = count($existingPlants);
+
+            foreach ($existingPlants as $existingPlant) {
+                $this->plants->set($existingPlant->getScientificName(), $existingPlant);
+            }
+
+            $lastFetchedPage = ceil((float) ($existingCount / self::PLANTS_PER_PAGE)) ;
+
+            for ($i = $lastFetchedPage; $i <= $pages; $i++) {
                 $request = $this->getPlantsFromPage("distributions/{$this->zoneId}/plants?page={$i}");
 
-                $insertCount +=  $request['insertCount'];;
+                $insertCount += $request['insertCount'];
 
                 /*
                  * If the number of inserts is bigger than the set batch - 500,
@@ -96,16 +114,17 @@ class PlantsFromZoneRetriever
                  * Note: can't use Modulo ($count % $batchSize) here so we use >
                  */
                 if ($insertCount > 500) {
-                    $insertCount = 0;
+                    $this->bulkInsertAll();
 
-                    $this->em->flush();
-                    $this->em->clear();
+                    $this->currentBatch = [];
+                    $insertCount = 0;
                 }
             }
-
-            $this->em->flush();
-            $this->em->clear();
         }
+
+        $this->bulkInsertAll();
+
+        $this->em->clear();
 
         $plants = $this->plants->toArray();
 
@@ -113,6 +132,104 @@ class PlantsFromZoneRetriever
 
         return $plants;
     }
+
+
+    private function bulkInsertAll(): void
+    {
+        if (isset($this->currentBatch['plants']) && is_array($this->currentBatch['plants']) && count(
+                $this->currentBatch['plants']
+            )) {
+            $this->plantRepository->bulkInsert($this->currentBatch['plants']);
+        }
+
+        if (isset($this->currentBatch['distributionPlants']) && is_array(
+                $this->currentBatch['distributionPlants']
+            ) && count($this->currentBatch['distributionPlants'])) {
+            $this->zonePlantRepository->bulkInsert($this->currentBatch['distributionPlants']);
+        }
+    }
+
+    /*
+    public function clean(array $batchGlobal)
+    {
+        foreach ($this->batched->getKeys() as $key) {
+            unset($batchGlobal[$key]);
+        }
+
+        file_put_contents(self::FILE_NAME, json_encode($batchGlobal));
+
+        $this->batched->clear();
+    }
+
+    public function detachDuplicates(): array
+    {
+        $contents = file_get_contents(self::FILE_NAME);
+        $batchGlobal = json_decode($contents, true);
+
+        //todo replace detach when new replacement is made
+        foreach ($this->batched as $name => $batch) {
+            //if it is in the file and the unique id is not the same detach the entities
+            if (isset($batchGlobal[$name]) && $batchGlobal[$name] !== $this->uid) {
+                $this->em->detach($batch['plant']);
+
+                if ($batch['distributionPlant'] !== null) {
+                    $this->em->detach($batch['distributionPlant']);
+                }
+
+                $this->batched->remove($name);
+            }
+        }
+
+        return $batchGlobal;
+    }
+
+    public function addToGlobalBatch(array $batches)
+    {
+        $newArr = [];
+
+        foreach ($batches as $batch) {
+            $newArr[$batch['plant']->getScientificName()] = $batch['uid'];
+        }
+
+        $contents = file_get_contents(self::FILE_NAME);
+        $batchGlobal = json_decode($contents, true);
+
+        $newContent = json_encode($batchGlobal + $newArr);
+
+        file_put_contents(self::FILE_NAME, $newContent);
+    }
+
+
+    private function addZoneToQ()
+    {
+        $contents = file_get_contents(self::FILE_NAME);
+        $zones = json_decode($contents, true);
+
+        $zones[$this->zoneId] = $this->uid;
+
+        $newContent = json_encode($zones);
+        file_put_contents(self::FILE_NAME, $newContent);
+    }
+
+    private function checkZoneQ(): bool
+    {
+        $contents = file_get_contents(self::FILE_NAME);
+        $zones = json_decode($contents, true);
+
+        return isset($zones[$this->zoneId]);
+    }
+
+    private function removeZoneQ()
+    {
+        $contents = file_get_contents(self::FILE_NAME);
+        $zones = json_decode($contents, true);
+
+        unset($zones[$this->zoneId]);
+
+        $newContent = json_encode($zones);
+        file_put_contents(self::FILE_NAME, $newContent);
+    }
+    */
 
     public function comparePlantNames(string $a, string $b)
     {
@@ -139,14 +256,14 @@ class PlantsFromZoneRetriever
      * @throws TransportExceptionInterface
      */
     public function getDistributionZone(string $lat, string $lng): bool|DistributionZone
-    {;
+    {
         $response = $this->geonamesApi->request('GET', "countrySubdivisionJSON?lat={$lat}&lng={$lng}");
         $data = $response->toArray();
 
         $country = $data['countryName'];
         $countryZone = $this->repository->findOneBy(['name' => $country]);
 
-        //adminName1 is the name the geonames api uses for lower level areas such as countries or large states.
+        //adminName1 is the name that the geonames api uses for lower level areas such as countries or large states.
         if (!isset($data['adminName1'])) {
             $subDiv = null;
             $subDivZone = null;
@@ -195,12 +312,9 @@ class PlantsFromZoneRetriever
         /**
          * Clear all duplicates by scientific name.
          */
-        foreach($body as $k => $v)
-        {
-            foreach($body as $key => $value)
-            {
-                if($k != $key && $v['scientific_name'] == $value['scientific_name'])
-                {
+        foreach ($body as $k => $v) {
+            foreach ($body as $key => $value) {
+                if ($k != $key && $v['scientific_name'] == $value['scientific_name']) {
                     unset($body[$k]);
                 }
             }
@@ -217,9 +331,10 @@ class PlantsFromZoneRetriever
             $insertCount += $insert;
         }
 
+
         return [
             'insertCount' => $insertCount,
-            'total' => $total
+            'total' => $total,
         ];
     }
 
@@ -258,14 +373,16 @@ class PlantsFromZoneRetriever
                 ->setCommonName($item['common_name'])
                 ->setImageUrl($item['image_url']);
 
-            $this->em->persist($plant);
+            $this->currentBatch['plants'][] = $plant;
+            // $this->em->persist($plant);
 
             $distributionPlant = new DistributionZonePlant();
             $distributionPlant->setPlant($plant)
                 ->setDistributionZone($zone);
 
-            $this->em->persist($distributionPlant);
+            // $this->em->persist($distributionPlant);
 
+            $this->currentBatch['distributionPlants'][] = $distributionPlant;
             $insertCount = 2;
         } else {
             /**
@@ -290,11 +407,20 @@ class PlantsFromZoneRetriever
                 $existing->addDistributionZonesPlant($distributionPlant);
 
 //                $this->em->persist($distributionPlant);
+
+                $this->currentBatch['distributionPlants'][] = $distributionPlant;
                 $insertCount = 1;
             }
+
             $plant = $existing;
-//            }
         }
+
+//        $batch = [
+//            'uid' => $this->uid,
+//            'distributionPlant' => $distributionPlant,
+//            'plant' => $plant
+//        ];
+//        $this->batched->set($item['scientific_name'], $batch);
 
         $this->plants->set($item['scientific_name'], $plant);
 

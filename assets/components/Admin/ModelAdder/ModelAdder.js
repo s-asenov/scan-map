@@ -43,7 +43,7 @@ function ModelAdder() {
 
         return;
       }
-      console.log({ modelName: file.name, model: content });
+
       apiInstance
         .post(`admin/models/${plant}`, {
           modelName: file.name,
@@ -54,7 +54,7 @@ function ModelAdder() {
         })
         .catch((error) => {
           const response = error.response;
-          console.log(response);
+          // console.log(response);
           if (response.status === 400) {
             props.setErrors({
               model: "Unexpected error",

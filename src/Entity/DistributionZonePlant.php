@@ -11,6 +11,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *
  * @ORM\Entity(repositoryClass=DistributionZonePlantRepository::class)
  * @UniqueEntity(fields={"distributionZone", "plant"})
+ * @ORM\Table(name="distribution_zone_plant", uniqueConstraints={@ORM\UniqueConstraint(name="unique_idx", columns={"distribution_zone_id", "plant_id"})})
  */
 class DistributionZonePlant
 {
@@ -19,7 +20,7 @@ class DistributionZonePlant
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private ?int $id;
+    private ?int $id = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=DistributionZone::class, inversedBy="distributionZonePlants")
@@ -61,4 +62,5 @@ class DistributionZonePlant
 
         return $this;
     }
+
 }

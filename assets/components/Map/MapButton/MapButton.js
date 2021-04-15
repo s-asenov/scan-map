@@ -43,9 +43,9 @@ function MapButton({ rectangle }) {
       return;
     }
 
-    //Center the rectangle on the map so we can screenshot the map
-    rectangle.getMap().setCenter(rectangle.getBounds().getCenter());
-    document.getElementById("map").scrollIntoView();
+    //Center the rectangle on the map so we can screenshot the map.
+    //rectangle.getMap().setCenter(rectangle.getBounds().getCenter());
+    // document.getElementById("map").scrollIntoView();
 
     const rLatLng = rectangle.getLatLng();
     const center = rectangle.getBounds().getCenter();
@@ -76,14 +76,22 @@ function MapButton({ rectangle }) {
      */
     const { ne, sw } = rectangle.getPos();
 
+    const width = ne.x - sw.x;
+    const height = sw.y - ne.y;
+
+    const squareCenter = {
+      x: Math.ceil(ne.x - width / 2) + 2,
+      y: Math.ceil(sw.y - height / 2) + 2,
+    };
+
     html2canvas(document.getElementById("map"), {
       useCORS: true,
-      x: sw.x - 25,
-      y: ne.y,
+      x: squareCenter.x - 175,
+      y: squareCenter.y - 150,
       width: 350,
       height: 300,
-      scrollY: document.getElementById("navbar").offsetHeight,
       logging: false,
+      scrollY: -document.getElementById("navbar").offsetHeight,
     }).then((gmCanvas) => {
       const dataUrl = gmCanvas.toDataURL("image/jpeg");
       const gmImage = dataUrl.split("base64,")[1];
@@ -116,8 +124,8 @@ function MapButton({ rectangle }) {
   };
 
   return (
-    <IndigoButton onClick={handleClick} block style={{ margin: "1rem 0" }}>
-      Генерирай
+    <IndigoButton onClick={handleClick} style={{ margin: "1rem 0" }}>
+      Генериране
     </IndigoButton>
   );
 }

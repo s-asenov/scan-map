@@ -24,7 +24,7 @@ class AppController extends AbstractController
     }
 
     #[
-        Route("/", name: "app_register", methods:["GET"]),
+        Route("/", name: "app_homepage", methods:["GET"]),
         Route("/admin/{reactRoute}", name: "app_admin", methods:["GET"]),
         Route("/{reactRoute}", name: "app_react", methods:["GET"])
     ]

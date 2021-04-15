@@ -44,5 +44,18 @@ class MyHelper
         }
         return implode('', $pieces);
     }
+
+    public function placeholders($text, $count = 0, $separator = ","): string
+    {
+        $result = [];
+
+        if($count > 0){
+            for($x=0; $x<$count; $x++){
+                $result[] = $text;
+            }
+        }
+
+        return implode($separator, $result);
+    }
 }
 

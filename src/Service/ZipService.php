@@ -6,7 +6,6 @@ namespace App\Service;
 
 use App\Entity\TerrainKey;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Finder\SplFileInfo;
 use ZipArchive;
 
 /**

@@ -27,6 +27,9 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
      */
     public function supports(Request $request): bool
     {
+//        return $request->headers->has("Authorization");
+
+        //todo old
         return $request->cookies->has('x-token');
 //            && $request->headers->has('Application');
     }
@@ -39,6 +42,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
      */
     public function getCredentials(Request $request): array
     {
+//        $request->headers->get('Authorization');
         return [
 //            'Application' => $request->headers->get('Application'),
             'AUTH-TOKEN' => $request->cookies->get('x-token')
@@ -110,7 +114,9 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $providerKey): ?JsonResponse
     {
         $currentRoute = $request->attributes->get("_route");
-        $routes = ["api_registration_confirmation_route", "api_verification_send", "api_registration_confirmation_route", "api_user", "api_logout"]; //list of routes where email verification is not needed
+
+        //list of routes where email verification is not needed
+        $routes = ["api_registration_confirmation_route", "api_verification_send", "api_registration_confirmation_route", "api_user", "api_logout"];
 
         if (!$token->getUser()->getIsVerified() && !in_array($currentRoute, $routes)) {
             return new JsonResponse([

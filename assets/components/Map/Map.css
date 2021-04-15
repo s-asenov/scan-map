@@ -2,6 +2,21 @@
   display: none;
 } */
 
+.generate-map {
+  display: flex;
+  flex-direction: column;
+}
+
 #map {
   height: 90vh;
+}
+
+@media only screen and (min-width: 992px) {
+  .generate-map {
+    flex-direction: row;
+  }
+
+  #map-content {
+    width: 85%;
+  }
 }

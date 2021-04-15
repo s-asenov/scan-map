@@ -23,6 +23,7 @@ class FormHelper
     const META_SUCCESS = "success";
     const META_ERROR = "error";
     const META_INVALID = "Invalid data";
+    const META_UPDATED = "updated";
 
     /**
      * Checks the expected form data with the current

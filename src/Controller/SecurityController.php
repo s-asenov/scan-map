@@ -51,10 +51,12 @@ class SecurityController extends MyController
      *
      * @return JsonResponse
      */
-   #[Route("/send/verify", name: "verification_send", methods:["POST"])]
+   #[Route("/send/verify", name: "verification_send", methods:["POST", "GET"])]
     public function sendVerificationEmail(): JsonResponse
     {
-        return $this->userService->sendVerificationEmail();
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        return $this->userService->sendVerificationEmail($this->getUser());
     }
 
     /**
@@ -63,11 +65,11 @@ class SecurityController extends MyController
      * @return RedirectResponse
      */
     #[Route("/verify", name:"registration_confirmation_route", methods: ["GET"])]
-    public function verifyUserEmail(): RedirectResponse
+    public function verifyUserEmail(Request $request): RedirectResponse
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
-        $this->userService->verifyEmail($this->getUser());
+        $this->userService->verifyEmail($this->getUser(), $request);
 
         return $this->redirectToRoute('app_homepage');
     }

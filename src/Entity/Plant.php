@@ -21,7 +21,7 @@ class Plant
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private ?int $id;
+    private ?int $id = null;
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
@@ -31,25 +31,25 @@ class Plant
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private ?string $commonName;
+    private ?string $commonName = null;
 
     /**
      * @ORM\Column(type="text", nullable=true)
      */
-    private ?string $description;
+    private ?string $description = null;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private ?string $imageUrl;
+    private ?string $imageUrl = null;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private ?string $modelPath;
+    private ?string $modelPath = null;
 
     /**
-     * @ORM\OneToMany(targetEntity=DistributionZonePlant::class, mappedBy="plant", cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity=DistributionZonePlant::class, mappedBy="plant")
      */
     private PersistentCollection|ArrayCollection $distributionZonesPlants;
 

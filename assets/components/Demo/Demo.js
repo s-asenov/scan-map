@@ -3,14 +3,15 @@ import "./Demo.css";
 import Unity, { UnityContent } from "react-unity-webgl";
 import { AiOutlineFullscreen } from "react-icons/ai";
 import { ImExit } from "react-icons/im";
+import { ReactVideo } from "reactjs-media";
 
 /**
  * The component will contain a webgl demo of the project
  */
 function Demo() {
   const unityContent = new UnityContent(
-    "demo/Demo.json",
-    "demo/UnityLoader.js"
+    "demo_build/Demo.json",
+    "demo_build/UnityLoader.js"
   );
 
   const handleOnClickFullscreen = () => {
@@ -18,8 +19,8 @@ function Demo() {
   };
 
   return (
-    <React.Fragment>
-      <ImExit
+    <div className="m-4">
+      {/* <ImExit
         size="2.75em"
         title="Обратно към сайта"
         color="var(--danger)"
@@ -35,8 +36,14 @@ function Demo() {
         color="var(--primary)"
         className="cursor-pointer font-weight-bold ml-auto mr-4 my-4"
         onClick={() => handleOnClickFullscreen()}
+      /> */}
+      <ReactVideo
+        src={`${process.env.BASE_URL}demo_video.mp4`}
+        poster={`${process.env.BASE_URL}video_poster.png`}
+        autoPlay
+        primaryColor={"rgba(75, 0, 130, 0.7)"}
       />
-    </React.Fragment>
+    </div>
   );
 }
 
