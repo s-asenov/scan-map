@@ -22,6 +22,8 @@ framework:
         base_uri: "https://trefle.io/api/v1/"
         query:
           token: "%env(resolve:TREFLE_TOKEN)%"
+      flora_api:
+        base_uri: "https://flora.noit.eu/"
       geonames_api:
         base_uri: "http://api.geonames.org/"
         query:

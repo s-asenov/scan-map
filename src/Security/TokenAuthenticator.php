@@ -28,7 +28,8 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
     public function supports(Request $request): bool
     {
 //        return $request->headers->has("Authorization");
-
+        $currentRoute = $request->attributes->get("_route");
+        dd($currentRoute);
         //todo old
         return $request->cookies->has('x-token');
 //            && $request->headers->has('Application');

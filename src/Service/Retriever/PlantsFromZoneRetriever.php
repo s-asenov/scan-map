@@ -7,6 +7,7 @@ namespace App\Service\Retriever;
 use App\Entity\DistributionZone;
 use App\Entity\DistributionZonePlant;
 use App\Entity\Plant;
+use App\Entity\PlantSync;
 use App\Repository\DistributionZonePlantRepository;
 use App\Repository\DistributionZoneRepository;
 use App\Repository\PlantRepository;
@@ -75,7 +76,7 @@ class PlantsFromZoneRetriever
          * If the zone is already fetched
          * return the plants which are already saved.
          */
-        if ($zone->getFetched()) {
+        if ($zone->getFullyFetched()) {
             $plants = $zone->getAllPlants();
 
             uksort($plants, [self::class, 'comparePlantNames']);
@@ -90,7 +91,7 @@ class PlantsFromZoneRetriever
         $total = $request['total'];
 
         $pages = ceil($total / self::PLANTS_PER_PAGE);
-        $insertCount = $request['insertCount'];
+//        $insertCount = $request['insertCount'];
 
         if ($pages > 1) {
             $existingPlants = $zone->getAllPlants();
@@ -100,12 +101,12 @@ class PlantsFromZoneRetriever
                 $this->plants->set($existingPlant->getScientificName(), $existingPlant);
             }
 
-            $lastFetchedPage = ceil((float) ($existingCount / self::PLANTS_PER_PAGE)) ;
+            $lastFetchedPage = ceil((float) ($existingCount / self::PLANTS_PER_PAGE));
 
             for ($i = $lastFetchedPage; $i <= $pages; $i++) {
                 $request = $this->getPlantsFromPage("distributions/{$this->zoneId}/plants?page={$i}");
 
-                $insertCount += $request['insertCount'];
+//                $insertCount += $request['insertCount'];
 
                 /*
                  * If the number of inserts is bigger than the set batch - 500,
@@ -113,17 +114,20 @@ class PlantsFromZoneRetriever
                  *
                  * Note: can't use Modulo ($count % $batchSize) here so we use >
                  */
-                if ($insertCount > 500) {
-                    $this->bulkInsertAll();
+                if (count($this->currentBatch) > 500) {
+//                    $this->bulkInsertAll();
+                    $this->em->flush();
+                    $this->em->clear();
 
                     $this->currentBatch = [];
-                    $insertCount = 0;
+//                    $insertCount = 0;
                 }
             }
         }
 
-        $this->bulkInsertAll();
+//        $this->bulkInsertAll();
 
+        $this->em->flush();
         $this->em->clear();
 
         $plants = $this->plants->toArray();
@@ -131,6 +135,39 @@ class PlantsFromZoneRetriever
         uksort($plants, [self::class, 'comparePlantNames']);
 
         return $plants;
+    }
+
+    public function syncTables($zoneId)
+    {
+        $i = 0;
+        /**
+         * @var $newPlants PlantSync[]
+         */
+        $newPlants = $this->em->getRepository(PlantSync::class)->findAll();
+        $zone = $this->em->getRepository(DistributionZone::class)->find($zoneId);
+
+        foreach ($newPlants as $newPlant) {
+            $plant = new Plant();
+
+            $plant->setScientificName($newPlant->getScientificName())
+                ->setCommonName($newPlant->getCommonName())
+                ->setImageUrl($newPlant->getImageUrl());
+
+            $this->em->persist($plant);
+
+            $distributionPlant = new DistributionZonePlant();
+            $distributionPlant->setPlant($plant)
+                ->setDistributionZone($zone);
+
+            $this->em->persist($distributionPlant);
+
+            $i += 2;
+
+            if ($i % 500 === 0) {
+                $this->em->flush();
+                $this->em->clear();
+            }
+        }
     }
 
 
@@ -321,21 +358,42 @@ class PlantsFromZoneRetriever
         }
 
         //Get the scientific names in separate array and use them to determine if they are already existing.
-        $scientificNames = array_column($body, 'scientific_name');
-
-        $existingPlants = $this->plantRepository->findByScientificName($scientificNames);
+//        $scientificNames = array_column($body, 'scientific_name');
+//        $existingPlants = $this->plantRepository->findByScientificName($scientificNames);
 
         foreach ($body as $item) {
-            $insert = $this->persistPlantInZone($existingPlants, $item);
-
-            $insertCount += $insert;
+//            $insert = $this->persistPlantInZone($existingPlants, $item);
+//            $insertCount += $insert;
+            $this->persistInSync($item);
         }
 
 
         return [
-            'insertCount' => $insertCount,
+//            'insertCount' => $insertCount,
             'total' => $total,
         ];
+    }
+
+
+    /**
+     * @param array $item
+     * @return void
+     */
+    private function persistInSync(array $item): void
+    {
+        $insertCount = 0;
+
+        $plant = new PlantSync();
+
+        $plant->setScientificName($item['scientific_name'])
+            ->setCommonName($item['common_name'])
+            ->setImageUrl($item['image_url'])
+            ->setDistributionZone($this->zoneId);
+
+        $this->plants->set($item['scientific_name'], $plant);
+        $this->currentBatch[$item['scientific_name']] =  $plant;
+
+        $this->em->persist($plant);
     }
 
     /**

@@ -30,6 +30,11 @@ class MapController extends AbstractController
         return $this->terrainService->createTerrain($this->getUser());
     }
 
+    #[Route("/api/sync/{zone}", name: "api_sync", methods: ["POST"])]
+    public function sync($zone): JsonResponse
+    {
+        return $this->terrainService->syncTables($zone);
+    }
 
     /**
      * @param TerrainKey $terrainKey

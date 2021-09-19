@@ -32,6 +32,7 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 
 class TerrainService
@@ -44,7 +45,18 @@ class TerrainService
         private TerrainRepository $terrainRepository,
         private TerrainNormalizer $terrainNormalizer,
         private string $zipDirectory,
+        private HttpClientInterface $floraApi
     ) { }
+
+    public function syncTables($zoneId)
+    {
+        $this->plantsFromZoneRetriever->syncTables($zoneId);
+
+        return new JsonResponse([
+            'status' => FormHelper::META_SUCCESS,
+            'meta' => "sync"
+        ]);
+    }
 
     /**
      * The method is responsible for creating the terrain entity
@@ -79,8 +91,10 @@ class TerrainService
         $gmImage = $data['images']['gmImage'];
         $name = $data['name'];
 
+        $zone = $this->plantsFromZoneRetriever->getDistributionZone($lat, $lng);
+
         try {
-            $zone = $this->plantsFromZoneRetriever->getDistributionZone($lat, $lng);
+            $zone?->incrementFetched();
 
             //remove the keys of the array, for now
             $plants = array_values($this->plantsFromZoneRetriever->getPlants($zone));
@@ -91,7 +105,7 @@ class TerrainService
              */
             if ($zone) {
                 $saveZone = $this->em->getRepository(DistributionZone::class)->find($zone->getId());
-                $saveZone->incrementFetched();
+                $saveZone->setFullyFetched(true);
                 $this->em->persist($saveZone);
             }
         } catch (ClientExceptionInterface |
@@ -99,8 +113,14 @@ class TerrainService
         ServerExceptionInterface |
         RedirectionExceptionInterface |
         DecodingExceptionInterface $e) {
-            $plants = [];
+            $saveZone = $this->em->getRepository(DistributionZone::class)->find($zone->getId());
+
+            $plants = $saveZone->getAllPlants();
+
+            uksort($plants, [PlantsFromZoneRetriever::class, 'comparePlantNames']);
         }
+
+        $this->em->clear();
 
         /**
          * Manually persist the current user because, EM is not watching it for some reason and it needs to.
@@ -125,6 +145,13 @@ class TerrainService
 
         $this->em->persist($terrain);
         $this->em->flush();
+
+//        $url = $this->request->getSchemeAndHttpHost();
+
+        if ($zone) {
+            $this->floraApi->request('POST', 'api/sync/'.$zone->getId());
+        }
+
 
         return new JsonResponse([
             'status' => FormHelper::META_SUCCESS,

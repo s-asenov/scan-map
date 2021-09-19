@@ -11,10 +11,10 @@ use Doctrine\ORM\PersistentCollection;
 /**
  * The entity responsible for holding the necessary information about the plant.
  *
- * @ORM\Entity(repositoryClass=PlantRepository::class)
- * @ORM\Table(name="`plants`")
+ * @ORM\Entity(repositoryClass=PlantSyncRepository::class)
+ * @ORM\Table(name="`plants_sync`")
  */
-class Plant
+class PlantSync
 {
     /**
      * @ORM\Id
@@ -24,7 +24,7 @@ class Plant
     private ?int $id = null;
 
     /**
-     * @ORM\Column(type="string", length=255, unique=true)
+     * @ORM\Column(type="string", length=255)
      */
     private ?string $scientificName;
 
@@ -49,14 +49,9 @@ class Plant
     private ?string $modelPath = null;
 
     /**
-     * @ORM\OneToMany(targetEntity=DistributionZonePlant::class, mappedBy="plant")
+     * @ORM\Column(type="integer", length=11)
      */
-    private PersistentCollection|ArrayCollection $distributionZonesPlants;
-
-    public function __construct()
-    {
-        $this->distributionZonesPlants = new ArrayCollection();
-    }
+    private ?string $distributionZone = null;
 
     public function __get($prop)
     {
@@ -133,34 +128,15 @@ class Plant
         return $this;
     }
 
-    /**
-     * @return Collection|DistributionZonePlant[]
-     */
-    public function getDistributionZonesPlants(): Collection
+    public function getDistributionZone(): ?int
     {
-        return $this->distributionZonesPlants;
+        return $this->distributionZone;
     }
 
-    public function addDistributionZonesPlant(DistributionZonePlant $distributionZonesPlant): self
+    public function setDistributionZone(int $zone): self
     {
-        if (!$this->distributionZonesPlants->contains($distributionZonesPlant)) {
-            $this->distributionZonesPlants[] = $distributionZonesPlant;
-            $distributionZonesPlant->setPlant($this);
-        }
+        $this->distributionZone = $zone;
 
         return $this;
     }
-
-    public function removeDistributionZonesPlant(DistributionZonePlant $distributionZonesPlant): self
-    {
-        if ($this->distributionZonesPlants->removeElement($distributionZonesPlant)) {
-            // set the owning side to null (unless already changed)
-            if ($distributionZonesPlant->getPlant() === $this) {
-                $distributionZonesPlant->setPlant(null);
-            }
-        }
-
-        return $this;
-    }
-
 }
