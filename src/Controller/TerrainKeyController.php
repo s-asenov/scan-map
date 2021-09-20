@@ -60,6 +60,6 @@ class TerrainKeyController extends AbstractController
     #[Route("/{id}", name: "api_key", methods: ["GET"])]
     public function getKey(TerrainKey $terrainKey): JsonResponse
     {
-        $this->keyService->getKey($terrainKey, $this->getUser());
+        return $this->keyService->getKey($terrainKey, $this->getUser());
     }
 }

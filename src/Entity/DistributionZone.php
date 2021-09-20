@@ -53,6 +53,11 @@ class DistributionZone
      */
     private ?int $fetched;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private ?int $fullyFetched;
+
     public function __construct()
     {
         $this->children = new ArrayCollection();
@@ -192,5 +197,17 @@ class DistributionZone
         }
 
         return $plants;
+    }
+
+    public function getFullyFetched(): ?bool
+    {
+        return $this->fullyFetched;
+    }
+
+    public function setFullyFetched(bool $fullyFetched): self
+    {
+        $this->fullyFetched = $fullyFetched;
+
+        return $this;
     }
 }

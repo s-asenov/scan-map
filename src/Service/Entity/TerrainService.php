@@ -94,8 +94,6 @@ class TerrainService
         $zone = $this->plantsFromZoneRetriever->getDistributionZone($lat, $lng);
 
         try {
-            $zone?->incrementFetched();
-
             //remove the keys of the array, for now
             $plants = array_values($this->plantsFromZoneRetriever->getPlants($zone));
 
@@ -106,7 +104,9 @@ class TerrainService
             if ($zone) {
                 $saveZone = $this->em->getRepository(DistributionZone::class)->find($zone->getId());
                 $saveZone->setFullyFetched(true);
+                $saveZone->incrementFetched();
                 $this->em->persist($saveZone);
+                $this->em->flush($saveZone);
             }
         } catch (ClientExceptionInterface |
         TransportExceptionInterface |

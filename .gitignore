@@ -20,6 +20,7 @@
 /public/TerrainFloraDrawer.rar
 /public/models
 /old
+/src/Resources
 
 ###> symfony/webpack-encore-bundle ###
 /node_modules/

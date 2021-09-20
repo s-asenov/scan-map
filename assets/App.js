@@ -62,6 +62,17 @@ function App() {
 
   return (
     <AuthContext.Provider value={value}>
+      {/*  <div className="z-2 position-absolute alert alert-danger"*/}
+      {/*     style={{*/}
+      {/*       zIndex: "10",*/}
+      {/*       left: "50%",*/}
+      {/*       /* position: absolute; */}
+      {/*       transform: "translateX(-50%)",*/}
+      {/*       bottom: "10px",*/}
+      {/*       textAlign: "center"*/}
+      {/*       }}>*/}
+      {/*  За съжаление услугата, която се използва за вземането на информация на растенията е спряна (05.05.2021г.). Работи се по обработването на базата от данни на тази услуга, за да продължи работата на Terrain Flora Drawer.*/}
+      {/*</div>*/}
       <Router history={history}>
         <Switch>
           <AuthRoute path="/map">
