@@ -27,7 +27,7 @@ class UploadFromCsv extends Command
     {
         ini_set('max_execution_time', 0);
 
-        $pdo = new PDO('mysql:host=localhost:3306;dbname=flora', "root", "");
+        $pdo = new PDO($_ENV['DATABASE_URL']);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         $zones = [];
@@ -38,6 +38,7 @@ class UploadFromCsv extends Command
             }
             fclose($handle);
         }
+        $output->writeln('Finished parsing the zones!');
 
         $plants = [];
         $row = 0;
@@ -68,6 +69,7 @@ class UploadFromCsv extends Command
             }
             fclose($handle);
         }
+        $output->writeln('Finished parsing the plants!');
 
         ksort($plants);
 
@@ -76,6 +78,7 @@ class UploadFromCsv extends Command
 //}
 //
 //echo "<pre>". print_r($plants['Bulgaria'], 1) ."</pre>";
+        $output->writeln('Populating the database');
 
         $progressBar = new ProgressBar($output, count($plants) * 2);
 
